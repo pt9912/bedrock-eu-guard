@@ -24,7 +24,9 @@ Bootstrap, bei Änderungen an
 Source-Precedence, ID-Schema) oder bei einem Drift-Audit gegen die
 Baseline. Für reine Implementierungs-Slices genügt die im Repo
 verkörperte Form (dieses Briefing, die Templates, die Konventionen); die
-Baseline ist dort bereits eingearbeitet. Derivativ: bei Konflikt gelten
+Baseline ist dort bereits eingearbeitet. Diese Schwellen-Lese-Disziplin ist
+als [`MR-003`](harness/conventions.md#mr-003--lese-disziplin-für-das-externe-regelwerk)
+hinterlegt. Derivativ: bei Konflikt gelten
 die kanonischen Quellen; adoptierter Stand steht in
 [`harness/conventions.md`](harness/conventions.md) §Baseline.
 

@@ -117,6 +117,33 @@ gilt das Lehrmaterial.
   Requirements zählt.
 - **Auflösungs-Trigger:** permanent.
 
+### MR-003 — Lese-Disziplin für das externe Regelwerk
+
+- **Datum:** 2026-06-24
+- **Geltungsbereich:** [`AGENTS.md`](../AGENTS.md) §1 (Regelwerk-Lesepflicht)
+- **Adaption:** Das externe Regelwerk-Bundle (ZIP) ist **nicht** pro Session
+  zu lesen, sondern nur bei **Schwellen-Ereignissen**, an denen die im Repo
+  verkörperte Form selbst berührt wird: (1) Harness-Bootstrap; (2) Änderung
+  an dieser Datei — Adaptionen (`MR-<NNN>`), Source-Precedence, ID-Schema;
+  (3) Drift-Audit der Verkörperung gegen die Baseline. Reine
+  Implementierungs-Slices arbeiten ausschließlich auf der verkörperten Form
+  (Briefing, Templates, Konventionen, Gate-Baseline) und lesen das Bundle
+  nicht.
+- **Begründung:** Die Baseline kennt keine Per-Session-Lesepflicht — ihr
+  8-Schritt-Workflow (Modul 9, gespiegelt in [`AGENTS.md`](../AGENTS.md) §6)
+  startet bei [`harness/README.md`](README.md) und der kanonischen Quelle,
+  nicht beim Regelwerk; das Bundle ist laut eigener README derivativ und
+  nicht-normativ (Quelle der Wahrheit ist der Kurs). Das Regelwerk ist damit
+  eine **Erkenntnis-**, keine **Laufzeit-Abhängigkeit**: das Derivat
+  (Briefing, diese Datei, Templates) lässt sich ohne die Quelle nicht auf
+  Treue auditieren, und genau dafür — Verifizieren oder Ändern der
+  Verkörperung — wird gelesen (Modul 0: Per-Lauf-Relevantes gehört
+  verkörpert, nicht extern nachgeladen). Die zuvor in §1 stehende „einmal pro
+  Session"-Pflicht war eine über-strenge Adopter-Setzung ohne Baseline-Deckung;
+  diese Adaption ersetzt sie durch die anlassbezogene Form und macht den
+  echten Lese-Anlass explizit und prüfbar.
+- **Auflösungs-Trigger:** permanent.
+
 ## Zusatzklassen-Deklaration für Sensors-Bindung
 
 Es werden **keine** Zusatzklassen über die vier kanonischen hinaus (ADR,
