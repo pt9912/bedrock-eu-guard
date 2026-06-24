@@ -3,14 +3,14 @@
 # gezogen (harness/conventions.md MR-002). Lauf: `make doc-check`.
 
 scan:
-  roots: [spec, docs, harness]
-  ignore: ["**/*.template.md", ".tmp/**"]   # co-located Templates + Scratch ausnehmen
+  roots: ["."]                               # ganzes Repo inkl. Root-README/AGENTS (Härtung wie d-check-Self-Config)
+  ignore: ["**/*.template.md", ".tmp/**"]    # co-located Templates + Scratch ausnehmen
 
 modules: [links, anchors, ids, matrix, codepaths]
 
 ids:
   scope:
-    roots: [spec, docs/user]
+    roots: ["."]   # ganzes Repo: ID-Linkpflicht auch in ADRs/Slices/Roadmap/README/AGENTS
   patterns:
     - regex: 'ADR-\d{4}'
       target: docs/plan/adr/
@@ -25,8 +25,10 @@ ids:
       target: spec/lastenheft.md
       link-policy: always
       exempt-paths: [CHANGELOG.md, "docs/reviews/**"]
-    # Nichtfunktional/Sicherheit: linkpflichtig, aber keine --trace-Requirements
-    - regex: 'LH-(NF|SEC)-\d+'
+    # Alle weiteren LH-Kategorien (NF, SEC + Kontext: AUSG/ZIEL/NZ/BEG/KONT/
+    # MOD/BSP/PRI/ABN/RISK/OFF/RM/TECH): linkpflichtig, aber keine
+    # --trace-Requirements — nur FA/QA zählen (Pattern oben hat Präzedenz).
+    - regex: 'LH-[A-Z]+(?:-[A-Z]+)?-\d{3}'
       target: spec/lastenheft.md
       link-policy: always
       exempt-paths: [CHANGELOG.md, "docs/reviews/**"]

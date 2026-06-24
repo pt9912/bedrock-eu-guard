@@ -91,16 +91,16 @@ gilt das Lehrmaterial.
 
   | Stratum / Artefakt | Präfix-Form | Beispiel |
   |---|---|---|
-  | Lastenheft — funktional | `LH-FA-<AREA>-<NNN>` | `LH-FA-LENV-001` |
-  | Lastenheft — nichtfunktional | `LH-NF-<NNN>` | `LH-NF-004` |
-  | Lastenheft — Qualität | `LH-QA-<NNN>` | `LH-QA-001` |
-  | Lastenheft — Sicherheit | `LH-SEC-<NNN>` | `LH-SEC-003` |
-  | Lastenheft — sonst (Ziele, Modi, Risiken, …) | `LH-<KAT>-<NNN>` | `LH-ZIEL-002` |
-  | Spezifikation (Technik) | `SPEC-<NNN>` | `SPEC-010` |
-  | Architektur (Sicht) | `ARC-<NNN>` | `ARC-003` |
-  | ADR | `ADR-<NNNN>` | `ADR-0001` |
+  | Lastenheft — funktional | `LH-FA-<AREA>-<NNN>` | [`LH-FA-LENV-001`](../spec/lastenheft.md) |
+  | Lastenheft — nichtfunktional | `LH-NF-<NNN>` | [`LH-NF-004`](../spec/lastenheft.md) |
+  | Lastenheft — Qualität | `LH-QA-<NNN>` | [`LH-QA-001`](../spec/lastenheft.md) |
+  | Lastenheft — Sicherheit | `LH-SEC-<NNN>` | [`LH-SEC-003`](../spec/lastenheft.md) |
+  | Lastenheft — sonst (Ziele, Modi, Risiken, …) | `LH-<KAT>-<NNN>` | [`LH-ZIEL-002`](../spec/lastenheft.md) |
+  | Spezifikation (Technik) | `SPEC-<NNN>` | [`SPEC-010`](../spec/spezifikation.md) |
+  | Architektur (Sicht) | `ARC-<NNN>` | [`ARC-003`](../spec/architecture.md) |
+  | ADR | `ADR-<NNNN>` | [`ADR-0001`](../docs/plan/adr/0001-dokumentation-als-source-of-truth.md) |
   | Carveout | `CO-<NNN>` | `CO-001` |
-  | Slice | `slice-<NNN>` | `slice-001` |
+  | Slice | `slice-<NNN>` | [`slice-001`](../docs/plan/planning/open/slice-001-hexagon-skelett-env-region.md) |
   | Adaption | `MR-<NNN>` | `MR-002` |
 
   Die `<AREA>`-Codes des Lastenhefts: `LENV` (lokale Env), `CLAUDE`
@@ -125,7 +125,7 @@ Carveout, Schwelle, Reproduzierbarkeit) verwendet.
 — keine —
 
 > Wird später z. B. ein Gate eingeführt, das genau eine Lastenheft-Regel
-> prüft (etwa ein „No-Secret-Output"-Test gebunden an `LH-NF-004`),
+> prüft (etwa ein „No-Secret-Output"-Test gebunden an [`LH-NF-004`](../spec/lastenheft.md)),
 > wird die **LH-Bindung** hier als Klasse `LH-<…>` deklariert, bevor
 > sie in der Sensors-Tabelle auftaucht.
 
@@ -140,7 +140,7 @@ Inventur und keinen Reconciliation-Backlog.
 | `*` (Default für gesamtes Repo) | Greenfield | Leeres Repo, Spec und ADRs werden vor Code geschrieben. | n/a (GF) |
 | Spezifikation & Architektur (`spec/`) | Greenfield | Verträge entstehen aus dem Lastenheft, nicht aus Code. | n/a (GF) |
 | Regel-Engine & Scanner (`src/` geplant) | Greenfield | Regeln folgen den `LH-FA-*`-Anforderungen. | n/a (GF) |
-| Test-Infrastruktur | Greenfield | Tests werden gegen `LH-*`-IDs geschrieben (`LH-QA-001`). | n/a (GF) |
+| Test-Infrastruktur | Greenfield | Tests werden gegen `LH-*`-IDs geschrieben ([`LH-QA-001`](../spec/lastenheft.md)). | n/a (GF) |
 
 > Sub-Area-Disziplin: Die obigen Zeilen sind beim Bootstrap teils
 > *Sub-Area-Aspirantinnen* (Struktur vor Substanz). Sobald eine eigene
@@ -152,6 +152,6 @@ Inventur und keinen Reconciliation-Backlog.
 
 | Begriff | Bedeutung in diesem Repo |
 |---|---|
-| EU-safe Konfiguration | Konfiguration, die ausschließlich zugelassene EU-Regionen, freigegebene Modell-/Inference-Profile und AWS Bedrock statt direkter Anthropic-API nutzt (siehe `LH-BEG-005`). |
+| EU-safe Konfiguration | Konfiguration, die ausschließlich zugelassene EU-Regionen, freigegebene Modell-/Inference-Profile und AWS Bedrock statt direkter Anthropic-API nutzt (siehe [`LH-BEG-005`](../spec/lastenheft.md)). |
 | Finding | Einzelnes Prüfergebnis mit Schweregrad `PASS` / `WARN` / `FAIL`, Kennung, Nachricht und Empfehlung. |
-| Mantle | Bedrock-Endpunkt für Claude Code in nativer Anthropic-API-Form, aber mit AWS-IAM (siehe `LH-BEG-003`). |
+| Mantle | Bedrock-Endpunkt für Claude Code in nativer Anthropic-API-Form, aber mit AWS-IAM (siehe [`LH-BEG-003`](../spec/lastenheft.md)). |

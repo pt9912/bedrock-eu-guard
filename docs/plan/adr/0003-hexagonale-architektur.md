@@ -15,12 +15,12 @@
 ## Kontext
 
 `bedrock-eu-check` hat einen **offline-fähigen Prüfkern** (lokale +
-Terraform-Regeln ohne Netz, `LH-NF-005`), eine **eng begrenzte
-AWS-Berührung** (nur lesend, `LH-SEC-003`), **mehrere Eingabequellen**
+Terraform-Regeln ohne Netz, [`LH-NF-005`](../../../spec/lastenheft.md)), eine **eng begrenzte
+AWS-Berührung** (nur lesend, [`LH-SEC-003`](../../../spec/lastenheft.md)), **mehrere Eingabequellen**
 (Env, Dateien, AWS) und **mehrere Ausgabeformate** (console/json/sarif).
 Diese Asymmetrie — reiner Kern, wenige Seiteneffekt-Ränder — verlangt eine
-Struktur, die den Kern testbar (`LH-QA-002`) und seiteneffektfrei
-hält und neue Regeln ohne Architekturbruch zulässt (`LH-NF-006`).
+Struktur, die den Kern testbar ([`LH-QA-002`](../../../spec/lastenheft.md)) und seiteneffektfrei
+hält und neue Regeln ohne Architekturbruch zulässt ([`LH-NF-006`](../../../spec/lastenheft.md)).
 
 Als Vorbild dient **d-check** (`pt9912/d-check`, Go) — dasselbe Werkzeug,
 das unseren `make doc-check`-Gate stellt. Sein `internal/`-Layout ist ein
@@ -63,9 +63,9 @@ existiert):**
    einen Adapter.
 3. **Genau ein Adapter (`awscli`) berührt AWS**; jeder Netz-/AWS-Zugriff
    außerhalb davon ist ein Architekturverstoß (spiegelt d-checks
-   „einzige Netzwerk-Tür", erzwingt `LH-NF-005`/`SEC-003`).
+   „einzige Netzwerk-Tür", erzwingt [`LH-NF-005`](../../../spec/lastenheft.md)/`SEC-003`).
 4. Der **Reporter erhält nur `Finding`-Objekte** — Secret-Maskierung
-   passiert vorher im Kern (`LH-NF-004`).
+   passiert vorher im Kern ([`LH-NF-004`](../../../spec/lastenheft.md)).
 
 ## Verglichene Alternativen
 
@@ -81,8 +81,8 @@ existiert):**
   wichtigste Compliance-Eigenschaft des Tools ist *architektonisch*
   abgesichert, nicht nur per Test.
 - Positiv: Regeln wachsen in `core/rules/` ohne Adapter-Änderung
-  (`LH-NF-006`); jede Quelle ist über ihren Port mockbar
-  (`LH-QA-002`).
+  ([`LH-NF-006`](../../../spec/lastenheft.md)); jede Quelle ist über ihren Port mockbar
+  ([`LH-QA-002`](../../../spec/lastenheft.md)).
 - Negativ: Mehr Pakete/Interfaces als ein flaches Skript; Einstieg etwas
   steiler.
 - Folgepflicht: Import-Constraints als Fitness Function (`make arch-check`)

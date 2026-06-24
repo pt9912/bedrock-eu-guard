@@ -16,10 +16,12 @@ schon" — die in der Praxis oft nicht stimmt.
 ## Was kann ich heute tun?
 
 Ehrlicher Ist-Stand: Das Repo ist **frisch ge-bootstrappt** (Greenfield-
-Harness nach dem AI-Harness-Kurs). Es gibt **noch keinen Anwendungscode**.
+Harness nach dem [ai-harness-course](https://github.com/pt9912/ai-harness-course) v1.4.0).
+Es gibt **noch keinen Anwendungscode**. Die Gates brauchen nur **Docker**
+und GNU `make`:
 
 - `make help` — verfügbare Targets anzeigen.
-- `make doc-check` — Doku-Referenzen (Links/Anker) prüfen (via d-check, Docker).
+- `make doc-check` — Doku-Referenzen prüfen (Links, Anker, ID-Linkpflicht, Referenzmatrix; via d-check v0.29.0, netzlos im Container).
 - `make gates` — alle aktuell lauffähigen Gates (heute nur `doc-check`).
 
 Die erste lauffähige Tool-Version (`bedrock-eu-check local` mit
@@ -30,13 +32,24 @@ Vorbild [d-check](https://github.com/pt9912/d-check)); die Sprachwahl ist
 in [ADR-0002](docs/plan/adr/0002-implementierungssprache.md)
 (Status *Proposed*, Go empfohlen) offen.
 
+## Geplante Nutzung
+
+> Zielbild (noch nicht implementiert — ab Welle 1):
+
+```bash
+bedrock-eu-check local      # Env, Claude Code, Devcontainer/Docker prüfen
+bedrock-eu-check aws        # STS-Identität, Bedrock-Profile, IAM (read-only)
+bedrock-eu-check terraform  # .tf: Provider-Region, IAM-Policies, Modell-IDs
+bedrock-eu-check all --ci   # alles in einem Lauf, CI-Ausgabe, Exit 1 bei FAIL
+```
+
 ## Warum bedrock-eu-guard?
 
 Durch falsche Umgebungsvariablen, AWS-Profile, Claude-Code-Settings,
 Inference-Profile oder Terraform/IAM-Definitionen kann unbeabsichtigt eine
 US-Region oder ein globales Profil verwendet werden. Manuelle Kontrolle
 ist fehleranfällig und skaliert nicht über mehrere Entwickler,
-Devcontainer, CI-Pipelines und AWS-Accounts (`LH-AUSG-003/004`).
+Devcontainer, CI-Pipelines und AWS-Accounts ([`LH-AUSG-003`](spec/lastenheft.md)/[`LH-AUSG-004`](spec/lastenheft.md)).
 `bedrock-eu-check` macht diese Prüfung automatisierbar und CI-tauglich.
 
 ## Kerngedanke
@@ -55,4 +68,8 @@ ein Secret auszugeben.** Jede Prüfung hängt an einer `LH-*`-ID und ist
 
 > **Grenzen.** Das Tool ist **keine** Rechts-/Datenschutzberatung und kein
 > Beweis über AWS-internes Routing; es prüft nur sichtbare, steuerbare
-> Konfigurationen (`LH-NZ-001/002`, `LH-RISK-004`).
+> Konfigurationen ([`LH-NZ-001`](spec/lastenheft.md)/[`LH-NZ-002`](spec/lastenheft.md), [`LH-RISK-004`](spec/lastenheft.md)).
+
+## Lizenz
+
+[MIT](LICENSE) — Copyright (c) 2026 pt9912.

@@ -12,11 +12,11 @@ Reihenfolge von Terminen. Die Wellen bilden die Versions-Stufen
 
 **Welle-ID:** welle-01-lokaler-env-check
 **Start:** 2026-06-24
-**Geplantes Ende:** offen (Schätzung folgt nach ADR-0002-Sign-off)
+**Geplantes Ende:** offen (Schätzung folgt nach [ADR-0002](../../adr/0002-implementierungssprache.md)-Sign-off)
 
 **Closure-Trigger:** siehe [`../welle-01-lokaler-env-check.md`](../welle-01-lokaler-env-check.md).
 
-> **Blockiert durch ADR-0002** (Implementierungssprache, *Proposed*): Der
+> **Blockiert durch [`ADR-0002`](../../adr/0002-implementierungssprache.md)** (Implementierungssprache, *Proposed*): Der
 > erste Code-Slice braucht die bestätigte Sprachwahl, bevor die Toolchain
 > (`make lint/test/build`) verdrahtet wird.
 
