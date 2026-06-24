@@ -91,13 +91,13 @@ gilt das Lehrmaterial.
 
   | Stratum / Artefakt | Präfix-Form | Beispiel |
   |---|---|---|
-  | Lastenheft — funktional | `LH-FA-<AREA>-<NNN>` | [`LH-FA-LENV-001`](../spec/lastenheft.md) |
-  | Lastenheft — nichtfunktional | `LH-NF-<NNN>` | [`LH-NF-004`](../spec/lastenheft.md) |
-  | Lastenheft — Qualität | `LH-QA-<NNN>` | [`LH-QA-001`](../spec/lastenheft.md) |
-  | Lastenheft — Sicherheit | `LH-SEC-<NNN>` | [`LH-SEC-003`](../spec/lastenheft.md) |
-  | Lastenheft — sonst (Ziele, Modi, Risiken, …) | `LH-<KAT>-<NNN>` | [`LH-ZIEL-002`](../spec/lastenheft.md) |
-  | Spezifikation (Technik) | `SPEC-<NNN>` | [`SPEC-010`](../spec/spezifikation.md) |
-  | Architektur (Sicht) | `ARC-<NNN>` | [`ARC-003`](../spec/architecture.md) |
+  | Lastenheft — funktional | `LH-FA-<AREA>-<NNN>` | [`LH-FA-LENV-001`](../spec/lastenheft.md#lh-fa-lenv-001--prüfung-von-aws_region) |
+  | Lastenheft — nichtfunktional | `LH-NF-<NNN>` | [`LH-NF-004`](../spec/lastenheft.md#lh-nf-004--keine-secret-ausgabe) |
+  | Lastenheft — Qualität | `LH-QA-<NNN>` | [`LH-QA-001`](../spec/lastenheft.md#lh-qa-001--unit-tests) |
+  | Lastenheft — Sicherheit | `LH-SEC-<NNN>` | [`LH-SEC-003`](../spec/lastenheft.md#lh-sec-003--read-only-aws-zugriff) |
+  | Lastenheft — sonst (Ziele, Modi, Risiken, …) | `LH-<KAT>-<NNN>` | [`LH-ZIEL-002`](../spec/lastenheft.md#lh-ziel-002--eu-konformitätscheck) |
+  | Spezifikation (Technik) | `SPEC-<NNN>` | [`SPEC-010`](../spec/spezifikation.md#spec-010--klassifikation-von-modell-profil-ids) |
+  | Architektur (Sicht) | `ARC-<NNN>` | [`ARC-003`](../spec/architecture.md#2-schichten-und-constraints) |
   | ADR | `ADR-<NNNN>` | [`ADR-0001`](../docs/plan/adr/0001-dokumentation-als-source-of-truth.md) |
   | Carveout | `CO-<NNN>` | `CO-001` |
   | Slice | `slice-<NNN>` | [`slice-001`](../docs/plan/planning/open/slice-001-hexagon-skelett-env-region.md) |
@@ -125,7 +125,7 @@ Carveout, Schwelle, Reproduzierbarkeit) verwendet.
 — keine —
 
 > Wird später z. B. ein Gate eingeführt, das genau eine Lastenheft-Regel
-> prüft (etwa ein „No-Secret-Output"-Test gebunden an [`LH-NF-004`](../spec/lastenheft.md)),
+> prüft (etwa ein „No-Secret-Output"-Test gebunden an [`LH-NF-004`](../spec/lastenheft.md#lh-nf-004--keine-secret-ausgabe)),
 > wird die **LH-Bindung** hier als Klasse `LH-<…>` deklariert, bevor
 > sie in der Sensors-Tabelle auftaucht.
 
@@ -140,7 +140,7 @@ Inventur und keinen Reconciliation-Backlog.
 | `*` (Default für gesamtes Repo) | Greenfield | Leeres Repo, Spec und ADRs werden vor Code geschrieben. | n/a (GF) |
 | Spezifikation & Architektur (`spec/`) | Greenfield | Verträge entstehen aus dem Lastenheft, nicht aus Code. | n/a (GF) |
 | Regel-Engine & Scanner (`src/` geplant) | Greenfield | Regeln folgen den `LH-FA-*`-Anforderungen. | n/a (GF) |
-| Test-Infrastruktur | Greenfield | Tests werden gegen `LH-*`-IDs geschrieben ([`LH-QA-001`](../spec/lastenheft.md)). | n/a (GF) |
+| Test-Infrastruktur | Greenfield | Tests werden gegen `LH-*`-IDs geschrieben ([`LH-QA-001`](../spec/lastenheft.md#lh-qa-001--unit-tests)). | n/a (GF) |
 
 > Sub-Area-Disziplin: Die obigen Zeilen sind beim Bootstrap teils
 > *Sub-Area-Aspirantinnen* (Struktur vor Substanz). Sobald eine eigene
@@ -152,6 +152,6 @@ Inventur und keinen Reconciliation-Backlog.
 
 | Begriff | Bedeutung in diesem Repo |
 |---|---|
-| EU-safe Konfiguration | Konfiguration, die ausschließlich zugelassene EU-Regionen, freigegebene Modell-/Inference-Profile und AWS Bedrock statt direkter Anthropic-API nutzt (siehe [`LH-BEG-005`](../spec/lastenheft.md)). |
+| EU-safe Konfiguration | Konfiguration, die ausschließlich zugelassene EU-Regionen, freigegebene Modell-/Inference-Profile und AWS Bedrock statt direkter Anthropic-API nutzt (siehe [`LH-BEG-005`](../spec/lastenheft.md#lh-beg-005--eu-safe-konfiguration)). |
 | Finding | Einzelnes Prüfergebnis mit Schweregrad `PASS` / `WARN` / `FAIL`, Kennung, Nachricht und Empfehlung. |
-| Mantle | Bedrock-Endpunkt für Claude Code in nativer Anthropic-API-Form, aber mit AWS-IAM (siehe [`LH-BEG-003`](../spec/lastenheft.md)). |
+| Mantle | Bedrock-Endpunkt für Claude Code in nativer Anthropic-API-Form, aber mit AWS-IAM (siehe [`LH-BEG-003`](../spec/lastenheft.md#lh-beg-003--mantle)). |

@@ -34,7 +34,7 @@ das passende Template kopieren statt frei zu formulieren.
 In dieser Reihenfolge:
 
 1. [`spec/lastenheft.md`](spec/lastenheft.md) — vertraglich abnahmebindend.
-2. [`spec/spezifikation.md`](spec/spezifikation.md) — technisch verbindlich, fortschreibbar (3. Spec-Stratum, `conventions.md` [`MR-001`](harness/conventions.md)).
+2. [`spec/spezifikation.md`](spec/spezifikation.md) — technisch verbindlich, fortschreibbar (3. Spec-Stratum, `conventions.md` [`MR-001`](harness/conventions.md#mr-001--source-precedence-mit-eigener-spezifikations-schicht)).
 3. [`spec/architecture.md`](spec/architecture.md) — Komponenten- und Sequenzsicht.
 4. [`docs/plan/adr/`](docs/plan/adr/) — ADR-Verzeichnis und -Index.
 5. [`docs/plan/planning/in-progress/roadmap.md`](docs/plan/planning/in-progress/roadmap.md) — aktuelle Welle.
@@ -51,7 +51,7 @@ Quality-Gates werden über `make` ausgeführt; `make doc-check` nutzt ein
 auf `:v0.29.0` gepinntes, netzloses Docker-Image (`d-check.mk`, erzeugt mit
 `d-check --print-mk`; `DCHECK_DIGEST` für strikten Digest-Pin). **Aber:** Das Werkzeug
 `bedrock-eu-check` selbst muss lokal **ohne** Docker und ohne Internet
-lauffähig sein ([`LH-NF-001`](spec/lastenheft.md), [`LH-NF-005`](spec/lastenheft.md)) — es gibt also keinen
+lauffähig sein ([`LH-NF-001`](spec/lastenheft.md#lh-nf-001--plattform), [`LH-NF-005`](spec/lastenheft.md#lh-nf-005--offline-fähigkeit)) — es gibt also keinen
 Docker-only-Zwang für die Anwendung, nur für die reproduzierbaren Gates.
 
 ### 3.2 Suppression-Verbot
@@ -93,19 +93,19 @@ ein ADR, kein PR-Kommentar.
 
 `bedrock-eu-check` meldet Secrets ausschließlich als „set"/„not set"; der
 Wert von `ANTHROPIC_API_KEY`, AWS-Credentials o. Ä. wird nie ausgegeben,
-geloggt oder in JSON/SARIF geschrieben ([`LH-NF-004`](spec/lastenheft.md),
-[`LH-SEC-002`](spec/lastenheft.md)).
+geloggt oder in JSON/SARIF geschrieben ([`LH-NF-004`](spec/lastenheft.md#lh-nf-004--keine-secret-ausgabe),
+[`LH-SEC-002`](spec/lastenheft.md#lh-sec-002--keine-speicherung-von-claude-anthropic-secrets)).
 
 ### 3.8 Read-only gegenüber AWS, keine Remediation (Domäne)
 
 Version 1 nutzt ausschließlich lesende AWS-Operationen. Keine
 automatische Änderung von AWS-Ressourcen oder lokalen Configs
-([`LH-SEC-003`](spec/lastenheft.md), [`LH-SEC-005`](spec/lastenheft.md), [`LH-NZ-003`](spec/lastenheft.md)).
+([`LH-SEC-003`](spec/lastenheft.md#lh-sec-003--read-only-aws-zugriff), [`LH-SEC-005`](spec/lastenheft.md#lh-sec-005--keine-automatischen-remediations), [`LH-NZ-003`](spec/lastenheft.md#lh-nz-003--keine-automatische-änderung-produktiver-aws-konfigurationen)).
 
 ### 3.9 Allow-/Blocklisten sind konfigurierbar, nicht hartcodiert (Domäne)
 
 Erlaubte Regionen, Accounts, Modell-IDs und Profile sind über
-`bedrock-eu-check.yml` steuerbar ([`LH-NF-007`](spec/lastenheft.md)). Defaults dürfen im
+`bedrock-eu-check.yml` steuerbar ([`LH-NF-007`](spec/lastenheft.md#lh-nf-007--konfigurierbarkeit)). Defaults dürfen im
 Code stehen, müssen aber überschreibbar bleiben.
 
 ## 4. Quality Gates
@@ -125,7 +125,7 @@ werden erst hier eingetragen, wenn sie laufen.
 
 - Requirement- und Architektur-IDs müssen in PRs/Commits referenziert
   sein. IDs werden beim Spec-/ADR-Schreiben nach dem in
-  [`harness/conventions.md`](harness/conventions.md) [`MR-002`](harness/conventions.md) deklarierten
+  [`harness/conventions.md`](harness/conventions.md) [`MR-002`](harness/conventions.md#mr-002--id-schema-kanon-präfix-lh--mit-bereichscodes) deklarierten
   Schema vergeben (`LH-*`, `SPEC-*`, `ARC-*`, ADR-Nummern
   über den Index) — nie ad hoc im PR.
 - Neue ADRs müssen den [ADR-Index](docs/plan/adr/README.md) aktualisieren.

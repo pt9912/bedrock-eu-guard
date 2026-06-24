@@ -14,7 +14,7 @@ Eine erste lauffähige Version: `bedrock-eu-check local` prüft die lokalen
 Umgebungsvariablen und Modell-IDs, liefert `PASS`/`WARN`/`FAIL` auf der
 Konsole und setzt die Exit-Codes `0`/`1`/`2`. Damit ist das Hexagon-Gerüst
 (Kern, Ports, CLI-Composition-Root, ein driven-Adapter je Quelle) etabliert
-und die `MUSS`-Anforderungen [`LH-PRI-MUSS-001`](../../../spec/lastenheft.md) bis [`LH-PRI-MUSS-005`](../../../spec/lastenheft.md) sind im Kern
+und die `MUSS`-Anforderungen [`LH-PRI-MUSS-001`](../../../spec/lastenheft.md#lh-pri-muss-001) bis [`LH-PRI-MUSS-005`](../../../spec/lastenheft.md#lh-pri-muss-005) sind im Kern
 erfüllt (`RM-001` / v0.1).
 
 ## 2. Trigger (Welle startet)
@@ -26,18 +26,18 @@ erfüllt (`RM-001` / v0.1).
 
 - Alle Slices der Welle done.
 - `make gates` grün — inkl. der neu entstehenden `make lint`/`make test`.
-- `bedrock-eu-check local` erfüllt die Abnahmekriterien [`LH-ABN-001`](../../../spec/lastenheft.md)
+- `bedrock-eu-check local` erfüllt die Abnahmekriterien [`LH-ABN-001`](../../../spec/lastenheft.md#lh-abn-001--kritische-lokale-fehlkonfiguration)
   (kritische Fehlkonfiguration → ≥ 2 FAIL, Exit 1, kein Secret-Wert) und
-  [`LH-ABN-002`](../../../spec/lastenheft.md) (EU-Minimalumgebung → PASS, Exit 0).
+  [`LH-ABN-002`](../../../spec/lastenheft.md#lh-abn-002--eu-konforme-minimalumgebung) (EU-Minimalumgebung → PASS, Exit 0).
 - Closure-Notiz in `done/welle-01-results.md` mit Steering-Loop-Eintrag.
 
 ## 4. Slices in dieser Welle
 
 | Slice | Titel | Status | Bezug |
 |---|---|---|---|
-| slice-001 | Hexagon-Gerüst + Env-/Region-Check + Exit-Codes + Konsolen-Reporter | open | [`LH-FA-LENV-001`](../../../spec/lastenheft.md)/[`LH-FA-LENV-002`](../../../spec/lastenheft.md), `EXIT-*`, `REP-001` |
-| slice-002 | Modell-ID-Klassifikation (allow/block) | geplant | [`LH-FA-LENV-006`](../../../spec/lastenheft.md), [`SPEC-010`](../../../spec/spezifikation.md) |
-| slice-003 | Anthropic-Key- und Bedrock-Flag-Regeln | geplant | [`LH-FA-LENV-003`](../../../spec/lastenheft.md)/[`LH-FA-LENV-004`](../../../spec/lastenheft.md), `PRI-MUSS-002` |
+| slice-001 | Hexagon-Gerüst + Env-/Region-Check + Exit-Codes + Konsolen-Reporter | open | [`LH-FA-LENV-001`](../../../spec/lastenheft.md#lh-fa-lenv-001--prüfung-von-aws_region)/[`LH-FA-LENV-002`](../../../spec/lastenheft.md#lh-fa-lenv-002--prüfung-von-aws_default_region), `EXIT-*`, `REP-001` |
+| slice-002 | Modell-ID-Klassifikation (allow/block) | geplant | [`LH-FA-LENV-006`](../../../spec/lastenheft.md#lh-fa-lenv-006--prüfung-von-claude-default-modellvariablen), [`SPEC-010`](../../../spec/spezifikation.md#spec-010--klassifikation-von-modell-profil-ids) |
+| slice-003 | Anthropic-Key- und Bedrock-Flag-Regeln | geplant | [`LH-FA-LENV-003`](../../../spec/lastenheft.md#lh-fa-lenv-003--prüfung-von-claude_code_use_bedrock)/[`LH-FA-LENV-004`](../../../spec/lastenheft.md#lh-fa-lenv-004--prüfung-von-anthropic_api_key), `PRI-MUSS-002` |
 
 > Nur slice-001 ist als Datei in `open/` angelegt; slice-002/003 entstehen
 > aus dem Closure von slice-001 (Plan-vor-Code, Modul 5).

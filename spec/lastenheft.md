@@ -6,7 +6,7 @@ Dieses Lastenheft ist die **vertraglich abnahmebindende** Quelle der
 Wahrheit für `bedrock-eu-check` (Rang 1 der Source Precedence). Es prüft
 lokale, AWS-, Bedrock-, Claude-Code- und Terraform-Konfigurationen auf
 EU-/Frankfurt-Konformität. Das ID-Schema `LH-*` ist in
-[`harness/conventions.md`](../harness/conventions.md) ([`MR-002`](../harness/conventions.md)) deklariert.
+[`harness/conventions.md`](../harness/conventions.md) ([`MR-002`](../harness/conventions.md#mr-002--id-schema-kanon-präfix-lh--mit-bereichscodes)) deklariert.
 
 ## 1. Dokumentinformationen
 

@@ -6,7 +6,7 @@
 
 **Autor:** Projektteam bedrock-eu-guard
 
-**Bezug:** [`LH-NF-005`](../../../spec/lastenheft.md) (Offline-Fähigkeit), [`LH-NF-006`](../../../spec/lastenheft.md) (Erweiterbarkeit), [`LH-QA-002`](../../../spec/lastenheft.md) (mockbare AWS-Adapter)
+**Bezug:** [`LH-NF-005`](../../../spec/lastenheft.md#lh-nf-005--offline-fähigkeit) (Offline-Fähigkeit), [`LH-NF-006`](../../../spec/lastenheft.md#lh-nf-006--erweiterbarkeit) (Erweiterbarkeit), [`LH-QA-002`](../../../spec/lastenheft.md#lh-qa-002--integration-tests) (mockbare AWS-Adapter)
 
 **Schärft:** [`spec/architecture.md` §2 Schichten und Constraints](../../../spec/architecture.md) — diese ADR macht die dort beschriebene Schichtung und die Constraints (einzige AWS-Tür, importfreier Kern) verbindlich.
 
@@ -15,12 +15,12 @@
 ## Kontext
 
 `bedrock-eu-check` hat einen **offline-fähigen Prüfkern** (lokale +
-Terraform-Regeln ohne Netz, [`LH-NF-005`](../../../spec/lastenheft.md)), eine **eng begrenzte
-AWS-Berührung** (nur lesend, [`LH-SEC-003`](../../../spec/lastenheft.md)), **mehrere Eingabequellen**
+Terraform-Regeln ohne Netz, [`LH-NF-005`](../../../spec/lastenheft.md#lh-nf-005--offline-fähigkeit)), eine **eng begrenzte
+AWS-Berührung** (nur lesend, [`LH-SEC-003`](../../../spec/lastenheft.md#lh-sec-003--read-only-aws-zugriff)), **mehrere Eingabequellen**
 (Env, Dateien, AWS) und **mehrere Ausgabeformate** (console/json/sarif).
 Diese Asymmetrie — reiner Kern, wenige Seiteneffekt-Ränder — verlangt eine
-Struktur, die den Kern testbar ([`LH-QA-002`](../../../spec/lastenheft.md)) und seiteneffektfrei
-hält und neue Regeln ohne Architekturbruch zulässt ([`LH-NF-006`](../../../spec/lastenheft.md)).
+Struktur, die den Kern testbar ([`LH-QA-002`](../../../spec/lastenheft.md#lh-qa-002--integration-tests)) und seiteneffektfrei
+hält und neue Regeln ohne Architekturbruch zulässt ([`LH-NF-006`](../../../spec/lastenheft.md#lh-nf-006--erweiterbarkeit)).
 
 Als Vorbild dient **d-check** (`pt9912/d-check`, Go) — dasselbe Werkzeug,
 das unseren `make doc-check`-Gate stellt. Sein `internal/`-Layout ist ein
@@ -63,9 +63,9 @@ existiert):**
    einen Adapter.
 3. **Genau ein Adapter (`awscli`) berührt AWS**; jeder Netz-/AWS-Zugriff
    außerhalb davon ist ein Architekturverstoß (spiegelt d-checks
-   „einzige Netzwerk-Tür", erzwingt [`LH-NF-005`](../../../spec/lastenheft.md)/`SEC-003`).
+   „einzige Netzwerk-Tür", erzwingt [`LH-NF-005`](../../../spec/lastenheft.md#lh-nf-005--offline-fähigkeit)/`SEC-003`).
 4. Der **Reporter erhält nur `Finding`-Objekte** — Secret-Maskierung
-   passiert vorher im Kern ([`LH-NF-004`](../../../spec/lastenheft.md)).
+   passiert vorher im Kern ([`LH-NF-004`](../../../spec/lastenheft.md#lh-nf-004--keine-secret-ausgabe)).
 
 ## Verglichene Alternativen
 
@@ -81,8 +81,8 @@ existiert):**
   wichtigste Compliance-Eigenschaft des Tools ist *architektonisch*
   abgesichert, nicht nur per Test.
 - Positiv: Regeln wachsen in `core/rules/` ohne Adapter-Änderung
-  ([`LH-NF-006`](../../../spec/lastenheft.md)); jede Quelle ist über ihren Port mockbar
-  ([`LH-QA-002`](../../../spec/lastenheft.md)).
+  ([`LH-NF-006`](../../../spec/lastenheft.md#lh-nf-006--erweiterbarkeit)); jede Quelle ist über ihren Port mockbar
+  ([`LH-QA-002`](../../../spec/lastenheft.md#lh-qa-002--integration-tests)).
 - Negativ: Mehr Pakete/Interfaces als ein flaches Skript; Einstieg etwas
   steiler.
 - Folgepflicht: Import-Constraints als Fitness Function (`make arch-check`)

@@ -18,7 +18,7 @@ pro Sub-Area, Repo-Klasse, Adaptionen ggü. Baseline) leben in
 | Rang | Datei | Charakter |
 |---|---|---|
 | 1 | [`spec/lastenheft.md`](../spec/lastenheft.md) | vertraglich abnahmebindend |
-| 2 | [`spec/spezifikation.md`](../spec/spezifikation.md) | technisch fortschreibbar (3. Spec-Stratum, siehe `conventions.md` [`MR-001`](conventions.md)) |
+| 2 | [`spec/spezifikation.md`](../spec/spezifikation.md) | technisch fortschreibbar (3. Spec-Stratum, siehe `conventions.md` [`MR-001`](conventions.md#mr-001--source-precedence-mit-eigener-spezifikations-schicht)) |
 | 3 | [`spec/architecture.md`](../spec/architecture.md) | Komponenten/Sequenzen, meilensteinfrei |
 | 4 | [`docs/plan/adr/`](../docs/plan/adr/) | Architekturentscheidungen |
 | 5 | [`docs/plan/planning/in-progress/roadmap.md`](../docs/plan/planning/in-progress/roadmap.md) | aktuelle Welle |
@@ -55,7 +55,7 @@ Pipeline-Ergebnis (Rang höher als diese Datei).
 **Nicht behauptet** (geplant, entstehen mit dem ersten Code-Slice in
 Welle 1 und [`ADR-0002`](../docs/plan/adr/0002-implementierungssprache.md)): `make lint`, `make test`, `make coverage-gate`
 (bootstrap-aware), `make self-check` (`bedrock-eu-check` gegen das eigene
-Repo, [`LH-QA-005`](../spec/lastenheft.md)). Diese Targets existieren **noch nicht** im
+Repo, [`LH-QA-005`](../spec/lastenheft.md#lh-qa-005--ci-prüfung)). Diese Targets existieren **noch nicht** im
 `Makefile` und dürfen erst eingetragen werden, wenn sie real laufen
 (keine halluzinierten Gates, Modul 13).
 
@@ -75,17 +75,17 @@ Lastenheft (§4 Nicht-Ziele, §10 Sicherheit):
 
 - **Keine Rechtsberatung.** `bedrock-eu-check` prüft *technische
   Konfigurationen*, ist kein Datenschutzgutachten und keine vertragliche
-  Zusicherung ([`LH-NZ-001`](../spec/lastenheft.md), [`LH-RISK-004`](../spec/lastenheft.md)).
+  Zusicherung ([`LH-NZ-001`](../spec/lastenheft.md#lh-nz-001--kein-rechtlicher-nachweis), [`LH-RISK-004`](../spec/lastenheft.md#lh-risk-004--scheinbare-sicherheit)).
 - **Kein Beweis über AWS-internes Routing.** Geprüft werden nur sichtbare,
-  steuerbare Konfigurationen ([`LH-NZ-002`](../spec/lastenheft.md)).
+  steuerbare Konfigurationen ([`LH-NZ-002`](../spec/lastenheft.md#lh-nz-002--keine-garantie-interner-aws-routings)).
 - **Niemals Secrets im Klartext ausgeben.** `ANTHROPIC_API_KEY` &
-  Co. werden nur als „set"/„not set" gemeldet ([`LH-NF-004`](../spec/lastenheft.md),
-  [`LH-SEC-002`](../spec/lastenheft.md)).
+  Co. werden nur als „set"/„not set" gemeldet ([`LH-NF-004`](../spec/lastenheft.md#lh-nf-004--keine-secret-ausgabe),
+  [`LH-SEC-002`](../spec/lastenheft.md#lh-sec-002--keine-speicherung-von-claude-anthropic-secrets)).
 - **Read-only gegenüber AWS.** Version 1 nutzt ausschließlich lesende
   AWS-Operationen, keine automatischen Remediations
-  ([`LH-SEC-003`](../spec/lastenheft.md), [`LH-SEC-005`](../spec/lastenheft.md), [`LH-NZ-003`](../spec/lastenheft.md)).
+  ([`LH-SEC-003`](../spec/lastenheft.md#lh-sec-003--read-only-aws-zugriff), [`LH-SEC-005`](../spec/lastenheft.md#lh-sec-005--keine-automatischen-remediations), [`LH-NZ-003`](../spec/lastenheft.md#lh-nz-003--keine-automatische-änderung-produktiver-aws-konfigurationen)).
 - **Offline-Pfad muss offline bleiben.** Lokale und Terraform-Prüfungen
-  funktionieren ohne Internet/AWS ([`LH-NF-005`](../spec/lastenheft.md)).
+  funktionieren ohne Internet/AWS ([`LH-NF-005`](../spec/lastenheft.md#lh-nf-005--offline-fähigkeit)).
 
 ## Minimal agent workflow
 

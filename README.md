@@ -49,7 +49,7 @@ Durch falsche Umgebungsvariablen, AWS-Profile, Claude-Code-Settings,
 Inference-Profile oder Terraform/IAM-Definitionen kann unbeabsichtigt eine
 US-Region oder ein globales Profil verwendet werden. Manuelle Kontrolle
 ist fehleranfällig und skaliert nicht über mehrere Entwickler,
-Devcontainer, CI-Pipelines und AWS-Accounts ([`LH-AUSG-003`](spec/lastenheft.md)/[`LH-AUSG-004`](spec/lastenheft.md)).
+Devcontainer, CI-Pipelines und AWS-Accounts ([`LH-AUSG-003`](spec/lastenheft.md#lh-ausg-003--fehlkonfigurationsrisiko)/[`LH-AUSG-004`](spec/lastenheft.md#lh-ausg-004--manuelle-prüfung-reicht-nicht-aus)).
 `bedrock-eu-check` macht diese Prüfung automatisierbar und CI-tauglich.
 
 ## Kerngedanke
@@ -68,7 +68,7 @@ ein Secret auszugeben.** Jede Prüfung hängt an einer `LH-*`-ID und ist
 
 > **Grenzen.** Das Tool ist **keine** Rechts-/Datenschutzberatung und kein
 > Beweis über AWS-internes Routing; es prüft nur sichtbare, steuerbare
-> Konfigurationen ([`LH-NZ-001`](spec/lastenheft.md)/[`LH-NZ-002`](spec/lastenheft.md), [`LH-RISK-004`](spec/lastenheft.md)).
+> Konfigurationen ([`LH-NZ-001`](spec/lastenheft.md#lh-nz-001--kein-rechtlicher-nachweis)/[`LH-NZ-002`](spec/lastenheft.md#lh-nz-002--keine-garantie-interner-aws-routings), [`LH-RISK-004`](spec/lastenheft.md#lh-risk-004--scheinbare-sicherheit)).
 
 ## Lizenz
 
