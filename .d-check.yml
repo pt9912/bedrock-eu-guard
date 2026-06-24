@@ -1,0 +1,59 @@
+# .d-check.yml — bedrock-eu-guard. Basis: `d-check --suggest-config ai-harness-init`
+# (Voll-Kanon), ID-Schema kanonisch auf `LH-FA-<AREA>-NNN` / `LH-QA-NNN`
+# gezogen (harness/conventions.md MR-002). Lauf: `make doc-check`.
+
+scan:
+  roots: [spec, docs, harness]
+  ignore: ["**/*.template.md", ".tmp/**"]   # co-located Templates + Scratch ausnehmen
+
+modules: [links, anchors, ids, matrix, codepaths]
+
+ids:
+  scope:
+    roots: [spec, docs/user]
+  patterns:
+    - regex: 'ADR-\d{4}'
+      target: docs/plan/adr/
+      link-policy: always
+      exempt-paths: [CHANGELOG.md, "docs/reviews/**"]
+    - regex: 'MR-\d{3}'
+      target: harness/conventions.md
+      link-policy: always
+      exempt-paths: [CHANGELOG.md, "docs/reviews/**"]
+    # Anforderungen (Kanon: nur FA/QA werden von --trace als Requirement gezählt)
+    - regex: 'LH-(FA-[A-Z]+|QA)-\d+'
+      target: spec/lastenheft.md
+      link-policy: always
+      exempt-paths: [CHANGELOG.md, "docs/reviews/**"]
+    # Nichtfunktional/Sicherheit: linkpflichtig, aber keine --trace-Requirements
+    - regex: 'LH-(NF|SEC)-\d+'
+      target: spec/lastenheft.md
+      link-policy: always
+      exempt-paths: [CHANGELOG.md, "docs/reviews/**"]
+    - regex: 'SPEC-\d{3}'
+      target: spec/spezifikation.md
+      link-policy: always
+      exempt-paths: [CHANGELOG.md, "docs/reviews/**"]
+    - regex: 'ARC-\d{3}'
+      target: spec/architecture.md
+      link-policy: always
+      exempt-paths: [CHANGELOG.md, "docs/reviews/**"]
+    - regex: 'slice-\d{3}'
+      target: docs/plan/planning/
+      link-policy: always
+      exempt-paths: [CHANGELOG.md, "docs/reviews/**"]
+
+matrix:
+  classes:
+    - {name: spec-straten, paths: [spec/lastenheft.md, spec/spezifikation.md, spec/architecture.md]}
+    - {name: adr, paths: ["docs/plan/adr/[0-9]*.md"]}
+    - {name: slice, paths: ["docs/plan/planning/**/slice-*.md"]}
+  rules:
+    - {from: spec-straten, to: adr, allow: false}
+    - {from: spec-straten, to: slice, allow: false}
+  status:
+    forbidden: [superseded, deprecated]
+  exclude-sections: [Historie, "7. Historie", Geschichte, "20. Historie"]
+
+codepaths:
+  exempt-paths: [CHANGELOG.md, "docs/reviews/**"]

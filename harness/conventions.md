@@ -1,0 +1,157 @@
+# Harness-Konventionen — bedrock-eu-guard
+
+## Purpose
+
+Diese Datei deklariert die *repo-lokalen* Strukturregeln von
+**bedrock-eu-guard** gegenüber der adoptierten Harnesskonvention
+(Baseline: AI-Harness-Kurs). Sie ist der Default-Ort für:
+
+- **Adaptionen** ggü. der Baseline (mit Begründung und Auflösungs-Trigger).
+- **ID-Schema-Deklaration** — welches Präfix-Schema dieses Repo nutzt.
+- **Zusatzklassen-Deklarationen** für repo-spezifische Sensors-Bindungen.
+- **Modus-Deklarationen** pro Sub-Area (Greenfield / Brownfield / Hybrid).
+
+Bei Konflikt zwischen dieser Datei und einer kanonischen Quelle gilt die
+kanonische Quelle (Source Precedence, siehe [`README.md`](README.md)).
+Diese Datei ist konformitätsbringend für *Form*-Fragen, nicht autoritativ
+über Inhalt.
+
+**Repo-Klasse:** *Tooling/Referenz*. `bedrock-eu-check` ist ein lokal und
+in CI laufendes Prüfwerkzeug ohne produktiven Laufzeitpfad. Daraus folgt
+die Default-Source-Precedence (keine Regulatorik-Voranstellung wie bei
+einem Policy/Compliance-Repo) und eine moderate Hard-Rule-Schärfe — die
+domänenkritischen Negativ-Regeln (kein Secret-Klartext, Read-only-AWS)
+stehen trotzdem als Safety-Boundaries in [`README.md`](README.md).
+
+## Baseline
+
+- **Konvention:** AI-Harness-Kurs (`pt9912/ai-harness-course`).
+- **Stand:** v1.4.0 (Regelwerk + Templates als Release-Assets).
+- **Datum der Adoption:** 2026-06-24.
+
+## Adoptierte Konventions-Quellen
+
+- **Extern (Regelwerk, Modul-Bundle):**
+  <https://github.com/pt9912/ai-harness-course/releases/download/v1.4.0/lab-regelwerk.zip>
+  — self-navigierbares ZIP, interne Verweise auf den Tag gepinnt;
+  adoptierter Stand **v1.4.0**. Für harte Reproduzierbarkeit den
+  Release/Tag pinnen (nicht `main`).
+- **In-Repo (verkörperte Form):** die co-located `*.template.md` (ADR,
+  Slice, Welle, Carveout, Review-Report) sowie die Gate-Baseline
+  (`d-check.mk`, `.d-check.yml`, `Makefile`); `d-check.mk` ist mit
+  `d-check --print-mk` (v0.29.0) erzeugt, Templates aus
+  `lab-templates.zip` v1.4.0.
+
+Diese Datei dupliziert keinen Baseline-Text — sie verweist. Bei Konflikt
+gilt das Lehrmaterial.
+
+## Adaptions-Block
+
+### MR-000 — Baseline-Aussage
+
+- **Datum:** 2026-06-24
+- **Geltungsbereich:** gesamtes Repo
+- **Adaption:** *keine inhaltlichen Adaptionen ggü. Baseline-Default* für
+  Verzeichniskonvention, Slice-Lifecycle (`open → next → in-progress →
+  done`), Carveout-Disziplin und Trigger-Klassen. Repo-Klasse:
+  *Tooling/Referenz*. Abweichungen am Präfix-Schema und an der
+  Source-Precedence sind als eigene `MR-<NNN>` unten dokumentiert.
+- **Begründung:** Initial-Setzung beim Greenfield-Bootstrap.
+- **Auflösungs-Trigger:** permanent.
+
+### MR-001 — Source Precedence mit eigener Spezifikations-Schicht
+
+- **Datum:** 2026-06-24
+- **Geltungsbereich:** [`README.md`](README.md) §Source precedence
+- **Adaption:** Die Source-Precedence-Tabelle führt
+  [`spec/spezifikation.md`](../spec/spezifikation.md) als eigenen
+  **Rang 2** zwischen Lastenheft (Rang 1) und Architektur (Rang 3).
+  Der Kurs-Default kennt zwei Spec-Ränge; dieses Repo nutzt drei.
+- **Begründung:** Das Tool hat eine eigenständige technische Schicht
+  (Regel-Engine, Klassifikations-Algorithmen, Config-Schema, Finding-/
+  SARIF-Schema), die fortschreibbar ist, ohne das Lastenheft zu ändern.
+  Damit die ADR-Schärfungs-Regel („ADR darf Spezifikation schärfen, nicht
+  Lastenheft") strukturell abgebildet ist, muss die Spezifikation als
+  eigener Rang sichtbar sein.
+- **Auflösungs-Trigger:** permanent.
+
+### MR-002 — ID-Schema: Kanon-Präfix `LH-` mit Bereichscodes
+
+- **Datum:** 2026-06-24
+- **Geltungsbereich:** alle Spec-Straten, ADRs, Commits, PRs
+- **Adaption:** Dieses Repo nutzt das **kanonische** Anforderungs-Schema
+  `LH-FA-<AREA>-<NNN>` (funktional) und `LH-QA-<NNN>` (qualitativ) — exakt
+  die ai-harness/d-check-Form `LH-(FA-[A-Z]+|QA)-\d+`, sodass
+  `make doc-trace` Anforderungen erkennt. Über die zwei Kanon-Klassen
+  hinaus führt es **dokumentierte Zusatzkategorien** `LH-NF-*`
+  (nichtfunktional), `LH-SEC-*` (Sicherheit) und Kontext-Präfixe
+  (`LH-AUSG-*`, `LH-ZIEL-*`, …); diese sind linkpflichtig, zählen aber
+  **nicht** als `--trace`-Requirements. Spec/Sicht nutzen `SPEC-*` /
+  `ARC-*`:
+
+  | Stratum / Artefakt | Präfix-Form | Beispiel |
+  |---|---|---|
+  | Lastenheft — funktional | `LH-FA-<AREA>-<NNN>` | `LH-FA-LENV-001` |
+  | Lastenheft — nichtfunktional | `LH-NF-<NNN>` | `LH-NF-004` |
+  | Lastenheft — Qualität | `LH-QA-<NNN>` | `LH-QA-001` |
+  | Lastenheft — Sicherheit | `LH-SEC-<NNN>` | `LH-SEC-003` |
+  | Lastenheft — sonst (Ziele, Modi, Risiken, …) | `LH-<KAT>-<NNN>` | `LH-ZIEL-002` |
+  | Spezifikation (Technik) | `SPEC-<NNN>` | `SPEC-010` |
+  | Architektur (Sicht) | `ARC-<NNN>` | `ARC-003` |
+  | ADR | `ADR-<NNNN>` | `ADR-0001` |
+  | Carveout | `CO-<NNN>` | `CO-001` |
+  | Slice | `slice-<NNN>` | `slice-001` |
+  | Adaption | `MR-<NNN>` | `MR-002` |
+
+  Die `<AREA>`-Codes des Lastenhefts: `LENV` (lokale Env), `CLAUDE`
+  (Claude-Code-Config), `DEVCON`/`DOCKER` (Container), `AWS`, `BEDROCK`,
+  `IAM`, `TF` (Terraform), `REP` (Reporting), `EXIT` (Exit-Codes),
+  `AUTH` (Authentifizierung).
+- **Begründung:** Konformität zum Kanon, damit die Harness-Tooling
+  (`--trace`, `--suggest-config`) greift, **ohne** die d-check-Config
+  aufzuweichen. Die `<AREA>`-Codes (LENV, CLAUDE, …) halten die große
+  funktionale Fläche (8 Prüf-Modi, ~30 Regeln) navigierbar — genau wie
+  d-checks eigene `DC-FA-CLI-*`. **Migration 2026-06-24:** löst das
+  ursprünglich vorgeschlagene bespoke `LH-BECC-*`-Schema ab; die IDs
+  wurden repo-weit auf `LH-FA-*`/`LH-QA-*` gezogen, damit `--trace`
+  Requirements zählt.
+- **Auflösungs-Trigger:** permanent.
+
+## Zusatzklassen-Deklaration für Sensors-Bindung
+
+Es werden **keine** Zusatzklassen über die vier kanonischen hinaus (ADR,
+Carveout, Schwelle, Reproduzierbarkeit) verwendet.
+
+— keine —
+
+> Wird später z. B. ein Gate eingeführt, das genau eine Lastenheft-Regel
+> prüft (etwa ein „No-Secret-Output"-Test gebunden an `LH-NF-004`),
+> wird die **LH-Bindung** hier als Klasse `LH-<…>` deklariert, bevor
+> sie in der Sensors-Tabelle auftaucht.
+
+## Modus-Deklaration pro Sub-Area
+
+Das Repo ist ein **Greenfield**-Projekt: Dokumentation führt, Code folgt.
+Es existiert noch kein Bestandscode, daher gibt es keine Brownfield-
+Inventur und keinen Reconciliation-Backlog.
+
+| Sub-Area (Pfad / Modul) | Modus | Begründung | Graduation-Bedingung |
+|---|---|---|---|
+| `*` (Default für gesamtes Repo) | Greenfield | Leeres Repo, Spec und ADRs werden vor Code geschrieben. | n/a (GF) |
+| Spezifikation & Architektur (`spec/`) | Greenfield | Verträge entstehen aus dem Lastenheft, nicht aus Code. | n/a (GF) |
+| Regel-Engine & Scanner (`src/` geplant) | Greenfield | Regeln folgen den `LH-FA-*`-Anforderungen. | n/a (GF) |
+| Test-Infrastruktur | Greenfield | Tests werden gegen `LH-*`-IDs geschrieben (`LH-QA-001`). | n/a (GF) |
+
+> Sub-Area-Disziplin: Die obigen Zeilen sind beim Bootstrap teils
+> *Sub-Area-Aspirantinnen* (Struktur vor Substanz). Sobald eine eigene
+> `MR-NNN`-Adaption oder eine eigenständige Inventur-Linie entsteht,
+> qualifizieren sie nach der Drei-Achsen-Schwelle (≥ 2) zur vollen
+> Sub-Area.
+
+## Glossar (optional)
+
+| Begriff | Bedeutung in diesem Repo |
+|---|---|
+| EU-safe Konfiguration | Konfiguration, die ausschließlich zugelassene EU-Regionen, freigegebene Modell-/Inference-Profile und AWS Bedrock statt direkter Anthropic-API nutzt (siehe `LH-BEG-005`). |
+| Finding | Einzelnes Prüfergebnis mit Schweregrad `PASS` / `WARN` / `FAIL`, Kennung, Nachricht und Empfehlung. |
+| Mantle | Bedrock-Endpunkt für Claude Code in nativer Anthropic-API-Form, aber mit AWS-IAM (siehe `LH-BEG-003`). |
