@@ -18,9 +18,14 @@ Adaptionen ggü. Baseline, Modus-Deklarationen pro Sub-Area) leben in
 Das **Regelwerk der adoptierten Baseline** liegt als self-navigierbares
 **Modul-Bundle (ZIP)** unter
 <https://github.com/pt9912/ai-harness-course/releases/download/v1.4.0/lab-regelwerk.zip>
-— einmal pro Session die relevanten Module lesen, bevor der Workflow (§6)
-startet. Derivativ: bei Konflikt gelten die kanonischen Quellen;
-adoptierter Stand steht in
+— zu lesen, **bevor du an der Harness-Schicht selbst arbeitest**: beim
+Bootstrap, bei Änderungen an
+[`harness/conventions.md`](harness/conventions.md) (Adaptionen `MR-<NNN>`,
+Source-Precedence, ID-Schema) oder bei einem Drift-Audit gegen die
+Baseline. Für reine Implementierungs-Slices genügt die im Repo
+verkörperte Form (dieses Briefing, die Templates, die Konventionen); die
+Baseline ist dort bereits eingearbeitet. Derivativ: bei Konflikt gelten
+die kanonischen Quellen; adoptierter Stand steht in
 [`harness/conventions.md`](harness/conventions.md) §Baseline.
 
 Die **Skelett-Vorlagen** der Baseline liegen als ZIP unter
