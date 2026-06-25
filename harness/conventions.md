@@ -89,19 +89,19 @@ gilt das Lehrmaterial.
   **nicht** als `--trace`-Requirements. Spec/Sicht nutzen `SPEC-*` /
   `ARC-*`:
 
-  | Stratum / Artefakt | Präfix-Form | Beispiel |
-  |---|---|---|
-  | Lastenheft — funktional | `LH-FA-<AREA>-<NNN>` | [`LH-FA-LENV-001`](../spec/lastenheft.md#lh-fa-lenv-001--prüfung-von-aws_region) |
-  | Lastenheft — nichtfunktional | `LH-NF-<NNN>` | [`LH-NF-004`](../spec/lastenheft.md#lh-nf-004--keine-secret-ausgabe) |
-  | Lastenheft — Qualität | `LH-QA-<NNN>` | [`LH-QA-001`](../spec/lastenheft.md#lh-qa-001--unit-tests) |
-  | Lastenheft — Sicherheit | `LH-SEC-<NNN>` | [`LH-SEC-003`](../spec/lastenheft.md#lh-sec-003--read-only-aws-zugriff) |
-  | Lastenheft — sonst (Ziele, Modi, Risiken, …) | `LH-<KAT>-<NNN>` | [`LH-ZIEL-002`](../spec/lastenheft.md#lh-ziel-002--eu-konformitätscheck) |
-  | Spezifikation (Technik) | `SPEC-<NNN>` | [`SPEC-010`](../spec/spezifikation.md#spec-010--klassifikation-von-modell-profil-ids) |
-  | Architektur (Sicht) | `ARC-<NNN>` | [`ARC-003`](../spec/architecture.md#2-schichten-und-constraints) |
-  | ADR | `ADR-<NNNN>` | [`ADR-0001`](../docs/plan/adr/0001-dokumentation-als-source-of-truth.md) |
-  | Carveout | `CO-<NNN>` | `CO-001` |
-  | Slice | `slice-<NNN>` | [`slice-001`](../docs/plan/planning/open/slice-001-hexagon-skelett-env-region.md) |
-  | Adaption | `MR-<NNN>` | `MR-002` |
+  | Stratum / Artefakt                           | Präfix-Form          | Beispiel                                                                              |
+  | -------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------- |
+  | Lastenheft — funktional                      | `LH-FA-<AREA>-<NNN>` | [`LH-FA-LENV-001`](../spec/lastenheft.md#lh-fa-lenv-001--prüfung-von-aws_region)      |
+  | Lastenheft — nichtfunktional                 | `LH-NF-<NNN>`        | [`LH-NF-004`](../spec/lastenheft.md#lh-nf-004--keine-secret-ausgabe)                  |
+  | Lastenheft — Qualität                        | `LH-QA-<NNN>`        | [`LH-QA-001`](../spec/lastenheft.md#lh-qa-001--unit-tests)                            |
+  | Lastenheft — Sicherheit                      | `LH-SEC-<NNN>`       | [`LH-SEC-003`](../spec/lastenheft.md#lh-sec-003--read-only-aws-zugriff)               |
+  | Lastenheft — sonst (Ziele, Modi, Risiken, …) | `LH-<KAT>-<NNN>`     | [`LH-ZIEL-002`](../spec/lastenheft.md#lh-ziel-002--eu-konformitätscheck)              |
+  | Spezifikation (Technik)                      | `SPEC-<NNN>`         | [`SPEC-010`](../spec/spezifikation.md#spec-010--klassifikation-von-modell-profil-ids) |
+  | Architektur (Sicht)                          | `ARC-<NNN>`          | [`ARC-003`](../spec/architecture.md#2-schichten-und-constraints)                      |
+  | ADR                                          | `ADR-<NNNN>`         | [`ADR-0001`](../docs/plan/adr/0001-dokumentation-als-source-of-truth.md)              |
+  | Carveout                                     | `CO-<NNN>`           | `CO-001`                                                                              |
+  | Slice                                        | `slice-<NNN>`        | [`slice-001`](../docs/plan/planning/open/slice-001-hexagon-skelett-env-region.md)     |
+  | Adaption                                     | `MR-<NNN>`           | `MR-002`                                                                              |
 
   Die `<AREA>`-Codes des Lastenhefts: `LENV` (lokale Env), `CLAUDE`
   (Claude-Code-Config), `DEVCON`/`DOCKER` (Container), `AWS`, `BEDROCK`,
@@ -115,33 +115,6 @@ gilt das Lehrmaterial.
   ursprünglich vorgeschlagene bespoke `LH-BECC-*`-Schema ab; die IDs
   wurden repo-weit auf `LH-FA-*`/`LH-QA-*` gezogen, damit `--trace`
   Requirements zählt.
-- **Auflösungs-Trigger:** permanent.
-
-### MR-003 — Lese-Disziplin für das externe Regelwerk
-
-- **Datum:** 2026-06-24
-- **Geltungsbereich:** [`AGENTS.md`](../AGENTS.md) §1 (Regelwerk-Lesepflicht)
-- **Adaption:** Das externe Regelwerk-Bundle (ZIP) ist **nicht** pro Session
-  zu lesen, sondern nur bei **Schwellen-Ereignissen**, an denen die im Repo
-  verkörperte Form selbst berührt wird: (1) Harness-Bootstrap; (2) Änderung
-  an dieser Datei — Adaptionen (`MR-<NNN>`), Source-Precedence, ID-Schema;
-  (3) Drift-Audit der Verkörperung gegen die Baseline. Reine
-  Implementierungs-Slices arbeiten ausschließlich auf der verkörperten Form
-  (Briefing, Templates, Konventionen, Gate-Baseline) und lesen das Bundle
-  nicht.
-- **Begründung:** Die Baseline kennt keine Per-Session-Lesepflicht — ihr
-  8-Schritt-Workflow (Modul 9, gespiegelt in [`AGENTS.md`](../AGENTS.md) §6)
-  startet bei [`harness/README.md`](README.md) und der kanonischen Quelle,
-  nicht beim Regelwerk; das Bundle ist laut eigener README derivativ und
-  nicht-normativ (Quelle der Wahrheit ist der Kurs). Das Regelwerk ist damit
-  eine **Erkenntnis-**, keine **Laufzeit-Abhängigkeit**: das Derivat
-  (Briefing, diese Datei, Templates) lässt sich ohne die Quelle nicht auf
-  Treue auditieren, und genau dafür — Verifizieren oder Ändern der
-  Verkörperung — wird gelesen (Modul 0: Per-Lauf-Relevantes gehört
-  verkörpert, nicht extern nachgeladen). Die zuvor in §1 stehende „einmal pro
-  Session"-Pflicht war eine über-strenge Adopter-Setzung ohne Baseline-Deckung;
-  diese Adaption ersetzt sie durch die anlassbezogene Form und macht den
-  echten Lese-Anlass explizit und prüfbar.
 - **Auflösungs-Trigger:** permanent.
 
 ## Zusatzklassen-Deklaration für Sensors-Bindung
@@ -162,12 +135,12 @@ Das Repo ist ein **Greenfield**-Projekt: Dokumentation führt, Code folgt.
 Es existiert noch kein Bestandscode, daher gibt es keine Brownfield-
 Inventur und keinen Reconciliation-Backlog.
 
-| Sub-Area (Pfad / Modul) | Modus | Begründung | Graduation-Bedingung |
-|---|---|---|---|
-| `*` (Default für gesamtes Repo) | Greenfield | Leeres Repo, Spec und ADRs werden vor Code geschrieben. | n/a (GF) |
-| Spezifikation & Architektur (`spec/`) | Greenfield | Verträge entstehen aus dem Lastenheft, nicht aus Code. | n/a (GF) |
-| Regel-Engine & Scanner (`src/` geplant) | Greenfield | Regeln folgen den `LH-FA-*`-Anforderungen. | n/a (GF) |
-| Test-Infrastruktur | Greenfield | Tests werden gegen `LH-*`-IDs geschrieben ([`LH-QA-001`](../spec/lastenheft.md#lh-qa-001--unit-tests)). | n/a (GF) |
+| Sub-Area (Pfad / Modul)                 | Modus      | Begründung                                                                                              | Graduation-Bedingung |
+| --------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------- | -------------------- |
+| `*` (Default für gesamtes Repo)         | Greenfield | Leeres Repo, Spec und ADRs werden vor Code geschrieben.                                                 | n/a (GF)             |
+| Spezifikation & Architektur (`spec/`)   | Greenfield | Verträge entstehen aus dem Lastenheft, nicht aus Code.                                                  | n/a (GF)             |
+| Regel-Engine & Scanner (`src/` geplant) | Greenfield | Regeln folgen den `LH-FA-*`-Anforderungen.                                                              | n/a (GF)             |
+| Test-Infrastruktur                      | Greenfield | Tests werden gegen `LH-*`-IDs geschrieben ([`LH-QA-001`](../spec/lastenheft.md#lh-qa-001--unit-tests)). | n/a (GF)             |
 
 > Sub-Area-Disziplin: Die obigen Zeilen sind beim Bootstrap teils
 > *Sub-Area-Aspirantinnen* (Struktur vor Substanz). Sobald eine eigene
@@ -177,8 +150,8 @@ Inventur und keinen Reconciliation-Backlog.
 
 ## Glossar (optional)
 
-| Begriff | Bedeutung in diesem Repo |
-|---|---|
+| Begriff               | Bedeutung in diesem Repo                                                                                                                                                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | EU-safe Konfiguration | Konfiguration, die ausschließlich zugelassene EU-Regionen, freigegebene Modell-/Inference-Profile und AWS Bedrock statt direkter Anthropic-API nutzt (siehe [`LH-BEG-005`](../spec/lastenheft.md#lh-beg-005--eu-safe-konfiguration)). |
-| Finding | Einzelnes Prüfergebnis mit Schweregrad `PASS` / `WARN` / `FAIL`, Kennung, Nachricht und Empfehlung. |
-| Mantle | Bedrock-Endpunkt für Claude Code in nativer Anthropic-API-Form, aber mit AWS-IAM (siehe [`LH-BEG-003`](../spec/lastenheft.md#lh-beg-003--mantle)). |
+| Finding               | Einzelnes Prüfergebnis mit Schweregrad `PASS` / `WARN` / `FAIL`, Kennung, Nachricht und Empfehlung.                                                                                                                                   |
+| Mantle                | Bedrock-Endpunkt für Claude Code in nativer Anthropic-API-Form, aber mit AWS-IAM (siehe [`LH-BEG-003`](../spec/lastenheft.md#lh-beg-003--mantle)).                                                                                    |

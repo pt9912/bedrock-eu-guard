@@ -24,9 +24,7 @@ Bootstrap, bei Änderungen an
 Source-Precedence, ID-Schema) oder bei einem Drift-Audit gegen die
 Baseline. Für reine Implementierungs-Slices genügt die im Repo
 verkörperte Form (dieses Briefing, die Templates, die Konventionen); die
-Baseline ist dort bereits eingearbeitet. Diese Schwellen-Lese-Disziplin ist
-als [`MR-003`](harness/conventions.md#mr-003--lese-disziplin-für-das-externe-regelwerk)
-hinterlegt. Derivativ: bei Konflikt gelten
+Baseline ist dort bereits eingearbeitet. Derivativ: bei Konflikt gelten
 die kanonischen Quellen; adoptierter Stand steht in
 [`harness/conventions.md`](harness/conventions.md) §Baseline.
 
@@ -119,10 +117,10 @@ Code stehen, müssen aber überschreibbar bleiben.
 
 Nur real existierende Targets (keine halluzinierten Gates, Modul 13):
 
-| Target | Zweck |
-|---|---|
+| Target           | Zweck                                                              |
+| ---------------- | ------------------------------------------------------------------ |
 | `make doc-check` | Doku-Referenzen prüfen (Links/Anker, via d-check v0.29.0, netzlos) |
-| `make gates` | alle aktuell lauffähigen Gates (heute nur `doc-check`) |
+| `make gates`     | alle aktuell lauffähigen Gates (heute nur `doc-check`)             |
 
 `make lint`, `make test`, `make coverage-gate`, `make self-check`
 entstehen mit dem ersten Code-Slice (Welle 1) und **[`ADR-0002`](docs/plan/adr/0002-implementierungssprache.md)**; sie
