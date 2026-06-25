@@ -36,11 +36,25 @@ stehen trotzdem als Safety-Boundaries in [`README.md`](README.md).
   — self-navigierbares ZIP, interne Verweise auf den Tag gepinnt;
   adoptierter Stand **v1.4.0**. Für harte Reproduzierbarkeit den
   Release/Tag pinnen (nicht `main`).
-- **In-Repo (verkörperte Form):** die co-located `*.template.md` (ADR,
-  Slice, Welle, Carveout, Review-Report) sowie die Gate-Baseline
-  (`d-check.mk`, `.d-check.yml`, `Makefile`); `d-check.mk` ist mit
-  `d-check --print-mk` (v0.29.0) erzeugt, Templates aus
+- **In-Repo (verkörperte Form):** die co-located `*.template.md` der
+  **wiederkehrenden** Artefakte (ADR, Slice, Welle, Carveout, Review-Report)
+  — beim Anlegen kopieren; **autoritative** Autorenquelle. Singleton-Skelette
+  (AGENTS, conventions, README, spec, roadmap, Index-READMEs) sind bewusst
+  **nicht** co-located ([`MR-003`](#mr-003--template-verkörperung-nur-für-wiederkehrende-skelette)).
+  Dazu die Gate-Baseline (`d-check.mk`, `.d-check.yml`, `Makefile`);
+  `d-check.mk` ist mit `d-check --print-mk` (v0.29.0) erzeugt, Templates aus
   `lab-templates.zip` v1.4.0.
+- **Lokale Lese-/Adoptions-Form (Cache, ephemer):** das **Regelwerk** wird
+  zum Lesen nach `.harness/cache/<tag>/regelwerk/` entpackt (`<tag>` =
+  §Baseline-`**Stand:**`, derzeit `v1.4.0`); `tools/harness/fetch-baseline-cache.sh`
+  materialisiert es (Tag aus der §Baseline-Zeile oder als Argument). Dasselbe
+  Skript legt `lab-templates.zip` nach `.harness/cache/<tag>/templates/` —
+  **nur** als Adoptions-/Drift-Audit-Staging für die Singleton-Skelette
+  ([`MR-003`](#mr-003--template-verkörperung-nur-für-wiederkehrende-skelette)),
+  nicht als Autorenquelle. Der Cache ist gitignored und aus `make doc-check`
+  ausgenommen — `.d-check.yml` `scan.ignore` **und** `ids.scope.ignore` —, da er
+  externes Derivat-/Fremd-ID-Material trägt (gleiche Klasse wie die
+  `**/*.template.md`- und `.tmp/**`-Ausnahme).
 
 Diese Datei dupliziert keinen Baseline-Text — sie verweist. Bei Konflikt
 gilt das Lehrmaterial.
@@ -116,6 +130,34 @@ gilt das Lehrmaterial.
   wurden repo-weit auf `LH-FA-*`/`LH-QA-*` gezogen, damit `--trace`
   Requirements zählt.
 - **Auflösungs-Trigger:** permanent.
+
+### MR-003 — Template-Verkörperung nur für wiederkehrende Skelette
+
+- **Datum:** 2026-06-25
+- **Geltungsbereich:** co-located `*.template.md`; [`AGENTS.md`](../AGENTS.md) §1; §Adoptierte Konventions-Quellen
+- **Adaption:** bedrock verkörpert **nur die wiederkehrenden** Skelette
+  co-located — ADR, Slice, Welle, Carveout, Review-Report (pro Artefakt
+  kopiert). Die **Singleton**-Skelette (AGENTS, conventions, harness-/
+  project-README, die spec-Straten, roadmap, Index-READMEs) werden **nicht**
+  co-located: sie werden beim Bootstrap einmalig gefüllt, danach ist das
+  *gefüllte* File die Verkörperung; das Roh-Skelett bleibt im Cache
+  (`.harness/cache/<tag>/templates/` via `tools/harness/fetch-baseline-cache.sh`)
+  für Adoption/Drift-Audit.
+- **Begründung:** Der Baseline-Bootstrap (Regelwerk Modul 2) schreibt »alle
+  Skelette kopieren« — eine **defekte Kanon-Regel**: Sie kennt nur den
+  Adopter/Consumer und **verschweigt den Producer-/Self-Hosting-Fall**
+  (verifiziert 2026-06-25: 0 Treffer für Producer/Self-Hosting über alle
+  20 Module + 3 Grundlagen; die Repo-Klassen-Taxonomie achst nur nach Domäne,
+  nicht nach Baseline-Beziehung). Eine Ebene tiefer verschmilzt »alle Skelette«
+  die producer-autorierten **Singletons** (einmal gefüllt) mit den
+  consumer-**wiederkehrenden** Artefakten (pro Anlage kopiert). bedrock folgt
+  dem schärferen Prinzip (Modul 0: per-Lauf-Relevantes gehört verkörpert)
+  statt der Pauschale — wiederkehrend → co-located, Singleton → Cache. Erklärt
+  zugleich, warum d-check (Producer/Self-Hoster) korrekt **keine** Templates
+  co-located.
+- **Auflösungs-Trigger:** entfällt, sobald der Kurs eine Producer/Self-Hosting-
+  Klasse bzw. die Singleton-/Wiederkehr-Unterscheidung kanonisiert; bis dahin
+  permanent.
 
 ## Zusatzklassen-Deklaration für Sensors-Bindung
 

@@ -3,6 +3,10 @@
 scratchpad/
 *.log
 
+# --- Harness-Baseline-Cache (ephemer; entpacktes Regelwerk-/Template-Bundle,
+#     materialisiert via tools/harness/fetch-baseline-cache.sh) ---
+.harness/cache/
+
 # --- Claude Code: lokale, persönliche Settings ---
 .claude/settings.local.json
 
@@ -29,7 +33,7 @@ build/
 *.sarif
 result.json
 
-# --- AWS / Secrets: niemals committen (LH-BECC-SEC-001/002) ---
+# --- AWS / Secrets: niemals committen (LH-SEC-001/002) ---
 .env
 .env.*
 !.env.example

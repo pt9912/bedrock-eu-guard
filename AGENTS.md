@@ -15,24 +15,31 @@ Strukturregeln (ID-Schemata, Verzeichniskonvention, Repo-Klasse,
 Adaptionen ggü. Baseline, Modus-Deklarationen pro Sub-Area) leben in
 [`harness/conventions.md`](harness/conventions.md).
 
-Das **Regelwerk der adoptierten Baseline** liegt als self-navigierbares
-**Modul-Bundle (ZIP)** unter
-<https://github.com/pt9912/ai-harness-course/releases/download/v1.4.0/lab-regelwerk.zip>
-— zu lesen, **bevor du an der Harness-Schicht selbst arbeitest**: beim
-Bootstrap, bei Änderungen an
-[`harness/conventions.md`](harness/conventions.md) (Adaptionen `MR-<NNN>`,
-Source-Precedence, ID-Schema) oder bei einem Drift-Audit gegen die
-Baseline. Für reine Implementierungs-Slices genügt die im Repo
-verkörperte Form (dieses Briefing, die Templates, die Konventionen); die
-Baseline ist dort bereits eingearbeitet. Derivativ: bei Konflikt gelten
-die kanonischen Quellen; adoptierter Stand steht in
-[`harness/conventions.md`](harness/conventions.md) §Baseline.
-
-Die **Skelett-Vorlagen** der Baseline liegen als ZIP unter
-<https://github.com/pt9912/ai-harness-course/releases/download/v1.4.0/lab-templates.zip>;
-die wiederkehrenden Varianten (ADR, Slice, Welle, Carveout, Review-Report)
-sind als `*.template.md` co-located im Repo. Beim Anlegen neuer Artefakte
-das passende Template kopieren statt frei zu formulieren.
+Das Betriebsregelwerk der adoptierten Baseline in Agenten-Kurzform
+einmal pro Session lesen, bevor der Workflow (§6) startet. **Lese-Form ist
+ausschließlich das nach Modulen und Grundlagen-Abschnitten aufgeteilte
+Release-Bundle**
+[`lab-regelwerk.zip`](https://github.com/pt9912/ai-harness-course/releases/download/v1.4.0/lab-regelwerk.zip)
+(`v1.4.0`): herunterladen, entpacken und **nur den benötigten Abschnitt**
+laden (die Bundle-`README.md` ist der Index), ohne das gesamte Regelwerk
+im Kontext zu halten. Konventioneller Ablageort des entpackten **Regelwerks** ist
+`.harness/cache/<tag>/regelwerk/` (gitignored; Pfadschema siehe
+[`harness/conventions.md`](harness/conventions.md) §Adoptierte
+Konventions-Quellen); materialisieren per
+`tools/harness/fetch-baseline-cache.sh` (zieht + entpackt, Tag aus §Baseline).
+**Templates** werden dagegen nicht gefetcht, sondern **verkörpert**: die
+wiederkehrenden Skelette (ADR, Slice, Welle, Carveout, Review-Report) liegen
+co-located als `*.template.md` im Repo — beim Anlegen eines Artefakts das
+passende kopieren. Singleton-Skelette (AGENTS, conventions, README, spec,
+roadmap) werden beim Bootstrap einmalig gefüllt; dasselbe Skript entpackt
+`lab-templates.zip` nach `.harness/cache/<tag>/templates/` nur als
+Adoptions-/Drift-Audit-Staging, nicht als Autorenquelle
+([`MR-003`](harness/conventions.md#mr-003--template-verkörperung-nur-für-wiederkehrende-skelette)).
+Das Bundle ist derivativ; bei Konflikt sticht die
+Quelldatei das Bundle, über ihr die kanonischen Quellen (Source
+Precedence). Den Link auf die Quelldatei und den adoptierten Stand führt
+[`harness/conventions.md`](harness/conventions.md) (§Adoptierte
+Konventions-Quellen bzw. §Baseline).
 
 ## 2. Kanonische Quellen (Source Precedence)
 

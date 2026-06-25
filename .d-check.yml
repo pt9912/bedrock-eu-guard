@@ -4,13 +4,14 @@
 
 scan:
   roots: ["."]                               # ganzes Repo inkl. Root-README/AGENTS (Härtung wie d-check-Self-Config)
-  ignore: ["**/*.template.md", ".tmp/**"]    # co-located Templates + Scratch ausnehmen
+  ignore: ["**/*.template.md", ".tmp/**", ".harness/cache/**"]    # co-located Templates + Scratch + ephemerer Baseline-Cache (externes Derivat, gitignored) ausnehmen
 
 modules: [links, anchors, ids, matrix, codepaths]
 
 ids:
   scope:
     roots: ["."]   # ganzes Repo: ID-Linkpflicht auch in ADRs/Slices/Roadmap/README/AGENTS
+    ignore: ["**/*.template.md", ".tmp/**", ".harness/cache/**"]   # spiegelt scan.ignore: Skelett-Templates (Beispiel-IDs), Scratch, Baseline-Cache (Fremd-IDs) sind keine autoritativen ID-Träger
   patterns:
     - regex: 'ADR-\d{4}'
       target: docs/plan/adr/
