@@ -213,6 +213,10 @@ func CheckClaudeEndpoints(sc ScanContext, _ model.Config) []model.Finding {
 			fd.Severity, fd.Reason, fd.Line = model.FAIL, model.ReasonDirectAnthropic, line
 			fd.Message = "Direkter Anthropic-Endpunkt: " + what
 			fd.Recommendation = "Direkte Anthropic-Konfiguration entfernen"
+		} else if f.S.APIKeyHelperLine > 0 {
+			fd.Severity, fd.Reason, fd.Line = model.WARN, model.ReasonAPIKeyHelper, f.S.APIKeyHelperLine
+			fd.Message = "apiKeyHelper konfiguriert: liefert einen API-Key und kann eine direkte Anthropic-Verbindung ermöglichen; manuell prüfen"
+			fd.Recommendation = "apiKeyHelper entfernen, wenn Claude Code über Bedrock laufen soll"
 		} else if e, ok := f.S.EnvEntry("ANTHROPIC_BASE_URL"); ok && e.Value != "" {
 			fd.Severity, fd.Reason, fd.Line = model.WARN, model.ReasonEndpointForeign, e.Line
 			fd.Message = "ANTHROPIC_BASE_URL zeigt auf einen anderen Host; manuell prüfen"
