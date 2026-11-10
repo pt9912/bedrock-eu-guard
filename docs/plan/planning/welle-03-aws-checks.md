@@ -20,8 +20,11 @@ den Adapter `awscli` (einzige AWS-Tür, siehe [`spec/architecture.md`](../../../
 ## 2. Trigger (Welle startet)
 
 - welle-02-config-scanner done (M2), insbesondere slice-007.
-- Entscheidung zur CLI-Struktur ([`LH-MOD-004`](../../../spec/lastenheft.md#lh-mod-004--gesamtprüfung)): `terraform` bleibt Teil von `local` oder wird
-  eigener Befehl (siehe §7, Entscheidung der Agenten untereinander).
+- CLI-Struktur entschieden (Agenten untereinander, 2026-11-10): `local` = Env, Claude-Config,
+  Devcontainer/Compose/Dockerfile; `terraform` = nur Terraform-Regeln (eigener Befehl,
+  [`LH-MOD-003`](../../../spec/lastenheft.md#lh-mod-003--terraform-modus)); `aws` = AWS-Regeln; `all` = `local` + `terraform` + `aws`
+  ([`LH-MOD-004`](../../../spec/lastenheft.md#lh-mod-004--gesamtprüfung)). Der Umbau (Terraform aus `local`) ist ein Vorab-PR von w2; der Kern macht dafür alle
+  Felder von `app.Scan` optional.
 
 ## 3. Closure-Trigger (Welle schließt)
 
@@ -78,7 +81,7 @@ den Adapter `awscli` (einzige AWS-Tür, siehe [`spec/architecture.md`](../../../
 - **Rechte des Tools:** `sts:GetCallerIdentity`, `bedrock:ListInferenceProfiles`, `bedrock:ListFoundationModels`, `iam:SimulatePrincipalPolicy`, `iam:List*`/`iam:Get*` auf den eigenen Principal. Least-Privilege-Policy wird mit slice-010 dokumentiert ([`LH-SEC-004`](../../../spec/lastenheft.md#lh-sec-004--least-privilege)).
 - **„Verwendet“ vs. „sichtbar“** ([`LH-FA-BEDROCK-002`](../../../spec/lastenheft.md#lh-fa-bedrock-002--nicht-erlaubte-profile-erkennen)): verwendet = in Env/Settings/Konfiguration referenziert (Ergebnis des `local`-Laufs); sichtbar = nur in der Profilliste. Die Zusammenführung beider Modi (`all`) legt slice-009 fest.
 - **SSO/temporäre Credentials** laufen ab: eine abgelaufene Sitzung ist `AWS_NO_CREDENTIALS`, kein Tool-Fehler.
-- **Terraform-Befehl:** Entscheidung `terraform` als eigener Befehl oder nur über `local`/`all` ([`LH-MOD-004`](../../../spec/lastenheft.md#lh-mod-004--gesamtprüfung)) vor slice-008.
+- **Regionen der Abfragen:** `--region` kommt aus `allowedRegions` (Default `eu-central-1`). Ob `ListInferenceProfiles` zusätzlich eine feste Liste typischer Nicht-EU-Regionen abfragt, um „sichtbare, nicht erlaubte“ Profile ([`LH-FA-BEDROCK-002`](../../../spec/lastenheft.md#lh-fa-bedrock-002--nicht-erlaubte-profile-erkennen)) zu finden, legt der Plan von slice-009 fest.
 
 ## 8. Closure-Notiz
 
