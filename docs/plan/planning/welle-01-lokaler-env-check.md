@@ -45,7 +45,7 @@ erfüllt (`RM-001` / v0.1).
 ## 5. Abhängigkeiten
 
 - Blockiert: welle-02 (Config-Scanner bauen auf Kern + Reporter auf).
-- Wird blockiert von: [ADR-0002](../adr/0002-implementierungssprache.md)-Sign-off.
+- Wird blockiert von: nichts ([ADR-0002](../adr/0002-implementierungssprache.md) accepted 2026-11-10).
 
 ## 6. Out-of-Scope für diese Welle
 

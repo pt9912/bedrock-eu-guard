@@ -57,7 +57,7 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 6. Risiken und offene Punkte
 
-- Sprachwahl ([`ADR-0002`](../../adr/0002-implementierungssprache.md)) noch *Proposed* — blockiert Start.
+- Sprachwahl ([`ADR-0002`](../../adr/0002-implementierungssprache.md)) accepted (2026-11-10) — Start nicht mehr blockiert.
 - HCL-/YAML-Parserwahl betrifft erst spätere Slices, hier nicht relevant.
 
 ## 7. Closure-Notiz (nach `done/`)

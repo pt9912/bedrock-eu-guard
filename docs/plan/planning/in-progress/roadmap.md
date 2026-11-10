@@ -12,13 +12,12 @@ Reihenfolge von Terminen. Die Wellen bilden die Versions-Stufen
 
 **Welle-ID:** welle-01-lokaler-env-check
 **Start:** 2026-06-24
-**Geplantes Ende:** offen (Schätzung folgt nach [ADR-0002](../../adr/0002-implementierungssprache.md)-Sign-off)
+**Geplantes Ende:** offen (Schätzung folgt mit slice-001)
 
 **Closure-Trigger:** siehe [`../welle-01-lokaler-env-check.md`](../welle-01-lokaler-env-check.md).
 
-> **Blockiert durch [`ADR-0002`](../../adr/0002-implementierungssprache.md)** (Implementierungssprache, *Proposed*): Der
-> erste Code-Slice braucht die bestätigte Sprachwahl, bevor die Toolchain
-> (`make lint/test/build`) verdrahtet wird.
+> **[`ADR-0002`](../../adr/0002-implementierungssprache.md) accepted (2026-11-10):** Sprachwahl Go bestätigt; der erste Code-Slice
+> (slice-001) kann starten und verdrahtet die Toolchain (`make lint/test/build`).
 
 ## Nächste Wellen
 
