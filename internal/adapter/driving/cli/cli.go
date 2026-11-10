@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"sort"
 
+	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/awscli"
 	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/claudesettings"
 	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/configyaml"
 	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/envos"
@@ -23,7 +24,10 @@ import (
 
 const exitToolError = 2
 
-const usage = "usage: bedrock-eu-check (local|terraform|all) [--root DIR] [--config FILE]\n"
+const usage = "usage: bedrock-eu-check (local|terraform|aws|all) [--root DIR] [--config FILE] [--allowed-account ID]...\n"
+
+// awsBinary ist das aws-Binary (Name oder Pfad); Variable nur für Tests.
+var awsBinary = awscli.DefaultBinary
 
 // Run führt die CLI aus und liefert den Prozess-Exit-Code.
 func Run(args []string, stdout, stderr io.Writer) int {
@@ -32,7 +36,7 @@ func Run(args []string, stdout, stderr io.Writer) int {
 }
 
 func run(args []string, env driven.Environment, home string, stdout, stderr io.Writer) int {
-	if len(args) == 0 || (args[0] != "local" && args[0] != "terraform" && args[0] != "all") {
+	if len(args) == 0 || (args[0] != "local" && args[0] != "terraform" && args[0] != "aws" && args[0] != "all") {
 		fmt.Fprint(stderr, usage)
 		return exitToolError
 	}
@@ -51,7 +55,7 @@ func run(args []string, env driven.Environment, home string, stdout, stderr io.W
 		}
 	}
 	// Eigene Konfiguration ungültig → Tool-Fehler, Exit 2 (SPEC-030).
-	cfg, err := app.LoadConfig(configyaml.New(opts.configPath()))
+	cfg, err := app.LoadConfig(accountOverlay{configyaml.New(opts.configPath()), opts.accounts})
 	if err != nil {
 		return finish(nil, err, stdout, stderr)
 	}
@@ -64,6 +68,11 @@ func run(args []string, env driven.Environment, home string, stdout, stderr io.W
 		var tf []model.Finding
 		tf, err = app.Scan{Terraform: terraform.New(opts.root)}.Run(cfg)
 		findings = append(findings, tf...)
+	}
+	if err == nil && (mode == "aws" || mode == "all") {
+		var aws []model.Finding
+		aws, err = app.CheckAWS{AWS: awscli.New(awsBinary, cfg.AllowedRegions[0])}.Run(env, cfg)
+		findings = append(findings, aws...)
 	}
 	sort.SliceStable(findings, func(i, j int) bool { return findings[i].RuleID < findings[j].RuleID })
 	return finish(findings, err, stdout, stderr)
@@ -85,7 +94,29 @@ func runLocal(env driven.Environment, cfg model.Config, opts options, home strin
 	return append(findings, files...), err
 }
 
-type options struct{ root, config string }
+type options struct {
+	root, config string
+	accounts     []string
+}
+
+// accountOverlay ergänzt die Konfiguration um --allowed-account (Vereinigung
+// mit allowedAccounts aus der Datei, Format wird in model.Resolve geprüft).
+type accountOverlay struct {
+	driven.ConfigLoader
+	accounts []string
+}
+
+func (o accountOverlay) Load() (*model.PartialConfig, error) {
+	p, err := o.ConfigLoader.Load()
+	if err != nil || len(o.accounts) == 0 {
+		return p, err
+	}
+	if p == nil {
+		p = &model.PartialConfig{}
+	}
+	p.AllowedAccounts = append(append([]string{}, p.AllowedAccounts...), o.accounts...)
+	return p, nil
+}
 
 // configPath liefert --config oder <root>/bedrock-eu-check.yml.
 func (o options) configPath() string {
@@ -108,6 +139,8 @@ func parseOptions(args []string) (options, bool) {
 			opts.root = args[1]
 		case "--config":
 			opts.config = args[1]
+		case "--allowed-account":
+			opts.accounts = append(opts.accounts, args[1])
 		default:
 			return options{}, false
 		}
@@ -118,8 +151,11 @@ func parseOptions(args []string) (options, bool) {
 
 func finish(findings []model.Finding, err error, stdout, stderr io.Writer) int {
 	if err != nil {
+		if len(findings) > 0 { // bereits ermittelte Befunde trotzdem zeigen
+			_ = report.New(stdout).Report(findings)
+		}
 		fmt.Fprintf(stderr, "error: %v\n", err)
-		return app.ExitCode(findings, err)
+		return app.ExitCode(nil, err)
 	}
 	if rerr := report.New(stdout).Report(findings); rerr != nil {
 		fmt.Fprintf(stderr, "error: %v\n", rerr)
