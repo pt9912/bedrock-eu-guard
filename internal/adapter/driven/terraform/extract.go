@@ -1,7 +1,6 @@
 package terraform
 
 import (
-	"encoding/json"
 	"regexp"
 	"strings"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/zclconf/go-cty/cty"
 	ctyjson "github.com/zclconf/go-cty/cty/json"
 
+	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/iampolicy"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/core/model"
 )
 
@@ -20,8 +20,6 @@ var policyResources = map[string]bool{
 	"aws_iam_user_policy":  true,
 	"aws_iam_group_policy": true,
 }
-
-const regionConditionKey = "aws:requestedregion"
 
 // providerFrom liest region und alias eines provider "aws"-Blocks.
 func providerFrom(b *hclsyntax.Block) model.AWSProvider {
@@ -73,6 +71,10 @@ func documentStatements(b *hclsyntax.Block) []model.IAMStatement {
 			if attr, ok := c.Body.Attributes["variable"]; ok {
 				if v, ok := evalString(attr.Expr); ok && strings.EqualFold(v, "aws:RequestedRegion") {
 					s.HasRegionCondition = true
+					if vals, ok := c.Body.Attributes["values"]; ok {
+						regions, _ := evalStringList(vals.Expr) // nicht auflösbar: Regionen bleiben unbekannt
+						s.ConditionRegions = append(s.ConditionRegions, regions...)
+					}
 				}
 			}
 		}
@@ -93,39 +95,11 @@ func resourcePolicy(b *hclsyntax.Block) []model.IAMStatement {
 	if !ok {
 		return []model.IAMStatement{{Dynamic: true, Line: line}}
 	}
-	var doc struct {
-		Statement json.RawMessage `json:"Statement"`
-	}
-	if err := json.Unmarshal([]byte(text), &doc); err != nil || len(doc.Statement) == 0 {
+	stmts, ok := iampolicy.Statements([]byte(text), line)
+	if !ok {
 		return []model.IAMStatement{{Dynamic: true, Line: line}}
 	}
-	var raws []json.RawMessage
-	if err := json.Unmarshal(doc.Statement, &raws); err != nil {
-		raws = []json.RawMessage{doc.Statement} // einzelnes Statement als Objekt
-	}
-	var out []model.IAMStatement
-	for _, raw := range raws {
-		var st struct {
-			Effect    string                    `json:"Effect"`
-			Action    json.RawMessage           `json:"Action"`
-			Resource  json.RawMessage           `json:"Resource"`
-			Condition map[string]map[string]any `json:"Condition"`
-		}
-		if err := json.Unmarshal(raw, &st); err != nil {
-			out = append(out, model.IAMStatement{Dynamic: true, Line: line})
-			continue
-		}
-		s := model.IAMStatement{Effect: st.Effect, Actions: jsonStrings(st.Action), Resources: jsonStrings(st.Resource), Line: line}
-		for _, keys := range st.Condition {
-			for k := range keys {
-				if strings.EqualFold(k, regionConditionKey) {
-					s.HasRegionCondition = true
-				}
-			}
-		}
-		out = append(out, s)
-	}
-	return out
+	return stmts
 }
 
 // policyJSON liefert den Policy-Text aus jsonencode(...) oder einem
@@ -146,21 +120,6 @@ func policyJSON(e hclsyntax.Expression) (string, bool) {
 		return string(b), true
 	}
 	return evalString(e)
-}
-
-func jsonStrings(raw json.RawMessage) []string {
-	if len(raw) == 0 {
-		return nil
-	}
-	var one string
-	if err := json.Unmarshal(raw, &one); err == nil {
-		return []string{one}
-	}
-	var many []string
-	if err := json.Unmarshal(raw, &many); err == nil {
-		return many
-	}
-	return nil
 }
 
 // evalString wertet einen Ausdruck ohne Kontext aus; nur reine String-Literale
