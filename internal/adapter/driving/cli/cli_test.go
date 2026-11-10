@@ -119,3 +119,61 @@ func TestLocalBadArgs(t *testing.T) {
 		}
 	}
 }
+
+func localWith(t *testing.T, env mapEnv, extra ...string) (code int, out, errs string) {
+	t.Helper()
+	args, home := scanArgs("testdata/good")
+	var o, e bytes.Buffer
+	code = run(append(args, extra...), env, home, &o, &e)
+	return code, o.String(), e.String()
+}
+
+func mantleEnv() mapEnv {
+	return mapEnv{"AWS_REGION": "eu-central-1", "CLAUDE_CODE_USE_BEDROCK": "1", "CLAUDE_CODE_USE_MANTLE": "1"}
+}
+
+// SPEC-020 mantle: warn (Default) → WARN; allow → PASS; block → FAIL.
+func TestConfigMantleModes(t *testing.T) {
+	cases := []struct {
+		extra    []string
+		wantCode int
+		wantSub  string
+	}{
+		{nil, 0, "[WARN] LH-FA-LENV-005"},
+		{[]string{"--config", "testdata/config/mantle-allow.yml"}, 0, "MANTLE_ALLOWED"},
+		{[]string{"--config", "testdata/config/mantle-block.yml"}, 1, "MANTLE_BLOCKED"},
+	}
+	for _, c := range cases {
+		code, out, errs := localWith(t, mantleEnv(), c.extra...)
+		if code != c.wantCode || !strings.Contains(out, c.wantSub) {
+			t.Errorf("%v: exit=%d want %d, stdout=%q stderr=%q", c.extra, code, c.wantCode, out, errs)
+		}
+	}
+}
+
+// Ungültige eigene Konfiguration → Tool-Fehler Exit 2, ohne Feldwert (LH-NF-004).
+func TestInvalidConfigIsToolError(t *testing.T) {
+	for _, f := range []string{"invalid-regex.yml", "unknown-field.yml", "empty-regions.yml"} {
+		code, out, errs := localWith(t, euEnv, "--config", "testdata/config/"+f)
+		if code != 2 || out != "" || errs == "" {
+			t.Errorf("%s: exit=%d stdout=%q stderr=%q", f, code, out, errs)
+		}
+		if strings.Contains(errs, "GEHEIM") {
+			t.Errorf("%s: Feldwert in der Fehlermeldung: %q", f, errs)
+		}
+	}
+}
+
+func TestExplicitMissingConfigIsToolError(t *testing.T) {
+	code, _, errs := localWith(t, euEnv, "--config", "testdata/config/gibt-es-nicht.yml")
+	if code != 2 || errs == "" {
+		t.Errorf("exit=%d stderr=%q", code, errs)
+	}
+}
+
+// Fehlt die Default-Datei im Root, gelten die Defaults.
+func TestMissingDefaultConfigMeansDefaults(t *testing.T) {
+	if code, out, errs := localWith(t, euEnv); code != 0 {
+		t.Errorf("exit=%d stdout=%q stderr=%q", code, out, errs)
+	}
+}
