@@ -1,0 +1,7 @@
+{
+  "apiKeyHelper": "/usr/local/bin/get-key --token=GEHEIM-HELPER-BEFEHL",
+  "env": {
+    "CLAUDE_CODE_USE_BEDROCK": "1",
+    "AWS_REGION": "eu-central-1"
+  }
+}
