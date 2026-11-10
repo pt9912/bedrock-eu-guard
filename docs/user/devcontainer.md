@@ -46,6 +46,13 @@ Prüfsumme oder weicht sie ab, bricht die Installation ab und es wird nichts
 installiert. Voraussetzung sind `curl` und `sha256sum` (bei Debian/Ubuntu-Basen
 vorhanden).
 
+**Sicherheit:** `baseUrl` muss mit `https://` oder `file://` beginnen. `SHA256SUMS`
+stammt vom selben Ursprung wie das Binary: Die Prüfung schützt vor Korruption und
+Teil-Downloads, **nicht** vor einem kompromittierten Ursprung. Signierte Releases
+(z. B. Sigstore) sind ein Folgepunkt. Der Default `1.0.0` zeigt auf ein Release, das bis
+zur Veröffentlichung nicht existiert; die Installation schlägt dann mit
+„Download … fehlgeschlagen“ fehl.
+
 Zum Testen des Ablaufs ohne Release: `make feature-test` (baut ein lokales
 „Release“, installiert es per `file://` in einen Container ohne Netz und prüft
 auch die Fehlerfälle).

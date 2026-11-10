@@ -50,4 +50,12 @@ echo "$out" | grep -q 'BINARY-INSTALLIERT' && fail "trotz falscher Pruefsumme wu
 rc=0; docker run --rm --network none -v "$feature:/feature:ro" -e 'VERSION=1.0/../x' "$image" sh -c 'cd /feature && ./install.sh' >/dev/null 2>&1 || rc=$?
 [ "$rc" -ne 0 ] || fail "ungueltige Version wurde akzeptiert"
 
+# 6. Negativ: nur https:// oder file:// als baseUrl.
+for bad in http://example.invalid ftp://example.invalid /release example.invalid; do
+  rc=0
+  out=$(docker run --rm --network none -v "$feature:/feature:ro" -e "BASEURL=$bad" "$image" sh -c 'cd /feature && ./install.sh' 2>&1) || rc=$?
+  [ "$rc" -ne 0 ] || fail "baseUrl '$bad' wurde akzeptiert"
+  echo "$out" | grep -q 'baseUrl muss' || fail "keine Meldung zur baseUrl ($bad): $out"
+done
+
 echo "OK: Devcontainer-Feature"

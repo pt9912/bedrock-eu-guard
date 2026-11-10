@@ -3,7 +3,9 @@
 #
 # Lädt <baseUrl>/v<version>/bedrock-eu-check_<version>_linux_<arch> und prüft es
 # gegen <baseUrl>/v<version>/SHA256SUMS. Ohne passende Prüfsumme wird nichts
-# installiert. Optionen kommen als Umgebungsvariablen (VERSION, BASEURL) aus
+# installiert. Die Prüfsumme kommt vom selben Ursprung wie das Binary: Sie schützt
+# vor Korruption und Teil-Downloads, nicht vor einem kompromittierten Ursprung.
+# Optionen kommen als Umgebungsvariablen (VERSION, BASEURL) aus
 # devcontainer-feature.json.
 set -eu
 
@@ -12,6 +14,12 @@ BASEURL="${BASEURL:-https://github.com/pt9912/bedrock-eu-guard/releases/download
 DEST="/usr/local/bin/bedrock-eu-check"
 
 fail() { echo "bedrock-eu-check (Feature): $*" >&2; exit 1; }
+
+# Nur verschluesselte oder lokale Quellen (kein http://, kein ftp://).
+case "$BASEURL" in
+  https://*|file://*) ;;
+  *) fail "baseUrl muss mit https:// oder file:// beginnen" ;;
+esac
 
 case "$VERSION" in
   ''|*[!0-9A-Za-z.+_-]*) fail "ungueltige Version '$VERSION'" ;;
