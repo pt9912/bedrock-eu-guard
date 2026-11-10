@@ -1,7 +1,6 @@
 # Slice slice-014: Befehl `version` und Build-Informationen
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** welle-05-release.
 
@@ -27,12 +26,12 @@ reproduzierbar zu sein.
 
 ## 3. Definition of Done
 
-- [ ] `version`-Befehl mit Tests (Ausgabeformat, Defaults, mit gesetzten Variablen, Argumentfehler).
-- [ ] SARIF nutzt dieselbe Version; Test.
-- [ ] `make build` bettet Version und Commit ein; ein Aufruf des gebauten Binarys bestätigt es.
-- [ ] Reproduzierbarkeit geprüft: zwei Builds mit gleichen Eingaben liefern dieselbe SHA256; Ergebnis in der Closure-Notiz.
-- [ ] `make verify-clean` und CI grün; Sensors-Doku aktuell.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] `version`-Befehl mit Tests (Ausgabeformat, Defaults, mit gesetzten Variablen, Argumentfehler).
+- [x] SARIF nutzt dieselbe Version; Test.
+- [x] `make build` bettet Version und Commit ein; ein Aufruf des gebauten Binarys bestätigt es.
+- [x] Reproduzierbarkeit geprüft: zwei Builds mit gleichen Eingaben liefern dieselbe SHA256; Ergebnis in der Closure-Notiz.
+- [x] `make verify-clean` und CI grün; Sensors-Doku aktuell.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 4. Plan (vor Code)
 
@@ -56,7 +55,13 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 8. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-10 (PR #50, w2).
+
+- **Funktioniert:** `bedrock-eu-check version` gibt eine Zeile `bedrock-eu-check <version> (<commit>)` aus (Exit 0, kein Netz); Zusatzargumente sind ein Aufruffehler (Exit 2). Version und Commit kommen per `-ldflags` in `cli.version`/`cli.commit` (Defaults `dev`/`unknown`) und sind zugleich die Tool-Version in SARIF. `make build` setzt `VERSION`, `COMMIT` (Kurz-Hash) und baut mit `CGO_ENABLED=0`, `-trimpath`, `-buildvcs=false`, `-s -w`. Geprüft: zwei Builds mit gleichen Eingaben liefern dieselbe SHA256, das Binary ist statisch gelinkt.
+- **Anders als geplant:** Nichts Wesentliches.
+- **Offen:** Das Versionsschema im Release (SemVer, Tag `v<version>`) ist in `docs/user/releasing.md` festgelegt, aber noch nicht an einem echten Release erprobt.
+- **Steering-Loop:** Vor dem Wechsel des Branches uncommittete Änderungen sichern: Ein gescheiterter `git switch` ließ nachfolgende Befehle auf dem falschen Stand laufen und führte zu einer unbelegten Aussage über `main`; Ketten mit `&&` brechen ab, Befehle danach nicht.
+- **Folge-Slices:** slice-016, slice-018.
 
 ## 9. Sub-Area-Modus-Begründung
 
