@@ -1,6 +1,6 @@
 # Welle welle-04-output-ci: Ausgabeformate und CI-Modus
 
-**Status:** open
+**Status:** done
 
 **Zielmeilenstein:** M4 — CI-fähig
 
@@ -73,4 +73,4 @@ Farben) und beendet den Lauf mit den definierten Exit-Codes ([`SPEC-030`](../../
 
 ## 8. Closure-Notiz
 
-<!-- Erst nach Welle-Abschluss füllen. Verweis auf welle-04-results.md. -->
+Abgeschlossen am 2026-11-10, siehe [`done/welle-04-results.md`](done/welle-04-results.md).
