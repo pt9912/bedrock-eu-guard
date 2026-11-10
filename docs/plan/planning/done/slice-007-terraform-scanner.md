@@ -1,7 +1,6 @@
 # Slice slice-007: Terraform-Scanner
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** welle-02-config-scanner.
 
@@ -45,11 +44,11 @@ Datei vorhanden, aber kaputt → `FAIL` `FILE_INVALID`/`FILE_UNREADABLE` unter [
 
 ## 4. Definition of Done
 
-- [ ] Kern (w1): `model/terraform.go`, `TerraformReader`, `rules/terraform.go`, Erweiterung `app.Scan`, Double `coretest/faketerraform`, Unit-Tests je Zweig.
-- [ ] Adapter (w2): `adapter/driven/terraform` (rekursive Suche, HCL-Parser, Policy-/Modell-Extraktion, Zeilen), HCL-Abhängigkeit gevendort, `THIRD_PARTY_NOTICES.md` ergänzt, Tests inkl. Secret-/`tfvars`-Fälle.
-- [ ] CLI (w2): `local` übergibt `Terraform`; Testdaten good/bad; Akzeptanztest ohne Secret-Wert in der Ausgabe.
-- [ ] `make verify-clean`, `deps-verify` und CI grün; Sensors-Doku aktuell.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag; Welle-2-Abschluss (M2).
+- [x] Kern (w1): `model/terraform.go`, `TerraformReader`, `rules/terraform.go`, Erweiterung `app.Scan`, Double `coretest/faketerraform`, Unit-Tests je Zweig.
+- [x] Adapter (w2): `adapter/driven/terraform` (rekursive Suche, HCL-Parser, Policy-/Modell-Extraktion, Zeilen), HCL-Abhängigkeit gevendort, `THIRD_PARTY_NOTICES.md` ergänzt, Tests inkl. Secret-/`tfvars`-Fälle.
+- [x] CLI (w2): Befehl `terraform` (nur Terraform-Regeln) und `all`; `local` führt Terraform nicht aus ([`LH-MOD-001`](../../../../spec/lastenheft.md#lh-mod-001--lokaler-modus) und [`LH-MOD-003`](../../../../spec/lastenheft.md#lh-mod-003--terraform-modus)); Testdaten good/bad; Akzeptanztest ohne Secret-Wert in der Ausgabe.
+- [x] `make verify-clean`, `deps-verify` und CI grün; Sensors-Doku aktuell.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag; Welle-2-Abschluss (M2).
 
 ## 5. Plan (vor Code)
 
@@ -77,7 +76,13 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 9. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-10 (PRs #27 Kern/w1, #28 Adapter/w2, #29 ARN-Tail/w1, #31 `app.Scan` optional/w1, #32 CLI-Modi/w2).
+
+- **Funktioniert:** Der Terraform-Adapter findet `*.tf` rekursiv (ausgeschlossen: `.git`, `.terraform`, `vendor`, `node_modules` und `.tmp`; Symlinks werden nicht verfolgt) und liest Provider-Regionen (Literal oder dynamisch), IAM-Statements aus `aws_iam_policy_document` und aus `policy`-Attributen (`jsonencode`, JSON-String, Heredoc) sowie Modell-IDs und Bedrock-ARNs nur als Token. Nicht auflösbare Ausdrücke ergeben `WARN` statt stiller Erfolge; Werte aus `variable`, `locals` und `.tfvars` erreichen den Kern nie. `hashicorp/hcl/v2` v2.25.0 ist gevendort (MPL-2.0, unverändert; `vendor/` wächst auf rund 7 MB).
+- **Anders als geplant:** Terraform war zunächst an `local` verdrahtet. Das widersprach [`LH-MOD-001`](../../../../spec/lastenheft.md#lh-mod-001--lokaler-modus), [`LH-MOD-003`](../../../../spec/lastenheft.md#lh-mod-003--terraform-modus) und [`SPEC-002`](../../../../spec/spezifikation.md#spec-002--regel-modell); korrigiert in #32 (`local`/`terraform`/`all`, dafür wurden alle Reader in `app.Scan` optional). Bedrock-ARNs einer erlaubten Region wurden als „nicht klassifizierbar“ gewarnt; `Classify` prüft jetzt zusätzlich den ARN-Tail (#29).
+- **Offen:** Policy-Dokumente aus externen `.json`-Dateien (`file("policy.json")`), `.tfvars`-Auflösung, Module und `for_each` (ergeben `WARN`), Konfiguration der Ausschlussliste der Suche.
+- **Steering-Loop:** Vor dem Verdrahten eines Befehls die Modus-Zuordnung im Lastenheft prüfen (ein Anker in der Spec existierte, wurde aber nicht gelesen). Ein Gate-Exitcode darf in Pipes nicht verschluckt werden. Stapel-PRs: vor dem Merge den Stand der Basis prüfen; zu merkende Closure-PRs nicht vergessen (slice-006 lag zwei Stunden ungemergt).
+- **Folge-Slices:** keine in Welle 2; weiter mit Welle 3 (AWS-Prüfungen).
 
 ## 10. Sub-Area-Modus-Begründung
 
