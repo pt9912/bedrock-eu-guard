@@ -37,6 +37,7 @@ type ScanContext struct {
 	Devcontainers []EnvSourceFile
 	Composes      []EnvSourceFile
 	Dockerfiles   []EnvSourceFile
+	Terraform     TerraformScan
 }
 
 // ScanRule wertet die geladenen Settings gegen die Config aus.
@@ -46,7 +47,8 @@ type ScanRule func(sc ScanContext, cfg model.Config) []model.Finding
 // Dockerfile) in stabiler Reihenfolge.
 func ScanRules() []ScanRule {
 	return []ScanRule{CheckClaudeUser, CheckClaudeProject, CheckClaudeEndpoints, CheckClaudeWizard,
-		CheckDevcontainer, CheckCompose, CheckDockerfile}
+		CheckDevcontainer, CheckCompose, CheckDockerfile,
+		CheckTerraformFiles, CheckTerraformRegion, CheckTerraformIAM, CheckTerraformModels}
 }
 
 func fileErrorFinding(id string, f SettingsFile) model.Finding {

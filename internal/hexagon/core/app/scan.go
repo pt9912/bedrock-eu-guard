@@ -17,6 +17,8 @@ type Scan struct {
 	// Dockerfile-Prüfung). Files dient der Dateisuche per Glob.
 	EnvSources driven.EnvSourceReader
 	Files      driven.Filesystem
+	// Terraform ist optional (nil = keine Terraform-Prüfung).
+	Terraform driven.TerraformReader
 }
 
 // Run lädt die Settings einmal und wertet alle Scan-Regeln aus; Findings
@@ -33,6 +35,9 @@ func (u Scan) Run(cfg model.Config) ([]model.Finding, error) {
 		sc.Devcontainers = u.loadEnv(model.EnvDevcontainer, rules.DevcontainerPatterns)
 		sc.Composes = u.loadEnv(model.EnvCompose, rules.ComposePatterns)
 		sc.Dockerfiles = u.loadEnv(model.EnvDockerfile, rules.DockerfilePatterns)
+	}
+	if u.Terraform != nil {
+		sc.Terraform = u.loadTerraform()
 	}
 	var out []model.Finding
 	for _, r := range rules.ScanRules() {
@@ -89,4 +94,31 @@ func (u Scan) loadEnv(kind model.EnvSourceKind, patterns []string) []rules.EnvSo
 		out = append(out, sf)
 	}
 	return out
+}
+
+func (u Scan) loadTerraform() rules.TerraformScan {
+	t := rules.TerraformScan{Searched: true}
+	rels, err := u.Terraform.Find()
+	if err != nil {
+		var fe *model.FileError
+		if !errors.As(err, &fe) {
+			fe = &model.FileError{Path: ".", Reason: model.ReasonFileUnreadable}
+		}
+		t.FindErr = fe
+		return t
+	}
+	sort.Strings(rels)
+	for _, rel := range rels {
+		f, err := u.Terraform.Read(rel)
+		st := rules.TerraformFileState{Path: rel, F: f}
+		if err != nil {
+			var fe *model.FileError
+			if !errors.As(err, &fe) {
+				fe = &model.FileError{Path: rel, Reason: model.ReasonFileUnreadable}
+			}
+			st.F, st.Err = nil, fe
+		}
+		t.Files = append(t.Files, st)
+	}
+	return t
 }

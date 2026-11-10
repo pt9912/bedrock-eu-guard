@@ -39,3 +39,15 @@ type ConfigLoader interface {
 type EnvSourceReader interface {
 	ReadEnvSource(kind model.EnvSourceKind, rel string) (*model.EnvFile, error)
 }
+
+// TerraformReader findet und liest Terraform-Dateien (LH-FA-TF-001..004).
+//
+// Find sucht `*.tf` rekursiv unter dem Scan-Root (ohne .git, .terraform,
+// vendor, node_modules) und liefert sortierte relative Pfade; ein Fehler der
+// Suche selbst ist ein Fehler. Read: Datei fehlt → (nil, nil); kaputt →
+// (nil, *model.FileError). Es werden nur Fakten geliefert, keine
+// Variablenwerte.
+type TerraformReader interface {
+	Find() ([]string, error)
+	Read(rel string) (*model.TerraformFile, error)
+}
