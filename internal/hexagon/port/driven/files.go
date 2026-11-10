@@ -31,3 +31,11 @@ type ClaudeSettingsReader interface {
 type ConfigLoader interface {
 	Load() (*model.PartialConfig, error)
 }
+
+// EnvSourceReader liest Umgebungsvariablen aus Devcontainer-, Compose- und
+// Dockerfile-Quellen (rel relativ zum Scan-Root). Vertrag wie bei
+// ClaudeSettingsReader: fehlt → (nil, nil); kaputt → (nil, *model.FileError);
+// Secret-Werte sind geschwärzt (EnvEntry.Secret, Value="").
+type EnvSourceReader interface {
+	ReadEnvSource(kind model.EnvSourceKind, rel string) (*model.EnvFile, error)
+}

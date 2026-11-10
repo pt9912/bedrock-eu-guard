@@ -13,6 +13,10 @@ import (
 // werden zu Findings (nie zu Exit 2, SPEC-030 bleibt unberührt).
 type Scan struct {
 	Settings driven.ClaudeSettingsReader
+	// EnvSources und Files sind optional (nil = keine Devcontainer-/Compose-/
+	// Dockerfile-Prüfung). Files dient der Dateisuche per Glob.
+	EnvSources driven.EnvSourceReader
+	Files      driven.Filesystem
 }
 
 // Run lädt die Settings einmal und wertet alle Scan-Regeln aus; Findings
@@ -24,6 +28,11 @@ func (u Scan) Run(cfg model.Config) ([]model.Finding, error) {
 		sc.Projects = append(sc.Projects, load(rel, func() (*model.ClaudeSettings, error) {
 			return u.Settings.ReadProject(rel)
 		}))
+	}
+	if u.EnvSources != nil && u.Files != nil {
+		sc.Devcontainers = u.loadEnv(model.EnvDevcontainer, rules.DevcontainerPatterns)
+		sc.Composes = u.loadEnv(model.EnvCompose, rules.ComposePatterns)
+		sc.Dockerfiles = u.loadEnv(model.EnvDockerfile, rules.DockerfilePatterns)
 	}
 	var out []model.Finding
 	for _, r := range rules.ScanRules() {
@@ -44,4 +53,40 @@ func load(path string, read func() (*model.ClaudeSettings, error)) rules.Setting
 		f.S, f.Err = nil, fe
 	}
 	return f
+}
+
+// loadEnv sucht Dateien zu den Mustern (sortiert, ohne Duplikate) und lädt sie.
+// Ein Fehler der Dateisuche selbst wird als nicht lesbare Quelle gemeldet.
+func (u Scan) loadEnv(kind model.EnvSourceKind, patterns []string) []rules.EnvSourceFile {
+	var out []rules.EnvSourceFile
+	seen := map[string]bool{}
+	var rels []string
+	for _, pat := range patterns {
+		found, err := u.Files.Glob(pat)
+		if err != nil {
+			out = append(out, rules.EnvSourceFile{Path: pat,
+				Err: &model.FileError{Path: pat, Reason: model.ReasonFileUnreadable}})
+			continue
+		}
+		for _, rel := range found {
+			if !seen[rel] {
+				seen[rel] = true
+				rels = append(rels, rel)
+			}
+		}
+	}
+	sort.Strings(rels)
+	for _, rel := range rels {
+		f, err := u.EnvSources.ReadEnvSource(kind, rel)
+		sf := rules.EnvSourceFile{Path: rel, F: f}
+		if err != nil {
+			var fe *model.FileError
+			if !errors.As(err, &fe) {
+				fe = &model.FileError{Path: rel, Reason: model.ReasonFileUnreadable}
+			}
+			sf.F, sf.Err = nil, fe
+		}
+		out = append(out, sf)
+	}
+	return out
 }
