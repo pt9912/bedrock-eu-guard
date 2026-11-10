@@ -24,7 +24,7 @@ import (
 
 const exitToolError = 2
 
-const usage = "usage: bedrock-eu-check (local|terraform|aws|all) [--root DIR] [--config FILE] [--allowed-account ID]... [--format console|json|sarif]\n"
+const usage = "usage: bedrock-eu-check (local|terraform|aws|all) [--root DIR] [--config FILE] [--allowed-account ID]... [--format console|json|sarif] [--ci]\n"
 
 // toolVersion ist die Version des Werkzeugs (per -ldflags setzbar, Default
 // "dev"); sie erscheint im SARIF-Dokument.
@@ -61,7 +61,7 @@ func run(args []string, env driven.Environment, home string, stdout, stderr io.W
 	// Eigene Konfiguration ungültig → Tool-Fehler, Exit 2 (SPEC-030).
 	cfg, err := app.LoadConfig(accountOverlay{configyaml.New(opts.configPath()), opts.accounts})
 	if err != nil {
-		return finish(nil, err, reporterFor(opts, stdout), stdout, stderr)
+		return finish(nil, err, reporterFor(opts, stdout), opts.ci, stdout, stderr)
 	}
 	var findings []model.Finding
 	if mode == "local" || mode == "all" {
@@ -80,7 +80,7 @@ func run(args []string, env driven.Environment, home string, stdout, stderr io.W
 		findings = append(findings, aws...)
 	}
 	sort.SliceStable(findings, func(i, j int) bool { return findings[i].RuleID < findings[j].RuleID })
-	return finish(findings, err, reporterFor(opts, stdout), stdout, stderr)
+	return finish(findings, err, reporterFor(opts, stdout), opts.ci, stdout, stderr)
 }
 
 // runLocal ist der Modus local (LH-MOD-001): Env, Claude-Settings,
@@ -102,6 +102,7 @@ func runLocal(env driven.Environment, cfg model.Config, opts options, home strin
 type options struct {
 	root, config string
 	format       string // "" = console
+	ci           bool   // CI-Modus: Zusammenfassung auf stderr (LH-MOD-005)
 	accounts     []string
 }
 
@@ -159,6 +160,11 @@ func (o options) configPath() string {
 func parseOptions(args []string) (options, bool) {
 	opts := options{root: "."}
 	for len(args) > 0 {
+		if args[0] == "--ci" { // Schalter ohne Wert
+			opts.ci = true
+			args = args[1:]
+			continue
+		}
 		if len(args) < 2 || args[1] == "" {
 			return options{}, false
 		}
@@ -182,17 +188,40 @@ func parseOptions(args []string) (options, bool) {
 	return opts, true
 }
 
-func finish(findings []model.Finding, err error, rep driven.Reporter, stdout, stderr io.Writer) int {
+// finish gibt das Ergebnis über den Reporter aus und liefert den Exit-Code
+// (SPEC-030). Im CI-Modus steht zusätzlich eine Zusammenfassung auf stderr,
+// damit die Pipeline-Logs auch bei umgeleitetem stdout (z. B. SARIF-Datei)
+// den Ausgang zeigen; stdout trägt weiterhin nur das Ergebnis.
+func finish(findings []model.Finding, err error, rep driven.Reporter, ci bool, stdout, stderr io.Writer) int {
+	code := exitToolError
 	if err != nil {
 		if len(findings) > 0 { // bereits ermittelte Befunde trotzdem zeigen
 			_ = rep.Report(findings)
 		}
 		fmt.Fprintf(stderr, "error: %v\n", err)
-		return app.ExitCode(nil, err)
-	}
-	if rerr := rep.Report(findings); rerr != nil {
+		code = app.ExitCode(nil, err)
+	} else if rerr := rep.Report(findings); rerr != nil {
 		fmt.Fprintf(stderr, "error: %v\n", rerr)
-		return exitToolError
+	} else {
+		code = app.ExitCode(findings, nil)
 	}
-	return app.ExitCode(findings, nil)
+	if ci {
+		fmt.Fprintln(stderr, summaryLine(findings, code))
+	}
+	return code
+}
+
+func summaryLine(findings []model.Finding, code int) string {
+	var pass, warn, fail int
+	for _, f := range findings {
+		switch f.Severity {
+		case model.FAIL:
+			fail++
+		case model.WARN:
+			warn++
+		default:
+			pass++
+		}
+	}
+	return fmt.Sprintf("bedrock-eu-check: %d PASS, %d WARN, %d FAIL (Exit %d)", pass, warn, fail, code)
 }
