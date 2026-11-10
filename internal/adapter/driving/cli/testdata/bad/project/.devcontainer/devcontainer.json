@@ -1,0 +1,6 @@
+{
+  "containerEnv": {
+    "AWS_REGION": "us-east-1",
+    "ANTHROPIC_API_KEY": "sk-ant-GEHEIM-DEVCONTAINER"
+  }
+}

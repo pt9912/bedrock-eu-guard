@@ -1,0 +1,5 @@
+services:
+  app:
+    environment:
+      - AWS_REGION=us-west-2
+      - ANTHROPIC_API_KEY=sk-ant-GEHEIM-COMPOSE
