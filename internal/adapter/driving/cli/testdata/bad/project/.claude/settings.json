@@ -1,0 +1,7 @@
+{
+  "model": "us.anthropic.claude-sonnet-4-6",
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://api.anthropic.com",
+    "AWS_REGION": "us-west-2"
+  }
+}

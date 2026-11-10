@@ -28,11 +28,36 @@ func (c *Console) Report(findings []model.Finding) error {
 		default:
 			pass++
 		}
-		if _, err := fmt.Fprintf(c.w, "[%s] %s %s: %s (%s)\n",
-			f.Severity, f.RuleID, f.Subject, f.Message, f.Reason); err != nil {
+		subject, loc := f.Subject, location(f)
+		if f.File != "" && f.Subject == f.File { // Pfad nicht doppelt ausgeben
+			subject, loc = place(f), ""
+		}
+		if _, err := fmt.Fprintf(c.w, "[%s] %s %s%s: %s (%s)\n",
+			f.Severity, f.RuleID, subject, loc, f.Message, f.Reason); err != nil {
 			return err
+		}
+		if f.Recommendation != "" {
+			if _, err := fmt.Fprintf(c.w, "       Empfehlung: %s\n", f.Recommendation); err != nil {
+				return err
+			}
 		}
 	}
 	_, err := fmt.Fprintf(c.w, "Summary: %d PASS, %d WARN, %d FAIL\n", pass, warn, fail)
 	return err
+}
+
+// place liefert "Datei:Zeile" bzw. "Datei".
+func place(f model.Finding) string {
+	if f.Line > 0 {
+		return fmt.Sprintf("%s:%d", f.File, f.Line)
+	}
+	return f.File
+}
+
+// location liefert " [Datei:Zeile]" bzw. " [Datei]" für dateibezogene Findings.
+func location(f model.Finding) string {
+	if f.File == "" {
+		return ""
+	}
+	return " [" + place(f) + "]"
 }

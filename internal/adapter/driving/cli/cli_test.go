@@ -13,7 +13,7 @@ func (m mapEnv) Lookup(k string) (string, bool) { v, ok := m[k]; return v, ok }
 func TestUsageErrors(t *testing.T) {
 	for _, args := range [][]string{nil, {"bogus"}, {"local", "extra"}} {
 		var out, errb bytes.Buffer
-		if code := run(args, mapEnv{}, &out, &errb); code != 2 {
+		if code := run(args, mapEnv{}, "", &out, &errb); code != 2 {
 			t.Errorf("run(%v) = %d, want 2", args, code)
 		}
 		if !strings.Contains(errb.String(), "usage:") || out.Len() != 0 {
@@ -24,7 +24,7 @@ func TestUsageErrors(t *testing.T) {
 
 func TestLocalPrintsSummary(t *testing.T) {
 	var out, errb bytes.Buffer
-	run([]string{"local"}, mapEnv{}, &out, &errb)
+	run([]string{"local"}, mapEnv{}, "", &out, &errb)
 	if !strings.Contains(out.String(), "Summary:") {
 		t.Errorf("stdout=%q stderr=%q", out.String(), errb.String())
 	}
@@ -38,7 +38,7 @@ func TestAcceptanceCriticalMisconfiguration(t *testing.T) {
 		"ANTHROPIC_API_KEY": secret,
 	}
 	var out, errb bytes.Buffer
-	if code := run([]string{"local"}, env, &out, &errb); code != 1 {
+	if code := run([]string{"local"}, env, "", &out, &errb); code != 1 {
 		t.Errorf("exit = %d, want 1; stdout=%q stderr=%q", code, out.String(), errb.String())
 	}
 	if n := strings.Count(out.String(), "[FAIL]"); n < 2 {
@@ -56,10 +56,66 @@ func TestAcceptanceEUMinimalEnvironment(t *testing.T) {
 		"CLAUDE_CODE_USE_BEDROCK": "1",
 	}
 	var out, errb bytes.Buffer
-	if code := run([]string{"local"}, env, &out, &errb); code != 0 {
+	if code := run([]string{"local"}, env, "", &out, &errb); code != 0 {
 		t.Errorf("exit = %d, want 0; stdout=%q stderr=%q", code, out.String(), errb.String())
 	}
 	if strings.Contains(out.String(), "[FAIL]") {
 		t.Errorf("unerwartetes FAIL:\n%s", out.String())
+	}
+}
+
+// euEnv ist die EU-konforme Minimalumgebung (LH-ABN-002).
+var euEnv = mapEnv{"AWS_REGION": "eu-central-1", "CLAUDE_CODE_USE_BEDROCK": "1"}
+
+func scanArgs(dir string) (args []string, home string) {
+	return []string{"local", "--root", dir + "/project"}, dir + "/home"
+}
+
+// Positivbeispiel: EU-sichere Settings → kein FAIL, Exit 0.
+func TestLocalGoodSettings(t *testing.T) {
+	args, home := scanArgs("testdata/good")
+	var out, errb bytes.Buffer
+	if code := run(args, euEnv, home, &out, &errb); code != 0 {
+		t.Fatalf("exit = %d; stdout=%q stderr=%q", code, out.String(), errb.String())
+	}
+	if strings.Contains(out.String(), "[FAIL]") {
+		t.Errorf("unerwartetes FAIL:\n%s", out.String())
+	}
+}
+
+// Negativbeispiel: direkte Anthropic-Konfiguration, US-Region, blockiertes
+// Modell → FAIL mit Datei und Zeile, Exit 1, kein Secret-Wert (LH-NF-004).
+func TestLocalBadSettings(t *testing.T) {
+	args, home := scanArgs("testdata/bad")
+	var out, errb bytes.Buffer
+	if code := run(args, mapEnv{}, home, &out, &errb); code != 1 {
+		t.Fatalf("exit = %d; stdout=%q stderr=%q", code, out.String(), errb.String())
+	}
+	for _, want := range []string{"[FAIL]", "~/.claude/settings.json:", ".claude/settings.json:"} {
+		if !strings.Contains(out.String(), want) {
+			t.Errorf("Ausgabe enthält %q nicht:\n%s", want, out.String())
+		}
+	}
+	for _, s := range []string{out.String(), errb.String()} {
+		if strings.Contains(s, "GEHEIM") || strings.Contains(s, "sk-ant") {
+			t.Errorf("Secret-Wert in der Ausgabe:\n%s", s)
+		}
+	}
+}
+
+func TestLocalMissingFilesAreFindingsNotErrors(t *testing.T) {
+	var out, errb bytes.Buffer
+	code := run([]string{"local", "--root", t.TempDir()}, euEnv, t.TempDir(), &out, &errb)
+	if code != 0 || !strings.Contains(out.String(), "FILE_MISSING") {
+		t.Errorf("exit=%d stdout=%q stderr=%q", code, out.String(), errb.String())
+	}
+}
+
+func TestLocalBadArgs(t *testing.T) {
+	for _, args := range [][]string{{"local", "--root"}, {"local", "x"}, {"scan"}, {"scan", "--root", "x"}} {
+		var out, errb bytes.Buffer
+		if code := run(args, mapEnv{}, "", &out, &errb); code != 2 {
+			t.Errorf("run(%v) = %d, want 2", args, code)
+		}
 	}
 }
