@@ -24,11 +24,18 @@ import (
 
 const exitToolError = 2
 
-const usage = "usage: bedrock-eu-check (local|terraform|aws|all) [--root DIR] [--config FILE] [--allowed-account ID]... [--format console|json|sarif] [--ci]\n"
+const usage = "usage: bedrock-eu-check version | (local|terraform|aws|all) [--root DIR] [--config FILE] [--allowed-account ID]... [--format console|json|sarif] [--ci]\n"
 
-// toolVersion ist die Version des Werkzeugs (per -ldflags setzbar, Default
-// "dev"); sie erscheint im SARIF-Dokument.
-var toolVersion = "dev"
+// Build-Informationen, zur Buildzeit per -ldflags gesetzt (siehe Makefile):
+//
+//	-X github.com/pt9912/bedrock-eu-guard/internal/adapter/driving/cli.version=1.0.0
+//	-X github.com/pt9912/bedrock-eu-guard/internal/adapter/driving/cli.commit=abc123
+//
+// version erscheint im Befehl "version" und als Tool-Version in SARIF.
+var (
+	version = "dev"
+	commit  = "unknown"
+)
 
 // awsBinary ist das aws-Binary (Name oder Pfad); Variable nur für Tests.
 var awsBinary = awscli.DefaultBinary
@@ -40,6 +47,14 @@ func Run(args []string, stdout, stderr io.Writer) int {
 }
 
 func run(args []string, env driven.Environment, home string, stdout, stderr io.Writer) int {
+	if len(args) > 0 && args[0] == "version" {
+		if len(args) != 1 {
+			fmt.Fprint(stderr, usage)
+			return exitToolError
+		}
+		fmt.Fprintf(stdout, "bedrock-eu-check %s (%s)\n", version, commit)
+		return 0
+	}
 	if len(args) == 0 || (args[0] != "local" && args[0] != "terraform" && args[0] != "aws" && args[0] != "all") {
 		fmt.Fprint(stderr, usage)
 		return exitToolError
@@ -113,7 +128,7 @@ func reporterFor(opts options, w io.Writer) driven.Reporter {
 	case "json":
 		return report.NewJSON(w)
 	case "sarif":
-		return report.NewSARIF(w, toolVersion, opts.sarifFallback())
+		return report.NewSARIF(w, version, opts.sarifFallback())
 	default:
 		return report.New(w)
 	}
