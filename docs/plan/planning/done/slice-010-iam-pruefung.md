@@ -1,7 +1,6 @@
 # Slice slice-010: IAM-Prüfung (Bedrock-Rechte, zu breite Policies, Region-Condition)
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** welle-03-aws-checks.
 
@@ -38,12 +37,12 @@ Mindestberechtigung des Prüfwerkzeugs selbst festgehalten ([`LH-SEC-004`](../..
 
 ## 4. Definition of Done
 
-- [ ] Kern (w1): `model`-Typen, `driven.IAMReader`, `rules/iam.go` (inkl. Refactoring `assessBedrockStatements`), Erweiterung `app.CheckAWS`, Double `fakeaws.IAM`, Unit-Tests je Zweig und Fehlerart; bestehende Terraform-Tests unverändert grün.
-- [ ] Adapter (w2): `awscli` implementiert `IAMReader` (Simulation, Policy-Verflachung, URL-Decoding, Pagination), Tests mit Fake-`aws`.
-- [ ] CLI (w2): Befehl `aws` übergibt `IAM`; Akzeptanztest ohne Credential-Werte in der Ausgabe.
-- [ ] Doku der Mindestrechte des Prüfwerkzeugs ([`LH-SEC-004`](../../../../spec/lastenheft.md#lh-sec-004--least-privilege)): `docs/user/` (w2), inkl. Beispiel-Policy mit `sts:GetCallerIdentity`, `bedrock:ListInferenceProfiles`, `bedrock:ListFoundationModels`, `iam:SimulatePrincipalPolicy`, `iam:GetRole`, `iam:List*`/`iam:Get*` auf den eigenen Principal.
-- [ ] `make verify-clean` und CI grün; Sensors-Doku aktuell.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag; Welle-3-Abschluss (M3).
+- [x] Kern (w1): `model`-Typen, `driven.IAMReader`, `rules/iam.go` (inkl. Refactoring `assessBedrockStatements`), Erweiterung `app.CheckAWS`, Double `fakeaws.IAM`, Unit-Tests je Zweig und Fehlerart; bestehende Terraform-Tests unverändert grün.
+- [x] Adapter (w2): `awscli` implementiert `IAMReader` (Simulation, Policy-Verflachung, URL-Decoding, Pagination), Tests mit Fake-`aws`.
+- [x] CLI (w2): Befehl `aws` übergibt `IAM`; Akzeptanztest ohne Credential-Werte in der Ausgabe.
+- [x] Doku der Mindestrechte des Prüfwerkzeugs ([`LH-SEC-004`](../../../../spec/lastenheft.md#lh-sec-004--least-privilege)): `docs/user/` (w2), inkl. Beispiel-Policy mit `sts:GetCallerIdentity`, `bedrock:ListInferenceProfiles`, `bedrock:ListFoundationModels`, `iam:SimulatePrincipalPolicy`, `iam:GetRole`, `iam:List*`/`iam:Get*` auf den eigenen Principal.
+- [x] `make verify-clean` und CI grün; Sensors-Doku aktuell.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag; Welle-3-Abschluss (M3).
 
 ## 5. Plan (vor Code)
 
@@ -70,7 +69,13 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 9. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-10 (PRs #39 Kern/w1, #40 Adapter/CLI/Doku/w2).
+
+- **Funktioniert:** Die Rechte des eigenen Principals werden simuliert (Invoke-Rechte FAIL, Erkennungs-Rechte WARN; Simulation nicht erlaubt = WARN, nie stilles PASS) und seine Policies gelesen und bewertet (zu breit ohne Region-Condition FAIL, mit Condition WARN; Region-Condition mit erlaubten Regionen oder Bedrock-ARN einer erlaubten Region nötig). Der Adapter löst `assumed-role` über `iam get-role` zur IAM-Rolle samt Pfad auf, liest angehängte und Inline-Policies (Benutzer inklusive Gruppen), dekodiert URL-codierte Dokumente und markiert `NotAction`/`NotResource` als nicht auswertbar. Die Policy-Verflachung liegt im gemeinsamen Paket `iampolicy`, das auch der Terraform-Adapter nutzt; die Bewertung (`assessBedrockStatements`) ist für Terraform und IAM dieselbe. Die Mindestrechte des Werkzeugs stehen in `docs/user/aws-permissions.md` mit Beispiel-Policy ([`LH-SEC-004`](../../../../spec/lastenheft.md#lh-sec-004--least-privilege)).
+- **Anders als geplant:** Auch hier eine eigene Schnittstelle (`IAMReader`). Die Beispiel-Policy ist gültiges JSON, aber nicht gegen echtes AWS erprobt.
+- **Offen:** Die Simulation kennt Organisations-SCPs und Permission Boundaries nur eingeschränkt (Näherung); ausgewertet wird nur `aws:RequestedRegion` bzw. die ARN-Bindung; Variablen in Policies (`${aws:username}`) und andere Principals/Ressourcen-Policies sind Folgepunkte; Meldungstexte der AWS-CLI werden in englischer Sprache erwartet.
+- **Steering-Loop:** Gemeinsame Logik (Policy-Verflachung) in ein geteiltes Adapterpaket ziehen, sobald ein zweiter Adapter sie braucht. Ein Fake-Prozess ermöglicht auch komplexe Abläufe (get-role, Listen, Dokumente) offline zu testen.
+- **Folge-Slices:** keine in Welle 3; weiter mit Welle 4 (JSON/SARIF und CI-Modus).
 
 ## 10. Sub-Area-Modus-Begründung
 
