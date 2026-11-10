@@ -600,3 +600,70 @@ func TestFormatSARIFGoodHasNoResults(t *testing.T) {
 		t.Errorf("exit=%d results=%v", code, results)
 	}
 }
+
+// slice-013: --ci
+func ciRun(t *testing.T, mode, dir string, env mapEnv, extra ...string) (code int, out, errs string) {
+	t.Helper()
+	args, home := scanArgs("testdata/" + dir)
+	args[0] = mode
+	var o, e bytes.Buffer
+	code = run(append(args, extra...), env, home, &o, &e)
+	return code, o.String(), e.String()
+}
+
+// --ci ändert weder Exit-Codes noch stdout, ergänzt aber eine Zusammenfassung auf stderr.
+func TestCIModeKeepsStdoutAndExitCodes(t *testing.T) {
+	for _, c := range []struct {
+		dir      string
+		wantCode int
+	}{{"good", 0}, {"bad", 1}} {
+		codeA, outA, errA := ciRun(t, "local", c.dir, euEnv)
+		codeB, outB, errB := ciRun(t, "local", c.dir, euEnv, "--ci")
+		if codeA != c.wantCode || codeB != c.wantCode {
+			t.Errorf("%s: exit ohne --ci=%d, mit --ci=%d, want %d", c.dir, codeA, codeB, c.wantCode)
+		}
+		if outA != outB {
+			t.Errorf("%s: --ci darf stdout nicht ändern", c.dir)
+		}
+		if errA != "" || !strings.HasPrefix(errB, "bedrock-eu-check: ") || !strings.Contains(errB, "(Exit "+string(rune('0'+c.wantCode))+")") {
+			t.Errorf("%s: stderr ohne --ci=%q, mit --ci=%q", c.dir, errA, errB)
+		}
+	}
+}
+
+func TestCIModeWithJSONAndSARIFKeepsStdoutParsable(t *testing.T) {
+	for _, format := range []string{"json", "sarif"} {
+		code, out, errs := ciRun(t, "terraform", "bad", mapEnv{}, "--ci", "--format", format)
+		var doc map[string]any
+		if err := json.Unmarshal([]byte(out), &doc); err != nil {
+			t.Fatalf("%s: stdout ist kein JSON: %v", format, err)
+		}
+		if code != 1 || strings.Count(errs, "\n") != 1 || !strings.Contains(errs, "FAIL (Exit 1)") {
+			t.Errorf("%s: exit=%d stderr=%q", format, code, errs)
+		}
+		if strings.Contains(out+errs, "GEHEIM") || strings.Contains(out+errs, "sk-ant") {
+			t.Errorf("%s: Secret in der Ausgabe", format)
+		}
+	}
+}
+
+func TestCIModeToolErrorStillExit2(t *testing.T) {
+	old := awsBinary
+	awsBinary = filepath.Join(t.TempDir(), "gibt-es-nicht")
+	t.Cleanup(func() { awsBinary = old })
+	code, out, errs := ciRun(t, "all", "good", euEnv, "--ci", "--format", "json")
+	if code != 2 || !strings.Contains(errs, "AWS_CLI_MISSING") || !strings.Contains(errs, "(Exit 2)") {
+		t.Errorf("exit=%d stderr=%q", code, errs)
+	}
+	var doc map[string]any
+	if err := json.Unmarshal([]byte(out), &doc); err != nil {
+		t.Errorf("stdout muss auch bei Tool-Fehler parsebar bleiben: %v", err)
+	}
+}
+
+func TestCIFlagTakesNoValue(t *testing.T) {
+	var o, e bytes.Buffer
+	if code := run([]string{"local", "--ci", "--root", t.TempDir()}, euEnv, "", &o, &e); code == 2 && strings.Contains(e.String(), "usage:") {
+		t.Errorf("--ci vor weiteren Optionen muss gültig sein: %q", e.String())
+	}
+}
