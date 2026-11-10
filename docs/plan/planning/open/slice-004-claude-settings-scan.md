@@ -37,7 +37,7 @@ und meldet Findings mit Datei und Zeile. Secret-Werte erreichen nie den Kern.
 
 Präzisierungen aus dem Review (w1):
 
-- **Aktiv konfiguriert** ([\`LH-FA-CLAUDE-003\`](../../../../spec/lastenheft.md#lh-fa-claude-003--erkennung-direkter-anthropic-endpunkte) verlangt `FAIL` nur bei aktiver Konfiguration): Textfunde außerhalb von `env` sind höchstens `WARN`.
+- **Aktiv konfiguriert** ([`LH-FA-CLAUDE-003`](../../../../spec/lastenheft.md#lh-fa-claude-003--erkennung-direkter-anthropic-endpunkte) verlangt `FAIL` nur bei aktiver Konfiguration): Textfunde außerhalb von `env` sind höchstens `WARN`.
 - **CLAUDE-002:** Das Modell stammt aus `model` bzw. aus `ANTHROPIC_*_MODEL` in `env` und wird mit `Classify` bewertet (`blocked` = `FAIL`, `unclassified` = `WARN`, `allowed` = `PASS`). Eine nicht erlaubte `AWS_REGION` ist `FAIL` ([`SPEC-011`](../../../../spec/spezifikation.md#spec-011--regionsklassifikation)). `settings.json` und `settings.local.json` werden einzeln bewertet, je Datei ein Finding pro Regel mit `File` und `Line`.
 - **Doppelmeldungen sind gewollt:** Dieselbe Ursache (z. B. API-Key in den User-Settings) erzeugt je Regel-ID ein Finding (001, 003 und 004). Nicht deduplizieren.
 
