@@ -19,6 +19,10 @@ type AWSScan struct {
 	Env         driven.Environment
 	Identity    *model.AWSIdentity
 	IdentityErr *model.AWSError
+
+	// Bedrock ist nil, wenn kein BedrockReader konfiguriert ist (Regeln
+	// LH-FA-BEDROCK-* laufen dann nicht).
+	Bedrock *BedrockScan
 }
 
 // AWSRule wertet AWS-Fakten gegen die Config aus.
@@ -26,7 +30,8 @@ type AWSRule func(s AWSScan, cfg model.Config) []model.Finding
 
 // AWSRules liefert die AWS-Regeln in stabiler Reihenfolge.
 func AWSRules() []AWSRule {
-	return []AWSRule{CheckAWSIdentity, CheckAWSProfile, CheckAWSAccount, CheckAuthMethod}
+	return []AWSRule{CheckAWSIdentity, CheckAWSProfile, CheckAWSAccount, CheckAuthMethod,
+		CheckBedrockProfiles, CheckBedrockBlocked, CheckBedrockAllowlist, CheckBedrockAvailability}
 }
 
 func awsErrorFinding(id, subject string, e *model.AWSError) model.Finding {

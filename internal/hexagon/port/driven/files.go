@@ -60,3 +60,13 @@ type AWSReader interface {
 	// Identity entspricht `aws sts get-caller-identity`.
 	Identity() (*model.AWSIdentity, error)
 }
+
+// BedrockReader liest Bedrock-Metadaten einer Region (ARC-007, lesend).
+// Fehler sind *model.AWSError (nie CLI-Ausgabe oder Credential-Werte).
+// Die Regionen bestimmt der Kern; der Adapter bekommt jeweils eine.
+type BedrockReader interface {
+	// ListInferenceProfiles entspricht `aws bedrock list-inference-profiles`.
+	ListInferenceProfiles(region string) ([]model.InferenceProfile, error)
+	// ListFoundationModels entspricht `aws bedrock list-foundation-models`.
+	ListFoundationModels(region string) ([]model.FoundationModel, error)
+}

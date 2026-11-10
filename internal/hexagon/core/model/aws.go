@@ -37,3 +37,27 @@ type AWSIdentity struct {
 	ARN     string
 	UserID  string
 }
+
+// InferenceProfile ist ein Bedrock-Inference-Profil (nur die Felder, die die
+// Regeln brauchen).
+type InferenceProfile struct {
+	ID   string
+	Name string
+	Type string // z. B. SYSTEM_DEFINED | APPLICATION
+}
+
+// FoundationModel ist ein in einer Region verfügbares Basismodell.
+type FoundationModel struct {
+	ID string
+}
+
+// Reason-Codes der Bedrock-Regeln.
+const (
+	ReasonProfilesListed   = "PROFILES_LISTED"
+	ReasonProfilesNone     = "PROFILES_NONE"
+	ReasonProfilesVisible  = "PROFILES_VISIBLE_NOT_ALLOWED"
+	ReasonProfileNotListed = "PROFILE_NOT_ALLOWLISTED"
+	ReasonModelAvailable   = "MODEL_AVAILABLE"
+	ReasonModelUnavailable = "MODEL_UNAVAILABLE"
+	ReasonModelUnknown     = "MODEL_AVAILABILITY_UNKNOWN"
+)

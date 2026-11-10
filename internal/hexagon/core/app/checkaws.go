@@ -14,6 +14,8 @@ import (
 // ist ein Tool-Fehler (Exit 2, SPEC-030).
 type CheckAWS struct {
 	AWS driven.AWSReader
+	// Bedrock ist optional (nil = keine Bedrock-Regeln).
+	Bedrock driven.BedrockReader
 }
 
 // Run ermittelt die AWS-Fakten einmal und wertet alle AWS-Regeln aus; die
@@ -33,10 +35,50 @@ func (u CheckAWS) Run(env driven.Environment, cfg model.Config) ([]model.Finding
 	} else {
 		s.Identity = id
 	}
+	if u.Bedrock != nil {
+		s.Bedrock = u.readBedrock(env, cfg, s.IdentityErr)
+	}
 	var out []model.Finding
 	for _, r := range rules.AWSRules() {
 		out = append(out, r(s, cfg)...)
 	}
 	sort.SliceStable(out, func(i, j int) bool { return out[i].RuleID < out[j].RuleID })
 	return out, nil
+}
+
+// readBedrock liest die Bedrock-Daten je Region. Ist die Identität bereits
+// als unbrauchbar bekannt (keine Credentials / nicht erreichbar), werden die
+// Aufrufe nicht wiederholt, sondern derselbe Fehler je Region gemeldet.
+func (u CheckAWS) readBedrock(env driven.Environment, cfg model.Config, idErr *model.AWSError) *rules.BedrockScan {
+	b := &rules.BedrockScan{Primary: rules.PrimaryRegion(env, cfg)}
+	for _, region := range rules.QueryRegions(cfg) {
+		rd := rules.RegionData{Region: region}
+		if idErr != nil && (idErr.Reason == model.AWSNoCredentials || idErr.Reason == model.AWSUnreachable) {
+			e := &model.AWSError{Op: "bedrock:ListInferenceProfiles", Reason: idErr.Reason}
+			rd.ProfilesErr = e
+			rd.ModelsErr = &model.AWSError{Op: "bedrock:ListFoundationModels", Reason: idErr.Reason}
+			b.Regions = append(b.Regions, rd)
+			continue
+		}
+		rd.Profiles, rd.ProfilesErr = asAWSError("bedrock:ListInferenceProfiles", func() ([]model.InferenceProfile, error) {
+			return u.Bedrock.ListInferenceProfiles(region)
+		})
+		rd.Models, rd.ModelsErr = asAWSError("bedrock:ListFoundationModels", func() ([]model.FoundationModel, error) {
+			return u.Bedrock.ListFoundationModels(region)
+		})
+		b.Regions = append(b.Regions, rd)
+	}
+	return b
+}
+
+func asAWSError[T any](op string, call func() ([]T, error)) ([]T, *model.AWSError) {
+	v, err := call()
+	if err == nil {
+		return v, nil
+	}
+	var ae *model.AWSError
+	if !errors.As(err, &ae) {
+		ae = &model.AWSError{Op: op, Reason: model.AWSUnreachable}
+	}
+	return nil, ae
 }
