@@ -48,12 +48,14 @@ kanonische Quelle**, und diese Datei wird angepasst.
 | Target | Vertrag | Bindung |
 |---|---|---|
 | `make doc-check` | Doku-Referenzen lösen auf (Links + Anker; via d-check, netzlos `--network none`) | Reproduzierbarkeit (`:v0.29.0` in `d-check.mk`; `DCHECK_DIGEST` für Digest-Pin) |
-| `make gates` | alle aktuell lauffähigen Gates (heute nur `doc-check`) | — |
+| `make lint` | `gofmt -l .` (leer) + `go vet ./...` | Go-Image per Digest gepinnt (`GO_IMAGE` im `Makefile`), netzlos |
+| `make test` | `go test ./...` (Unit-Tests je Regel/Adapter, [`LH-QA-001`](../spec/lastenheft.md#lh-qa-001--unit-tests)) | wie `lint` |
+| `make build` | Binary `bin/bedrock-eu-check` bauen | wie `lint` |
+| `make gates` | alle lauffähigen Gates: `doc-check`, `lint`, `test` | — |
 
 **Aktueller Lauf-Status:** lokal `make gates` / `make help`; in CI das
 Pipeline-Ergebnis (Rang höher als diese Datei).
-**Nicht behauptet** (geplant, entstehen mit dem ersten Code-Slice in
-Welle 1 und [`ADR-0002`](../docs/plan/adr/0002-implementierungssprache.md)): `make lint`, `make test`, `make coverage-gate`
+**Nicht behauptet** (geplant, entstehen in späteren Slices): `make coverage-gate`
 (bootstrap-aware), `make self-check` (`bedrock-eu-check` gegen das eigene
 Repo, [`LH-QA-005`](../spec/lastenheft.md#lh-qa-005--ci-prüfung)). Diese Targets existieren **noch nicht** im
 `Makefile` und dürfen erst eingetragen werden, wenn sie real laufen
