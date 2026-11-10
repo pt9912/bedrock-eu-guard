@@ -20,7 +20,7 @@ GO_NET = docker run --rm -u $(shell id -u):$(shell id -g) \
 	-e HOME=/tmp -e GOCACHE=/src/.tmp/gocache -e GOMODCACHE=/src/.tmp/gomod \
 	-e GOFLAGS=-mod=mod -v "$(CURDIR):/src" -w /src $(GO_IMAGE)
 
-.PHONY: help gates lint test build verify-clean deps deps-verify
+.PHONY: help gates lint test build verify-clean deps deps-verify self-check
 help: ## Targets anzeigen
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  %-16s %s\n", $$1, $$2}'
@@ -45,6 +45,13 @@ LDFLAGS  = -s -w -X $(CLI_PKG).version=$(VERSION) -X $(CLI_PKG).commit=$(COMMIT)
 build: ## Binary nach bin/bedrock-eu-check bauen (VERSION=..., COMMIT=...)
 	@mkdir -p .tmp/gocache bin
 	$(GO_RUN) env CGO_ENABLED=0 go build -trimpath -buildvcs=false -ldflags "$(LDFLAGS)" -o bin/bedrock-eu-check ./cmd/bedrock-eu-check
+
+# Kontrollierte Umgebung für den Self-Check (EU-konforme Minimalumgebung, kein HOME).
+SELF_ENV = env -i AWS_REGION=eu-central-1 CLAUDE_CODE_USE_BEDROCK=1 HOME=
+
+self-check: build ## bedrock-eu-check gegen das eigene Repository (local, terraform); Exit 0 Pflicht (LH-QA-005)
+	$(SELF_ENV) ./bin/bedrock-eu-check local --root . --ci
+	$(SELF_ENV) ./bin/bedrock-eu-check terraform --root . --ci
 
 deps: ## go mod tidy + vendor/ neu erzeugen (mit Netz, nicht Teil der Gates)
 	@mkdir -p .tmp/gocache .tmp/gomod

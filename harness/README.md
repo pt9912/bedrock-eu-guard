@@ -55,6 +55,7 @@ kanonische Quelle**, und diese Datei wird angepasst.
 | `make verify-clean` | `make gates` im frischen `git worktree` des committeten HEAD (fängt ungetrackte/ignorierte Dateien ab) | Handoff-Gate; CI führt `make gates` im frischen Checkout aus (`.github/workflows/gates.yml`) |
 | `make deps` | `go mod tidy` + `vendor/` neu erzeugen (mit Netz, nicht Teil der Gates) | [`ADR-0004`](../docs/plan/adr/0004-abhaengigkeiten-und-offline-gates.md): `vendor/` nie von Hand editieren |
 | `make deps-verify` | `go mod verify` + `vendor/` entspricht Upstream (mit Netz) | CI-Job `deps-verify`, nur bei Änderungen an `vendor/`, `go.mod`, `go.sum` |
+| `make self-check` | `bedrock-eu-check local` und `terraform` gegen das eigene Repository ([`LH-QA-005`](../spec/lastenheft.md#lh-qa-005--ci-prüfung)); Exit 0 Pflicht | `env -i` mit EU-Minimalumgebung; Ausschlüsse (Testdaten, `vendor/`) in `bedrock-eu-check.yml`; CI-Schritt in `gates.yml` |
 
 **Aktueller Lauf-Status:** lokal `make gates` / `make help`; in CI das
 Pipeline-Ergebnis (Rang höher als diese Datei).
