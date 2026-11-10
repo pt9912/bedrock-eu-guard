@@ -38,6 +38,8 @@ const (
 	ReasonModelAllowed       = "MODEL_ALLOWED"
 	ReasonModelBlocked       = "MODEL_BLOCKED"
 	ReasonModelUnclassified  = "MODEL_UNCLASSIFIED"
+	ReasonMantleUnverified   = "MANTLE_UNVERIFIED"
+	ReasonMantleVerified     = "MANTLE_VERIFIED"
 )
 
 // ModelClass ist das Ergebnis der Modell-/Profil-ID-Klassifikation (SPEC-010).
