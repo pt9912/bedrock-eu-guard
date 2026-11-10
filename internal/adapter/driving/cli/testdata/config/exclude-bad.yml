@@ -1,0 +1,1 @@
+exclude: [main.tf, Dockerfile, docker-compose.yml, .devcontainer, ".claude"]

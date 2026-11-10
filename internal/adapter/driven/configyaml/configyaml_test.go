@@ -22,6 +22,7 @@ allowedAccounts: ["123456789012"]
 allowedModelPatterns: ['^eu\.']
 blockedModelPatterns: ['^us\.', 'us-east-1']
 allowedProfiles: ['eu.*']
+exclude: [testdata, "docs/*/gen"]
 mantle: block
 `
 	p, err := configyaml.Parse("c.yml", []byte(in))
@@ -34,6 +35,7 @@ mantle: block
 		AllowedModelPatterns: []string{`^eu\.`},
 		BlockedModelPatterns: []string{`^us\.`, "us-east-1"},
 		AllowedProfiles:      []string{"eu.*"},
+		Exclude:              []string{"testdata", "docs/*/gen"},
 		Mantle:               "block",
 	}
 	if !reflect.DeepEqual(p, want) {
@@ -141,5 +143,31 @@ func TestNullFieldIsAbsent(t *testing.T) {
 	}
 	if p.AllowedAccounts != nil {
 		t.Errorf("null muss nil bleiben, got %#v", p.AllowedAccounts)
+	}
+}
+
+// exclude: abwesend (nil) und explizit leer ([]) bleiben unterscheidbar; Einträge,
+// die keine Strings sind, ergeben FILE_INVALID (ohne den Wert zu zitieren).
+func TestExclude(t *testing.T) {
+	p, err := configyaml.Parse("c.yml", []byte("mantle: warn\n"))
+	if err != nil || p.Exclude != nil {
+		t.Errorf("abwesend: %+v, %v", p, err)
+	}
+	p, err = configyaml.Parse("c.yml", []byte("exclude: []\n"))
+	if err != nil || p.Exclude == nil || len(p.Exclude) != 0 {
+		t.Errorf("leer: %#v, %v", p, err)
+	}
+	p, err = configyaml.Parse("c.yml", []byte("exclude:\n  - testdata\n  - vendor\n"))
+	if err != nil || len(p.Exclude) != 2 || p.Exclude[0] != "testdata" || p.Exclude[1] != "vendor" {
+		t.Errorf("Liste: %#v, %v", p, err)
+	}
+	for _, in := range []string{"exclude: GEHEIM\n", "exclude:\n  - {a: GEHEIM}\n", "exclude:\n  - [GEHEIM]\n"} {
+		_, err := configyaml.Parse("c.yml", []byte(in))
+		var fe *model.FileError
+		if !errors.As(err, &fe) || fe.Reason != model.ReasonFileInvalid {
+			t.Errorf("%q: want FILE_INVALID, got %v", in, err)
+		} else if strings.Contains(err.Error(), "GEHEIM") {
+			t.Errorf("%q: Fehlertext zitiert Wert: %v", in, err)
+		}
 	}
 }
