@@ -147,3 +147,84 @@ func TestTimeout(t *testing.T) {
 		t.Errorf("Timeout griff nicht rechtzeitig: %v", time.Since(start))
 	}
 }
+
+var _ driven.BedrockReader = Reader{}
+
+func TestListInferenceProfilesPagination(t *testing.T) {
+	// Seite 1 (ohne --next-token) liefert ein nextToken, Seite 2 das Ende.
+	bin, log := fakeAWS(t, `echo "$@" >> "$LOG"
+case "$*" in
+  *--next-token\ tok2*) echo '{"inferenceProfileSummaries":[{"inferenceProfileId":"us.anthropic.claude-x","inferenceProfileName":"US X","type":"SYSTEM_DEFINED"}]}' ;;
+  *) echo '{"inferenceProfileSummaries":[{"inferenceProfileId":"eu.anthropic.claude-y","inferenceProfileName":"EU Y","type":"SYSTEM_DEFINED"}],"nextToken":"tok2"}' ;;
+esac`)
+	got, err := New(bin, "eu-central-1").ListInferenceProfiles("eu-west-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []model.InferenceProfile{
+		{ID: "eu.anthropic.claude-y", Name: "EU Y", Type: "SYSTEM_DEFINED"},
+		{ID: "us.anthropic.claude-x", Name: "US X", Type: "SYSTEM_DEFINED"},
+	}
+	if len(got) != 2 || got[0] != want[0] || got[1] != want[1] {
+		t.Errorf("got %+v", got)
+	}
+	b, _ := os.ReadFile(log)
+	lines := strings.Split(strings.TrimSpace(string(b)), "\n")
+	if len(lines) != 2 ||
+		lines[0] != "bedrock list-inference-profiles --output json --region eu-west-1" ||
+		lines[1] != "bedrock list-inference-profiles --output json --region eu-west-1 --next-token tok2" {
+		t.Errorf("Aufrufe (Region je Aufruf, nicht die des Readers): %q", lines)
+	}
+}
+
+func TestListInferenceProfilesStopsOnRepeatedToken(t *testing.T) {
+	bin, _ := fakeAWS(t, `echo '{"inferenceProfileSummaries":[],"nextToken":"same"}'`)
+	got, err := New(bin, "").ListInferenceProfiles("eu-central-1")
+	if err != nil || len(got) != 0 {
+		t.Errorf("got %+v, %v", got, err)
+	}
+}
+
+func TestListFoundationModels(t *testing.T) {
+	bin, log := fakeAWS(t, `echo "$@" > "$LOG"
+echo '{"modelSummaries":[{"modelId":"anthropic.claude-sonnet-4-6"},{"modelId":"amazon.nova-pro-v1:0"}]}'`)
+	got, err := New(bin, "").ListFoundationModels("eu-central-1")
+	if err != nil || len(got) != 2 || got[0].ID != "anthropic.claude-sonnet-4-6" || got[1].ID != "amazon.nova-pro-v1:0" {
+		t.Fatalf("got %+v, %v", got, err)
+	}
+	b, _ := os.ReadFile(log)
+	if strings.TrimSpace(string(b)) != "bedrock list-foundation-models --output json --region eu-central-1" {
+		t.Errorf("Aufruf: %q", b)
+	}
+}
+
+func TestBedrockErrorsAreTypedAndLeakFree(t *testing.T) {
+	cases := map[string]struct{ stderr, want string }{
+		"keine Credentials":  {"Unable to locate credentials", model.AWSNoCredentials},
+		"Zugriff verweigert": {"An error occurred (AccessDeniedException) when calling the ListInferenceProfiles operation", model.AWSAccessDenied},
+		"nicht erreichbar":   {"Could not connect to the endpoint URL", model.AWSUnreachable},
+	}
+	for name, c := range cases {
+		t.Run(name, func(t *testing.T) {
+			bin, _ := fakeAWS(t, "echo '"+c.stderr+" "+leak+"' >&2; exit 255")
+			_, perr := New(bin, "").ListInferenceProfiles("eu-central-1")
+			var ae *model.AWSError
+			if !errors.As(perr, &ae) || ae.Op != "bedrock:ListInferenceProfiles" || ae.Reason != c.want || strings.Contains(perr.Error(), leak) {
+				t.Errorf("profiles: %v", perr)
+			}
+			_, merr := New(bin, "").ListFoundationModels("eu-central-1")
+			if !errors.As(merr, &ae) || ae.Op != "bedrock:ListFoundationModels" || ae.Reason != c.want || strings.Contains(merr.Error(), leak) {
+				t.Errorf("models: %v", merr)
+			}
+		})
+	}
+}
+
+func TestBedrockInvalidJSONIsUnreachable(t *testing.T) {
+	bin, _ := fakeAWS(t, "echo 'kein json "+leak+"'")
+	_, err := New(bin, "").ListFoundationModels("eu-central-1")
+	var ae *model.AWSError
+	if !errors.As(err, &ae) || ae.Reason != model.AWSUnreachable || strings.Contains(err.Error(), leak) {
+		t.Errorf("got %v", err)
+	}
+}

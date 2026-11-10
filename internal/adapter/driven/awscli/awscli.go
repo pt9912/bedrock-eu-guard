@@ -21,7 +21,11 @@ import (
 // DefaultBinary ist der Name des AWS-CLI-Binarys im PATH.
 const DefaultBinary = "aws"
 
-const opIdentity = "sts:GetCallerIdentity"
+const (
+	opIdentity = "sts:GetCallerIdentity"
+	opProfiles = "bedrock:ListInferenceProfiles"
+	opModels   = "bedrock:ListFoundationModels"
+)
 
 // timeout begrenzt einen CLI-Aufruf (Variable nur für Tests).
 var timeout = 30 * time.Second
@@ -48,19 +52,91 @@ func (r Reader) Identity() (*model.AWSIdentity, error) {
 	if r.region != "" {
 		args = append(args, "--region", r.region)
 	}
-	stdout, stderr, err := r.run(args)
-	if err != nil {
-		return nil, classify(opIdentity, err, stderr)
-	}
 	var out struct {
 		UserID  string `json:"UserId"`
 		Account string `json:"Account"`
 		ARN     string `json:"Arn"`
 	}
-	if jerr := json.Unmarshal(stdout, &out); jerr != nil || out.Account == "" {
+	if err := r.call(opIdentity, args, &out); err != nil {
+		return nil, err
+	}
+	if out.Account == "" {
 		return nil, &model.AWSError{Op: opIdentity, Reason: model.AWSUnreachable}
 	}
 	return &model.AWSIdentity{Account: out.Account, ARN: out.ARN, UserID: out.UserID}, nil
+}
+
+// maxPages begrenzt die Paginierung (Schutz vor Endlosschleifen).
+const maxPages = 100
+
+// ListInferenceProfiles ruft `aws bedrock list-inference-profiles` für eine
+// Region auf. Die AWS-CLI paginiert selbst; liefert sie dennoch ein
+// nextToken, wird bis zum Ende nachgeladen.
+func (r Reader) ListInferenceProfiles(region string) ([]model.InferenceProfile, error) {
+	var all []model.InferenceProfile
+	token := ""
+	for page := 0; page < maxPages; page++ {
+		var out struct {
+			Summaries []struct {
+				ID   string `json:"inferenceProfileId"`
+				Name string `json:"inferenceProfileName"`
+				Type string `json:"type"`
+			} `json:"inferenceProfileSummaries"`
+			NextToken string `json:"nextToken"`
+		}
+		if err := r.call(opProfiles, bedrockArgs("list-inference-profiles", region, token), &out); err != nil {
+			return nil, err
+		}
+		for _, p := range out.Summaries {
+			all = append(all, model.InferenceProfile{ID: p.ID, Name: p.Name, Type: p.Type})
+		}
+		if out.NextToken == "" || out.NextToken == token {
+			return all, nil
+		}
+		token = out.NextToken
+	}
+	return nil, &model.AWSError{Op: opProfiles, Reason: model.AWSUnreachable}
+}
+
+// ListFoundationModels ruft `aws bedrock list-foundation-models` auf.
+func (r Reader) ListFoundationModels(region string) ([]model.FoundationModel, error) {
+	var out struct {
+		Summaries []struct {
+			ID string `json:"modelId"`
+		} `json:"modelSummaries"`
+	}
+	if err := r.call(opModels, bedrockArgs("list-foundation-models", region, ""), &out); err != nil {
+		return nil, err
+	}
+	all := make([]model.FoundationModel, 0, len(out.Summaries))
+	for _, m := range out.Summaries {
+		all = append(all, model.FoundationModel{ID: m.ID})
+	}
+	return all, nil
+}
+
+func bedrockArgs(sub, region, token string) []string {
+	args := []string{"bedrock", sub, "--output", "json"}
+	if region != "" {
+		args = append(args, "--region", region)
+	}
+	if token != "" {
+		args = append(args, "--next-token", token)
+	}
+	return args
+}
+
+// call führt einen CLI-Aufruf aus und liest die JSON-Antwort in out. Fehler
+// sind immer *model.AWSError ohne CLI-Ausgabe.
+func (r Reader) call(op string, args []string, out any) error {
+	stdout, stderr, err := r.run(args)
+	if err != nil {
+		return classify(op, err, stderr)
+	}
+	if jerr := json.Unmarshal(stdout, out); jerr != nil {
+		return &model.AWSError{Op: op, Reason: model.AWSUnreachable}
+	}
+	return nil
 }
 
 // run startet das Binary ohne Shell mit Allowlist-Umgebung und Timeout.
