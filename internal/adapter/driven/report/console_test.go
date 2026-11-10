@@ -51,3 +51,23 @@ func TestReportWriteError(t *testing.T) {
 		t.Error("expected write error")
 	}
 }
+
+func TestReportFileLineAndRecommendation(t *testing.T) {
+	var buf bytes.Buffer
+	err := report.New(&buf).Report([]model.Finding{
+		{RuleID: "R1", Severity: model.FAIL, Reason: "X", Message: "m", Subject: "S", File: ".claude/settings.json", Line: 7, Recommendation: "Region ändern"},
+		{RuleID: "R2", Severity: model.WARN, Reason: "Y", Message: "n", Subject: "T", File: "a.json"},
+		{RuleID: "R3", Severity: model.PASS, Reason: "OK", Message: "o", Subject: "b.json", File: "b.json", Line: 3},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "[FAIL] R1 S [.claude/settings.json:7]: m (X)\n" +
+		"       Empfehlung: Region ändern\n" +
+		"[WARN] R2 T [a.json]: n (Y)\n" +
+		"[PASS] R3 b.json:3: o (OK)\n" +
+		"Summary: 1 PASS, 1 WARN, 1 FAIL\n"
+	if got := buf.String(); got != want {
+		t.Errorf("got:\n%s\nwant:\n%s", got, want)
+	}
+}
