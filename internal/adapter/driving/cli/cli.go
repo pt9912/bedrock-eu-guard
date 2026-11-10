@@ -12,6 +12,8 @@ import (
 	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/claudesettings"
 	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/configyaml"
 	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/envos"
+	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/envsource"
+	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/fs"
 	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/report"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/core/app"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/core/model"
@@ -55,7 +57,11 @@ func run(args []string, env driven.Environment, home string, stdout, stderr io.W
 	findings, err := app.CheckLocal{}.Run(env, cfg)
 	if err == nil {
 		var files []model.Finding
-		files, err = app.Scan{Settings: claudesettings.New(opts.root, home)}.Run(cfg)
+		files, err = app.Scan{
+			Settings:   claudesettings.New(opts.root, home),
+			EnvSources: envsource.New(opts.root),
+			Files:      fs.New(opts.root),
+		}.Run(cfg)
 		findings = append(findings, files...)
 	}
 	sort.SliceStable(findings, func(i, j int) bool { return findings[i].RuleID < findings[j].RuleID })

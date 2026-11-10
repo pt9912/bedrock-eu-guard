@@ -1,7 +1,6 @@
 # Slice slice-005: Konfigurationsdatei `bedrock-eu-check.yml`
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** welle-02-config-scanner.
 
@@ -30,13 +29,13 @@ Tool-Fehler (Exit `2`). Das `mantle`-Feld steuert [`LH-FA-LENV-005`](../../../..
 
 ## 3. Definition of Done
 
-- [ ] Kern (w1): Verträge aus §2, `lenv005.go` Mantle-Modi, Unit-Tests je Feld und je Fehlerfall (`coretest/fakeconfig`).
-- [ ] `yaml.v3` gevendort ([`ADR-0004`](../../adr/0004-abhaengigkeiten-und-offline-gates.md)): exakte Version, Lizenz dokumentiert; `make deps-verify` und `make gates` grün.
-- [ ] Adapter `configyaml` (w2): YAML 1:1 auf `PartialConfig`; Abwesenheit (nil) und `[]` (leer) unterscheiden; unbekannte Felder und Syntaxfehler → `FileError` mit Zeile, ohne Dateiinhalt; Datei fehlt → `(nil, nil)`.
-- [ ] Composition Root (w2): Suche `<root>/bedrock-eu-check.yml` (Default aktuelles Verzeichnis) oder `--config PATH`; `LoadConfig`; Fehler → stderr ohne Wert, Exit `2`.
-- [ ] Testdaten im Repo (gültig, teilweise, ungültig); Akzeptanztests: `mantle: block` → FAIL, ungültige Regex → Exit 2.
-- [ ] `make verify-clean` und CI grün; Sensors-Doku aktuell.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Kern (w1): Verträge aus §2, `lenv005.go` Mantle-Modi, Unit-Tests je Feld und je Fehlerfall (`coretest/fakeconfig`).
+- [x] `yaml.v3` gevendort ([`ADR-0004`](../../adr/0004-abhaengigkeiten-und-offline-gates.md)): exakte Version, Lizenz dokumentiert; `make deps-verify` und `make gates` grün.
+- [x] Adapter `configyaml` (w2): YAML 1:1 auf `PartialConfig`; Abwesenheit (nil) und `[]` (leer) unterscheiden; unbekannte Felder und Syntaxfehler → `FileError` mit Zeile, ohne Dateiinhalt; Datei fehlt → `(nil, nil)`.
+- [x] Composition Root (w2): Suche `<root>/bedrock-eu-check.yml` (Default aktuelles Verzeichnis) oder `--config PATH`; `LoadConfig`; Fehler → stderr ohne Wert, Exit `2`.
+- [x] Testdaten im Repo (gültig, teilweise, ungültig); Akzeptanztests: `mantle: block` → FAIL, ungültige Regex → Exit 2.
+- [x] `make verify-clean` und CI grün; Sensors-Doku aktuell.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 4. Plan (vor Code)
 
@@ -65,7 +64,13 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 8. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-10 (PRs #20 Kern/w1, #22 Adapter/CLI/Vendoring/w2).
+
+- **Funktioniert:** `bedrock-eu-check.yml` überschreibt die Defaults feldweise; abwesende Felder (`nil`) und explizit leere (`[]`) bleiben unterscheidbar. Ungültige eigene Konfiguration (Regex, unbekanntes Feld, leere Regionen, Konto-Format) ergibt Exit `2`, ohne Feldwerte in der Meldung. Mantle-Modi `warn|allow|block` wirken über die CLI. `gopkg.in/yaml.v3` v3.0.1 ist gevendort (Lizenzen in `THIRD_PARTY_NOTICES.md`), `make deps-verify` und der CI-Job `deps-verify` laufen grün.
+- **Anders als geplant:** Ein ausdrücklich angegebenes `--config` muss existieren (sonst Exit `2`); nur die Default-Datei `<root>/bedrock-eu-check.yml` ist optional. YAML-`null` (`allowedAccounts:` ohne Wert) zählt als abwesend, nicht als leer.
+- **Offen:** `allowedAccounts` und `allowedProfiles` sind validiert und eingelesen, wirken aber erst mit den AWS-Prüfungen (Welle 3). Eine Config-Suche außerhalb des Scan-Roots (z. B. im Home-Verzeichnis) ist nicht vorgesehen.
+- **Steering-Loop:** Ein Sammel-Shell-Befehl mit vielen Änderungen wurde einmal vom Sicherheitscheck blockiert; kleinere Schritte bzw. die Edit-Werkzeuge sind verlässlicher. CI startet mit mehreren Minuten Verzögerung; auf den Lauf für die Commit-SHA warten und bei Workflows mit mehreren Jobs auf alle Ergebnisse (nicht nur den ersten). Vendoring: nur importierte Pakete landen in `vendor/`, die Bibliothek kommt daher erst mit dem Adapter, der sie nutzt.
+- **Folge-Slices:** slice-006 (Devcontainer, Compose, Dockerfile) und slice-007 (Terraform, braucht HCL-Bibliothek per Vendoring).
 
 ## 9. Sub-Area-Modus-Begründung
 

@@ -1,0 +1,8 @@
+{
+  // EU-konforme Devcontainer-Konfiguration
+  "name": "dev",
+  "containerEnv": {
+    "AWS_REGION": "eu-central-1",
+    "CLAUDE_CODE_USE_BEDROCK": "1",
+  },
+}
