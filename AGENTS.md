@@ -131,6 +131,7 @@ Nur real existierende Targets (keine halluzinierten Gates, Modul 13):
 | `make test`      | Unit-Tests (`go test ./...`, containerisiert, netzlos)             |
 | `make build`     | Binary `bin/bedrock-eu-check` bauen                                |
 | `make gates`     | alle lauffähigen Gates: `doc-check`, `lint`, `test`                |
+| `make verify-clean` | `make gates` im frischen `git worktree` des committeten HEAD     |
 `make coverage-gate` und `make self-check` entstehen in späteren Slices;
 sie werden erst hier eingetragen, wenn sie laufen.
 werden erst hier eingetragen, wenn sie laufen.
