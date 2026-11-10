@@ -53,6 +53,8 @@ kanonische Quelle**, und diese Datei wird angepasst.
 | `make build` | Binary `bin/bedrock-eu-check` bauen | wie `lint` |
 | `make gates` | alle lauffähigen Gates: `doc-check`, `lint`, `test` | — |
 | `make verify-clean` | `make gates` im frischen `git worktree` des committeten HEAD (fängt ungetrackte/ignorierte Dateien ab) | Handoff-Gate; CI führt `make gates` im frischen Checkout aus (`.github/workflows/gates.yml`) |
+| `make deps` | `go mod tidy` + `vendor/` neu erzeugen (mit Netz, nicht Teil der Gates) | [`ADR-0004`](../docs/plan/adr/0004-abhaengigkeiten-und-offline-gates.md): `vendor/` nie von Hand editieren |
+| `make deps-verify` | `go mod verify` + `vendor/` entspricht Upstream (mit Netz) | CI-Job `deps-verify`, nur bei Änderungen an `vendor/`, `go.mod`, `go.sum` |
 
 **Aktueller Lauf-Status:** lokal `make gates` / `make help`; in CI das
 Pipeline-Ergebnis (Rang höher als diese Datei).

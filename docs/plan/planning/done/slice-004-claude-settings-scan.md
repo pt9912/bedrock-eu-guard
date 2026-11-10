@@ -1,7 +1,6 @@
 # Slice slice-004: Filesystem-Port, Scan-Gerüst und Claude-Code-Settings
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** welle-02-config-scanner.
 
@@ -13,7 +12,7 @@ Verzeichnisse bewegt).
 
 ## 1. Ziel
 
-`bedrock-eu-check scan` liest `~/.claude/settings.json` sowie
+`bedrock-eu-check local` liest `~/.claude/settings.json` sowie
 `.claude/settings.json` und `.claude/settings.local.json` des Projekts
 (reiner Lesezugriff, offline), prüft sie gegen die vier CLAUDE-Anforderungen
 und meldet Findings mit Datei und Zeile. Secret-Werte erreichen nie den Kern.
@@ -47,13 +46,13 @@ Datei vorhanden, aber nicht lesbar oder ungültig: `FAIL` mit
 
 ## 4. Definition of Done
 
-- [ ] Verträge aus §2 umgesetzt, additiv und rückwärtskompatibel (`bedrock-eu-check local` unverändert).
-- [ ] Kern (w1): Regeln `rules/claude*.go`, Use-Case `app.Scan`, Doubles `coretest/memfs` und `coretest/fakesettings`, Unit-Tests je Zweig und je Dateizustand.
-- [ ] Adapter (w2): `adapter/driven/fs`, `adapter/driven/claudesettings` (JSON-Parser mit Zeilen aus Decoder-Offsets, Schwärzung, Hits, Home-Injektion), Tests inkl. Secret-Fälle.
-- [ ] CLI (w2): Befehl `scan` mit Scan-Root (Default aktuelles Verzeichnis); Reporter gibt `Datei:Zeile` aus.
-- [ ] Testdaten im Repo: je ein positives und ein negatives Beispiel je Quelle; Akzeptanztest, dass kein Secret-Wert (`sk-…`) in stdout/stderr erscheint.
-- [ ] `make verify-clean` und CI grün; Sensors-Doku aktuell.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Verträge aus §2 umgesetzt, additiv und rückwärtskompatibel (`bedrock-eu-check local` unverändert).
+- [x] Kern (w1): Regeln `rules/claude*.go`, Use-Case `app.Scan`, Doubles `coretest/memfs` und `coretest/fakesettings`, Unit-Tests je Zweig und je Dateizustand.
+- [x] Adapter (w2): `adapter/driven/fs`, `adapter/driven/claudesettings` (JSON-Parser mit Zeilen aus Decoder-Offsets, Schwärzung, Hits, Home-Injektion), Tests inkl. Secret-Fälle.
+- [x] CLI (w2): `bedrock-eu-check local [--root DIR]` führt Env- und Datei-Regeln aus (Scan-Root Default aktuelles Verzeichnis); Reporter gibt `Datei:Zeile` aus. Ein eigener Befehl `scan` entfällt (Entscheidung des Auftraggebers: [`SPEC-002`](../../../../spec/spezifikation.md#spec-002--regel-modell) kennt nur die Modi `local`/`aws`/`terraform`).
+- [x] Testdaten im Repo: je ein positives und ein negatives Beispiel je Quelle; Akzeptanztest, dass kein Secret-Wert (`sk-…`) in stdout/stderr erscheint.
+- [x] `make verify-clean` und CI grün; Sensors-Doku aktuell.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 5. Plan (vor Code)
 
@@ -84,7 +83,16 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 9. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-10 (PRs #15 Kern/w1, #16 Adapter/CLI/w2).
+
+- **Funktioniert:** Claude-Code-Settings (User und Projekt) werden gelesen, geparst und gegen CLAUDE-001 bis -004 geprüft; Findings tragen Datei, Zeile und Empfehlung. Secrets werden im Adapter geschwärzt, der Kern sieht nie einen Wert; Akzeptanztests prüfen, dass kein Secret in stdout/stderr erscheint. Abstimmung über einen früh festgelegten Vertrag, Kern und Adapter parallel.
+- **Anders als geplant:** Es gibt keinen Befehl `scan`. `local` führt Env- und Datei-Regeln aus ([`SPEC-002`](../../../../spec/spezifikation.md#spec-002--regel-modell) kennt nur die Modi `local`/`aws`/`terraform`). Das Verhalten je Regel (§3) wurde im Review von w1 präzisiert (aktiv konfiguriert, Doppelmeldungen gewollt).
+- **Offen:**
+  - `apiKeyHelper` (Top-Level-Schlüssel) wird nicht als direkte Anthropic-Konfiguration gewertet; das Lastenheft nennt ihn nicht. Dafür ist eine Spec-Präzisierung zu CLAUDE-003 nötig, nicht stilles FAIL.
+  - Optionales Refactoring: `app.CheckLocal` mit optionalem Settings-Reader, damit der Composition Root nur noch einen Aufruf macht (separater kleiner PR, nur auf Wunsch).
+  - Die Secret-Schlüsselliste ist eine großzügige Heuristik; Fehlalarme sind akzeptiert.
+- **Steering-Loop:** Verträge zwischen den Agenten zuerst festlegen und im Plan festhalten, bevor Kern und Adapter parallel entstehen. Die Namensfrage für Befehle gehört vor den Code (Spec-Anker prüfen); hier kostete sie einen Umbau von #16. CI startet verzögert; vor dem Merge auf den Lauf für den Ende-Stand (Commit-SHA) warten.
+- **Folge-Slices:** Plan für slice-005 (Konfigurationsdatei, YAML) nach Vendoring-Umbau gemäß [`ADR-0004`](../../adr/0004-abhaengigkeiten-und-offline-gates.md).
 
 ## 10. Sub-Area-Modus-Begründung
 
