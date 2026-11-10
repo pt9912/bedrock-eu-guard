@@ -87,7 +87,7 @@ data "aws_iam_policy_document" "p" {
 		!reflect.DeepEqual(s0.Resources, []string{"*"}) || s0.HasRegionCondition || s0.Dynamic || s0.Line != 3 {
 		t.Errorf("s0: %+v", s0)
 	}
-	if s1.Effect != "Allow" || !s1.HasRegionCondition || s1.Line != 8 {
+	if s1.Effect != "Allow" || !s1.HasRegionCondition || s1.Line != 8 || !reflect.DeepEqual(s1.ConditionRegions, []string{"eu-central-1"}) {
 		t.Errorf("s1 (Default-Effect Allow, Region-Condition): %+v", s1)
 	}
 	if s2.Effect != "Deny" || !s2.Dynamic || !reflect.DeepEqual(s2.Actions, []string{"s3:*"}) {
@@ -138,7 +138,7 @@ resource "aws_iam_policy" "d" {
 		t.Fatalf("Statements: %+v", f.Statements)
 	}
 	a1, a2, b, c, d := f.Statements[0], f.Statements[1], f.Statements[2], f.Statements[3], f.Statements[4]
-	if !a1.HasRegionCondition || a1.Effect != "Allow" || !reflect.DeepEqual(a1.Actions, []string{"bedrock:InvokeModel"}) || !reflect.DeepEqual(a1.Resources, []string{"*"}) {
+	if !a1.HasRegionCondition || !reflect.DeepEqual(a1.ConditionRegions, []string{"eu-central-1"}) || a1.Effect != "Allow" || !reflect.DeepEqual(a1.Actions, []string{"bedrock:InvokeModel"}) || !reflect.DeepEqual(a1.Resources, []string{"*"}) {
 		t.Errorf("a1: %+v", a1)
 	}
 	if a2.HasRegionCondition || !reflect.DeepEqual(a2.Actions, []string{"bedrock:*"}) {
