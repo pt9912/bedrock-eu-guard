@@ -32,16 +32,21 @@ type SettingsFile struct {
 
 // ScanContext bündelt die einmal geladenen Settings für alle Scan-Regeln.
 type ScanContext struct {
-	User     SettingsFile
-	Projects []SettingsFile
+	User          SettingsFile
+	Projects      []SettingsFile
+	Devcontainers []EnvSourceFile
+	Composes      []EnvSourceFile
+	Dockerfiles   []EnvSourceFile
 }
 
 // ScanRule wertet die geladenen Settings gegen die Config aus.
 type ScanRule func(sc ScanContext, cfg model.Config) []model.Finding
 
-// ScanRules liefert die Claude-Regeln in stabiler Reihenfolge.
+// ScanRules liefert die Scan-Regeln (Claude-Settings, Devcontainer, Compose,
+// Dockerfile) in stabiler Reihenfolge.
 func ScanRules() []ScanRule {
-	return []ScanRule{CheckClaudeUser, CheckClaudeProject, CheckClaudeEndpoints, CheckClaudeWizard}
+	return []ScanRule{CheckClaudeUser, CheckClaudeProject, CheckClaudeEndpoints, CheckClaudeWizard,
+		CheckDevcontainer, CheckCompose, CheckDockerfile}
 }
 
 func fileErrorFinding(id string, f SettingsFile) model.Finding {

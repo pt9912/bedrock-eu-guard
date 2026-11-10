@@ -6,6 +6,7 @@ import (
 
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/core/app"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/core/model"
+	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/coretest/fakeenvsource"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/coretest/fakesettings"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/coretest/memfs"
 )
@@ -95,5 +96,58 @@ func TestMemFS(t *testing.T) {
 	g, _ := m.Glob(".claude/*.json")
 	if len(g) != 2 {
 		t.Errorf("Glob: %v", g)
+	}
+}
+
+func TestScanEnvSourcesDiscoveryAndRules(t *testing.T) {
+	files := memfs.FS{
+		".devcontainer/devcontainer.json": "{}",
+		"docker-compose.yml":              "x",
+		"docker-compose.override.yml":     "x",
+		"Dockerfile":                      "x",
+		"Dockerfile.dev":                  "x",
+		".dockerignore":                   "x",
+		"README.md":                       "x",
+	}
+	env := func(kvs ...model.EnvEntry) *model.EnvFile { return &model.EnvFile{Env: kvs} }
+	r := fakeenvsource.Reader{
+		Files: map[string]*model.EnvFile{
+			".devcontainer/devcontainer.json": env(model.EnvEntry{Key: "CLAUDE_CODE_USE_BEDROCK", Value: "1"}, model.EnvEntry{Key: "AWS_REGION", Value: "eu-central-1"}),
+			"docker-compose.yml":              env(model.EnvEntry{Key: "AWS_REGION", Value: "us-east-1", Line: 7}),
+			"Dockerfile":                      env(model.EnvEntry{Key: "AWS_REGION", Value: "eu-central-1"}),
+		},
+		Errs: map[string]error{"Dockerfile.dev": &model.FileError{Path: "Dockerfile.dev", Reason: model.ReasonFileInvalid, Line: 2}},
+	}
+	fs, err := app.Scan{Settings: fakesettings.Reader{}, EnvSources: r, Files: files}.Run(model.DefaultConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]string{}
+	for _, f := range fs {
+		if f.File != "" {
+			got[f.RuleID+"|"+f.File] = f.Severity.String()
+		}
+	}
+	want := map[string]string{
+		"LH-FA-DEVCON-001|.devcontainer/devcontainer.json": "PASS",
+		"LH-FA-DOCKER-001|docker-compose.yml":              "FAIL",
+		"LH-FA-DOCKER-002|Dockerfile":                      "PASS",
+		"LH-FA-DOCKER-002|Dockerfile.dev":                  "FAIL",
+	}
+	for k, v := range want {
+		if got[k] != v {
+			t.Errorf("%s: got %q want %q (alle: %v)", k, got[k], v, got)
+		}
+	}
+	if _, ok := got["LH-FA-DOCKER-001|docker-compose.override.yml"]; ok {
+		t.Errorf("Override ohne relevante Variablen darf kein Finding erzeugen: %v", got)
+	}
+}
+
+func TestScanWithoutEnvSourcesIsUnchanged(t *testing.T) {
+	a, _ := app.Scan{Settings: fakesettings.Reader{}}.Run(model.DefaultConfig())
+	b, _ := app.Scan{Settings: fakesettings.Reader{}, EnvSources: fakeenvsource.Reader{}}.Run(model.DefaultConfig())
+	if len(a) != len(b) {
+		t.Fatalf("%d vs %d", len(a), len(b))
 	}
 }

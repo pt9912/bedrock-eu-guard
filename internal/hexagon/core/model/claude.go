@@ -47,6 +47,7 @@ type EnvEntry struct {
 	Value  string
 	Secret bool
 	Line   int
+	Scope  string // optional: Compose-Service bzw. Dockerfile-Stage
 }
 
 // Hit ist ein Rohinhalt-Fund eines Hit*-Musters, nur mit Zeile.
