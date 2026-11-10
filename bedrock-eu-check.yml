@@ -1,0 +1,6 @@
+# Konfiguration für den Self-Check (make self-check): bedrock-eu-check prüft das
+# eigene Repository. Absichtlich schlechte Beispiele (Testdaten) und Fremdcode
+# sind ausgenommen; alle anderen Defaults gelten (SPEC-020).
+exclude:
+  - internal/adapter/driving/cli/testdata   # good/bad-Datensätze der CLI-Tests
+  - vendor                                  # Fremdcode (ADR-0004)
