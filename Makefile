@@ -35,9 +35,16 @@ test: ## Unit-Tests (go test)
 	@mkdir -p .tmp/gocache
 	$(GO_RUN) go test ./...
 
-build: ## Binary nach bin/bedrock-eu-check bauen
+# Build-Informationen und reproduzierbare Flags (LH-QA-004): statisch gelinkt,
+# ohne Pfade/Zeitstempel/VCS-Stempel im Binary.
+VERSION ?= dev
+COMMIT  ?= $(shell git rev-parse --short=12 HEAD 2>/dev/null || echo unknown)
+CLI_PKG  = github.com/pt9912/bedrock-eu-guard/internal/adapter/driving/cli
+LDFLAGS  = -s -w -X $(CLI_PKG).version=$(VERSION) -X $(CLI_PKG).commit=$(COMMIT)
+
+build: ## Binary nach bin/bedrock-eu-check bauen (VERSION=..., COMMIT=...)
 	@mkdir -p .tmp/gocache bin
-	$(GO_RUN) go build -o bin/bedrock-eu-check ./cmd/bedrock-eu-check
+	$(GO_RUN) env CGO_ENABLED=0 go build -trimpath -buildvcs=false -ldflags "$(LDFLAGS)" -o bin/bedrock-eu-check ./cmd/bedrock-eu-check
 
 deps: ## go mod tidy + vendor/ neu erzeugen (mit Netz, nicht Teil der Gates)
 	@mkdir -p .tmp/gocache .tmp/gomod
