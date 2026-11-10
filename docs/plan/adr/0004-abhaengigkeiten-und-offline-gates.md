@@ -1,6 +1,6 @@
 # ADR-0004: Abhängigkeiten (YAML, HCL) und Offline-Gates
 
-**Status:** Proposed
+**Status:** Accepted
 
 **Datum:** 2026-11-10
 
@@ -42,7 +42,7 @@ Neue oder aktualisierte Abhängigkeiten laufen über einen eigenen Schritt
 mit Netz (`make deps`) und einen PR, in dem das Diff von `vendor/` und
 `go.sum` sichtbar ist. `vendor/` wird **nie von Hand editiert**.
 
-*(Status: Proposed — Sign-off durch den Auftraggeber ausstehend.)*
+*(Status: Accepted — Sign-off durch den Auftraggeber 2026-11-10.)*
 
 ## Verglichene Alternativen
 
@@ -84,3 +84,4 @@ mit Netz (`make deps`) und einen PR, in dem das Diff von `vendor/` und
 | Datum | Ereignis | Verweis |
 |---|---|---|
 | 2026-11-10 | Proposed | [`welle-02-config-scanner`](../planning/welle-02-config-scanner.md) §7 Risiken |
+| 2026-11-10 | Accepted | Sign-off durch den Auftraggeber (Option A, Vendoring); Review w1 eingearbeitet |
