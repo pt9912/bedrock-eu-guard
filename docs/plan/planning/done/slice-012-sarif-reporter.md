@@ -1,7 +1,6 @@
 # Slice slice-012: SARIF-Reporter
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** welle-04-output-ci.
 
@@ -29,13 +28,13 @@ verarbeiten können.
 
 ## 3. Definition of Done
 
-- [ ] `report.SARIF` mit strukturellen Tests (kein Schema im Repo, offline): `version`, `runs[0].tool.driver.name/rules`, `results[]` mit `ruleId`, `level`, `message.text`, `locations`; `PASS` ohne Result; leerer Lauf ergibt ein gültiges Dokument mit leerem `results`-Array.
-- [ ] Pfadregeln getestet: relative `/`-Pfade, Sonderzeichen und Leerzeichen kodiert, Windows-Trenner normalisiert, Ersatzposition mit Kennzeichnung, Pfad außerhalb des Scan-Roots.
-- [ ] Determinismus: zweimal identische Ausgabe; keine Zeitstempel oder GUIDs.
-- [ ] Secret-Regel: Message und Empfehlung unverändert, keine Werte in `properties`; Test mit `bad`-Testdaten ohne Secret in stdout/stderr.
-- [ ] CLI-Akzeptanztest: `terraform --format sarif` auf den `bad`-Testdaten liefert parsebares SARIF mit `error`-Results; Exit `1`.
-- [ ] `make verify-clean` und CI grün; Sensors-Doku aktuell.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] `report.SARIF` mit strukturellen Tests (kein Schema im Repo, offline): `version`, `runs[0].tool.driver.name/rules`, `results[]` mit `ruleId`, `level`, `message.text`, `locations`; `PASS` ohne Result; leerer Lauf ergibt ein gültiges Dokument mit leerem `results`-Array.
+- [x] Pfadregeln getestet: relative `/`-Pfade, Sonderzeichen und Leerzeichen kodiert, Windows-Trenner normalisiert, Ersatzposition mit Kennzeichnung, Pfad außerhalb des Scan-Roots.
+- [x] Determinismus: zweimal identische Ausgabe; keine Zeitstempel oder GUIDs.
+- [x] Secret-Regel: Message und Empfehlung unverändert, keine Werte in `properties`; Test mit `bad`-Testdaten ohne Secret in stdout/stderr.
+- [x] CLI-Akzeptanztest: `terraform --format sarif` auf den `bad`-Testdaten liefert parsebares SARIF mit `error`-Results; Exit `1`.
+- [x] `make verify-clean` und CI grün; Sensors-Doku aktuell.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 4. Plan (vor Code)
 
@@ -60,7 +59,12 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 8. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-10 (PR #47, w2).
+
+- **Funktioniert:** `--format sarif` erzeugt SARIF 2.1.0 ([`SPEC-022`](../../../../spec/spezifikation.md#spec-022--sarif-abbildung---format-sarif)): `PASS` ohne Result, `WARN` = `warning`, `FAIL` = `error`, `rules` eindeutig und nach ID sortiert, `ruleIndex`, relative `/`-Pfade (je Segment URI-kodiert, `%SRCROOT%`), Zeile nur bei `Line > 0`, deterministisch. Findings ohne Fundstelle oder mit Pfad außerhalb des Scan-Roots erhalten eine als Ersatz gekennzeichnete Position (`bedrock-eu-check.yml`, sonst `README.md`, Zeile 1; `properties.synthetic`, `properties.source`). Die Tool-Version kommt aus der Build-Variable.
+- **Offen:** Das offizielle SARIF-Schema liegt nicht im Repo, die Tests prüfen daher strukturell. Ob GitHub Code Scanning die Ersatzposition akzeptiert, ließ sich offline nicht prüfen. Windows-Pfade sind nur normalisiert getestet.
+- **Steering-Loop:** Eine erkennbare Ersatzposition ist ehrlicher als eine erfundene Fundstelle; die Kennzeichnung gehört ins Ergebnis, nicht nur in die Doku.
+- **Folge-Slices:** slice-013.
 
 ## 9. Sub-Area-Modus-Begründung
 

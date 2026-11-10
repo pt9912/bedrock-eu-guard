@@ -1,7 +1,6 @@
 # Slice slice-013: CI-Modus `--ci` und Beispiel-Workflow
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** welle-04-output-ci.
 
@@ -26,11 +25,11 @@ den Einsatz mit Code-Scanning.
 
 ## 3. Definition of Done
 
-- [ ] CLI: `--ci` in allen Modi; Tests: Exit-Codes unverändert, stdout parsebar (mit `--format json|sarif`), stderr enthält Fehler, kein Secret in stdout/stderr.
-- [ ] Tool-Fehler im CI-Modus: bereits ermittelte Findings erscheinen im gewählten Format auf stdout, die Fehlermeldung auf stderr, Exit `2`.
-- [ ] `docs/user/ci.md` mit Beispiel-Workflow (nur Dokumentation, kein Hochladen durch das Werkzeug), Verweis auf die Exit-Codes und die Rechte für `aws` ([`aws-permissions.md`](../../../user/aws-permissions.md)).
-- [ ] `make verify-clean` und CI grün; Sensors-Doku aktuell.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag; Welle-4-Abschluss (M4).
+- [x] CLI: `--ci` in allen Modi; Tests: Exit-Codes unverändert, stdout parsebar (mit `--format json|sarif`), stderr enthält Fehler, kein Secret in stdout/stderr.
+- [x] Tool-Fehler im CI-Modus: bereits ermittelte Findings erscheinen im gewählten Format auf stdout, die Fehlermeldung auf stderr, Exit `2`.
+- [x] `docs/user/ci.md` mit Beispiel-Workflow (nur Dokumentation, kein Hochladen durch das Werkzeug), Verweis auf die Exit-Codes und die Rechte für `aws` ([`aws-permissions.md`](../../../user/aws-permissions.md)).
+- [x] `make verify-clean` und CI grün; Sensors-Doku aktuell.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag; Welle-4-Abschluss (M4).
 
 ## 4. Plan (vor Code)
 
@@ -55,7 +54,13 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 8. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-10 (PR #48, w2).
+
+- **Funktioniert:** `--ci` lässt stdout und Exit-Codes unverändert ([`SPEC-030`](../../../../spec/spezifikation.md#spec-030--exit-codes)) und schreibt zusätzlich eine Zusammenfassung (`bedrock-eu-check: N PASS, N WARN, N FAIL (Exit X)`) auf stderr, auch bei Tool-Fehler, damit Pipeline-Logs bei umgeleitetem stdout den Ausgang zeigen. `docs/user/ci.md` beschreibt Optionen, Exit-Codes, Modi je Pipeline und einen Beispiel-Workflow für GitHub Code Scanning (zwei getrennte Prüfschritte, SARIF-Upload mit `always()`, abschließender Fehlschlag).
+- **Anders als geplant:** Der erste Entwurf des Workflows verlor beim Fehlschlag des ersten Befehls das zweite SARIF (GitHub bricht Schritte mit mehreren Befehlen ab); behoben durch getrennte Schritte.
+- **Offen:** Der Workflow ist als YAML geprüft, aber nicht gegen GitHub erprobt. `--fail-on warn`, Baseline-Dateien und `--output FILE` sind Folgepunkte. Der Self-Check gegen das eigene Repository ([`LH-QA-005`](../../../../spec/lastenheft.md#lh-qa-005--ci-prüfung)) kam später mit slice-015.
+- **Steering-Loop:** Beispiel-Konfigurationen, die sich nicht ausführen lassen, wenigstens syntaktisch prüfen und die Fehlerpfade (Schritt scheitert) durchdenken.
+- **Folge-Slices:** keine in Welle 4; weiter mit Welle 5 (Release 1.0).
 
 ## 9. Sub-Area-Modus-Begründung
 
