@@ -217,9 +217,18 @@ func TestLocalEnvSourcesBad(t *testing.T) {
 	}
 }
 
-// slice-007: Terraform — Positivbeispiel.
-func TestLocalTerraformGood(t *testing.T) {
-	code, out, errs := localWith(t, euEnv)
+func modeRun(t *testing.T, mode, dir string, env mapEnv) (code int, out, errs string) {
+	t.Helper()
+	args, home := scanArgs("testdata/" + dir)
+	args[0] = mode
+	var o, e bytes.Buffer
+	code = run(args, env, home, &o, &e)
+	return code, o.String(), e.String()
+}
+
+// Modus terraform (LH-MOD-003): nur Terraform-Regeln — Positivbeispiel.
+func TestTerraformModeGood(t *testing.T) {
+	code, out, errs := modeRun(t, "terraform", "good", mapEnv{})
 	if code != 0 || strings.Contains(out, "[FAIL]") {
 		t.Fatalf("exit=%d stdout=%q stderr=%q", code, out, errs)
 	}
@@ -228,28 +237,59 @@ func TestLocalTerraformGood(t *testing.T) {
 			t.Errorf("kein PASS für %s:\n%s", want, out)
 		}
 	}
+	for _, other := range []string{"LH-FA-LENV", "LH-FA-CLAUDE", "LH-FA-DEVCON", "LH-FA-DOCKER"} {
+		if strings.Contains(out, other) {
+			t.Errorf("Modus terraform darf %s nicht ausführen:\n%s", other, out)
+		}
+	}
 }
 
 // Negativbeispiel: US-Region, Bedrock-Wildcard auf "*", blockierte Modell-ID → FAIL
 // mit Datei und Zeile, Exit 1, kein Wert aus variable/tfvars (LH-NF-004).
-func TestLocalTerraformBad(t *testing.T) {
-	args, home := scanArgs("testdata/bad")
-	var o, e bytes.Buffer
-	code := run(args, euEnv, home, &o, &e)
-	out := o.String()
+func TestTerraformModeBad(t *testing.T) {
+	code, out, errs := modeRun(t, "terraform", "bad", mapEnv{})
 	if code != 1 {
-		t.Fatalf("exit=%d stdout=%q stderr=%q", code, out, e.String())
+		t.Fatalf("exit=%d stdout=%q stderr=%q", code, out, errs)
 	}
-	for _, want := range []string{
-		"[FAIL] LH-FA-TF-002", "[FAIL] LH-FA-TF-003", "[FAIL] LH-FA-TF-004", "main.tf:",
-	} {
+	for _, want := range []string{"[FAIL] LH-FA-TF-002", "[FAIL] LH-FA-TF-003", "[FAIL] LH-FA-TF-004", "main.tf:"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("Ausgabe enthält %q nicht:\n%s", want, out)
 		}
 	}
-	for _, s := range []string{out, e.String()} {
+	for _, s := range []string{out, errs} {
 		if strings.Contains(s, "GEHEIM") || strings.Contains(s, "sk-ant") {
 			t.Errorf("Wert aus variable/Secret in der Ausgabe:\n%s", s)
 		}
+	}
+}
+
+// Modus local führt Terraform NICHT aus (LH-MOD-001 vs. LH-MOD-003).
+func TestLocalModeExcludesTerraform(t *testing.T) {
+	_, out, _ := modeRun(t, "local", "good", euEnv)
+	if strings.Contains(out, "LH-FA-TF-") {
+		t.Errorf("local darf keine Terraform-Regeln ausführen:\n%s", out)
+	}
+}
+
+// Modus all = local + terraform.
+func TestAllModeRunsBoth(t *testing.T) {
+	code, out, errs := modeRun(t, "all", "good", euEnv)
+	if code != 0 {
+		t.Fatalf("exit=%d stdout=%q stderr=%q", code, out, errs)
+	}
+	for _, want := range []string{"LH-FA-LENV-001", "LH-FA-CLAUDE-001", "LH-FA-DEVCON-001", "LH-FA-TF-001"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("all enthält %s nicht:\n%s", want, out)
+		}
+	}
+	if code, _, _ := modeRun(t, "all", "bad", euEnv); code != 1 {
+		t.Errorf("all bad: exit=%d", code)
+	}
+}
+
+func TestUnknownModeIsUsageError(t *testing.T) {
+	var o, e bytes.Buffer
+	if code := run([]string{"aws"}, euEnv, "", &o, &e); code != 2 || !strings.Contains(e.String(), "usage:") {
+		t.Errorf("exit=%d stderr=%q", code, e.String())
 	}
 }
