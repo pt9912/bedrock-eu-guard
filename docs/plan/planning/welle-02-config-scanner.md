@@ -1,6 +1,6 @@
 # Welle welle-02-config-scanner: Config-Scanner (Claude Code, Devcontainer, Docker, Terraform)
 
-**Status:** open
+**Status:** done
 
 **Zielmeilenstein:** M2 — vollständiger statischer Scan
 
@@ -74,4 +74,4 @@ die in Welle 1 bewusst offen blieb (`RM-002` / v0.2).
 
 ## 8. Closure-Notiz
 
-<!-- Erst nach Welle-Abschluss füllen. Verweis auf welle-02-results.md. -->
+Abgeschlossen am 2026-11-10, siehe [`done/welle-02-results.md`](done/welle-02-results.md).
