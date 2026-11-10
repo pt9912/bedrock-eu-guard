@@ -51,3 +51,12 @@ type TerraformReader interface {
 	Find() ([]string, error)
 	Read(rel string) (*model.TerraformFile, error)
 }
+
+// AWSReader ist die einzige Tür zu AWS (ARC-007), ausschließlich lesend
+// (LH-SEC-003). Fehler sind *model.AWSError und enthalten nie CLI-Ausgabe
+// oder Credential-Werte. Weitere Methoden (Bedrock, IAM) kommen mit
+// slice-009 und slice-010.
+type AWSReader interface {
+	// Identity entspricht `aws sts get-caller-identity`.
+	Identity() (*model.AWSIdentity, error)
+}
