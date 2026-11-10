@@ -84,6 +84,9 @@ type Config struct {
 	AllowedRegions       []string
 	AllowedModelPatterns []string // reguläre Ausdrücke (SPEC-020)
 	BlockedModelPatterns []string // reguläre Ausdrücke; Vorrang vor Allow (SPEC-010)
+	AllowedAccounts      []string // leer = nicht geprüft (SPEC-020)
+	AllowedProfiles      []string // reguläre Ausdrücke (SPEC-020)
+	Mantle               MantleMode
 }
 
 // DefaultConfig liefert die Defaults (LH-NF-007: überschreibbar).
@@ -92,6 +95,9 @@ func DefaultConfig() Config {
 		AllowedRegions:       []string{"eu-central-1"},
 		AllowedModelPatterns: []string{`^eu\.`, `^anthropic\.claude-sonnet-4-6$`, `^anthropic\.claude-haiku-4-5$`},
 		BlockedModelPatterns: []string{`^us\.`, `^global\.`, `us-east-1`, `us-west-2`},
+		AllowedAccounts:      nil,
+		AllowedProfiles:      []string{`eu.*`, `eu-central-1.*`},
+		Mantle:               MantleWarn,
 	}
 }
 
