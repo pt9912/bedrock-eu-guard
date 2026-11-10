@@ -99,7 +99,15 @@ allowedModelPatterns:  ['^eu\.', '^anthropic\.claude-sonnet-4-6$', '^anthropic\.
 blockedModelPatterns:  ['^us\.', '^global\.', 'us-east-1', 'us-west-2']
 allowedProfiles:       ['eu.*', 'eu-central-1.*']
 mantle:                warn                         # warn | allow | block; LH-OFF-003
+exclude:               []                           # Glob-Muster relativ zum Scan-Root
 ```
+
+`exclude` nimmt Pfade von der Datei-Discovery aus (Claude-Projekt-Settings,
+Devcontainer, Compose, Dockerfile, Terraform): Muster nach `path.Match`,
+relativ zum Scan-Root, mit `/` getrennt; ein Muster trifft den Pfad selbst
+oder ein Verzeichnis darüber (`testdata` nimmt `testdata/a/b.tf` aus,
+`docs/*/gen` nimmt `docs/x/gen/y` aus); `**` wird nicht unterstützt. Die
+Benutzer-Settings (`~/.claude/settings.json`) sind davon nicht betroffen.
 
 Alle Felder optional; fehlende Felder fallen auf die Defaults zurück
 ([`LH-NF-007`](lastenheft.md#lh-nf-007--konfigurierbarkeit)). Block-Muster haben Vorrang (`SPEC-010`).

@@ -2,6 +2,7 @@ package app_test
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/core/app"
@@ -235,5 +236,48 @@ func TestScanAllReadersNilIsEmpty(t *testing.T) {
 	fs, err := app.Scan{}.Run(model.DefaultConfig())
 	if err != nil || len(fs) != 0 {
 		t.Fatalf("got %+v, %v", fs, err)
+	}
+}
+
+func TestScanExcludeFiltersAllDiscoveries(t *testing.T) {
+	env := func(kvs ...model.EnvEntry) *model.EnvFile { return &model.EnvFile{Env: kvs} }
+	bad := env(model.EnvEntry{Key: "AWS_REGION", Value: "us-east-1", Line: 1})
+	good := env(model.EnvEntry{Key: "AWS_REGION", Value: "eu-central-1", Line: 1})
+	r := fakeenvsource.Reader{Files: map[string]*model.EnvFile{"Dockerfile": good, "Dockerfile.bad": bad, "testdata/Dockerfile": bad}}
+	fsys := memfs.FS{"Dockerfile": "x", "Dockerfile.bad": "x", "testdata/Dockerfile": "x"}
+	tf := faketerraform.Reader{Files: map[string]*model.TerraformFile{
+		"main.tf":         {Providers: []model.AWSProvider{{Region: "eu-central-1"}}},
+		"testdata/bad.tf": {Providers: []model.AWSProvider{{Region: "us-east-1"}}},
+	}}
+	st := fakesettings.Reader{Project: map[string]*model.ClaudeSettings{
+		".claude/settings.json": {Env: []model.EnvEntry{{Key: "AWS_REGION", Value: "us-east-1"}}}}}
+
+	run := func(cfg model.Config) map[string]string {
+		fs, err := app.Scan{Settings: st, EnvSources: r, Files: fsys, Terraform: tf}.Run(cfg)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := map[string]string{}
+		for _, f := range fs {
+			if f.File != "" {
+				got[f.RuleID+"|"+f.File] = f.Severity.String()
+			}
+		}
+		return got
+	}
+	cfg := model.DefaultConfig()
+	all := run(cfg)
+	if all["LH-FA-DOCKER-002|Dockerfile.bad"] != "FAIL" || all["LH-FA-TF-002|testdata/bad.tf"] != "FAIL" || all["LH-FA-CLAUDE-002|.claude/settings.json"] != "FAIL" {
+		t.Fatalf("ohne exclude: %v", all)
+	}
+	cfg.Exclude = []string{"testdata", ".claude", "Dockerfile.bad"}
+	ex := run(cfg)
+	for k := range ex {
+		if strings.Contains(k, "testdata") || strings.HasSuffix(k, "|.claude/settings.json") || strings.Contains(k, "Dockerfile.bad") {
+			t.Errorf("ausgeschlossen, aber gemeldet: %s (%v)", k, ex)
+		}
+	}
+	if ex["LH-FA-DOCKER-002|Dockerfile"] != "PASS" || ex["LH-FA-TF-002|main.tf"] != "PASS" {
+		t.Errorf("Rest bleibt geprüft: %v", ex)
 	}
 }

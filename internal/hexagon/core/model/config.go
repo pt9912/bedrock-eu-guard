@@ -2,8 +2,10 @@ package model
 
 import (
 	"errors"
+	"path"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 // MantleMode steuert den Umgang mit Mantle (SPEC-020, LH-OFF-003).
@@ -25,6 +27,7 @@ const (
 	ConfigInvalidValue   = "INVALID_VALUE"
 	ConfigInvalidAccount = "INVALID_ACCOUNT"
 	ConfigEmptyRegions   = "EMPTY_REGIONS"
+	ConfigInvalidPattern = "INVALID_PATTERN"
 )
 
 // PartialConfig ist der gelesene Inhalt von bedrock-eu-check.yml. Ein
@@ -37,6 +40,7 @@ type PartialConfig struct {
 	BlockedModelPatterns []string
 	AllowedProfiles      []string
 	Mantle               string
+	Exclude              []string
 }
 
 // ConfigError beschreibt ein ungültiges Konfigurationsfeld. Sie zitiert
@@ -109,6 +113,16 @@ func Resolve(p PartialConfig) (Config, error) {
 			}
 		}
 	}
+	if p.Exclude != nil {
+		c.Exclude = p.Exclude
+		for i, pat := range p.Exclude {
+			if normalizeExclude(pat) == "" {
+				bad("exclude", i, ConfigInvalidValue)
+			} else if _, err := path.Match(normalizeExclude(pat), ""); err != nil {
+				bad("exclude", i, ConfigInvalidPattern)
+			}
+		}
+	}
 	if p.Mantle != "" {
 		switch m := MantleMode(p.Mantle); m {
 		case MantleWarn, MantleAllow, MantleBlock:
@@ -118,4 +132,30 @@ func Resolve(p PartialConfig) (Config, error) {
 		}
 	}
 	return c, errors.Join(errs...)
+}
+
+func normalizeExclude(pat string) string {
+	pat = strings.TrimPrefix(pat, "./")
+	return strings.Trim(pat, "/")
+}
+
+// Excluded meldet, ob rel (relativ zum Scan-Root, "/"-getrennt) von einem
+// Exclude-Muster getroffen wird. Ein Muster trifft den Pfad selbst oder
+// ein Verzeichnis darüber (Muster "testdata" nimmt "testdata/a/b.tf" aus,
+// "docs/*/gen" nimmt "docs/x/gen/y" aus). "**" wird nicht unterstützt.
+func (c Config) Excluded(rel string) bool {
+	rel = strings.TrimPrefix(strings.ReplaceAll(rel, "\\", "/"), "./")
+	parts := strings.Split(rel, "/")
+	for _, pat := range c.Exclude {
+		pat = normalizeExclude(pat)
+		if pat == "" {
+			continue
+		}
+		for i := 1; i <= len(parts); i++ {
+			if ok, err := path.Match(pat, strings.Join(parts[:i], "/")); err == nil && ok {
+				return true
+			}
+		}
+	}
+	return false
 }

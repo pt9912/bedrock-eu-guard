@@ -31,6 +31,9 @@ func (u Scan) Run(cfg model.Config) ([]model.Finding, error) {
 		sc.User = load(rules.UserSettingsPath, u.Settings.ReadUser)
 		for _, rel := range rules.ProjectSettingsFiles {
 			rel := rel
+			if cfg.Excluded(rel) {
+				continue
+			}
 			sc.Projects = append(sc.Projects, load(rel, func() (*model.ClaudeSettings, error) {
 				return u.Settings.ReadProject(rel)
 			}))
@@ -39,12 +42,12 @@ func (u Scan) Run(cfg model.Config) ([]model.Finding, error) {
 		sc.SkipClaude = true
 	}
 	if u.EnvSources != nil && u.Files != nil {
-		sc.Devcontainers = u.loadEnv(model.EnvDevcontainer, rules.DevcontainerPatterns)
-		sc.Composes = u.loadEnv(model.EnvCompose, rules.ComposePatterns)
-		sc.Dockerfiles = u.loadEnv(model.EnvDockerfile, rules.DockerfilePatterns)
+		sc.Devcontainers = u.loadEnv(cfg, model.EnvDevcontainer, rules.DevcontainerPatterns)
+		sc.Composes = u.loadEnv(cfg, model.EnvCompose, rules.ComposePatterns)
+		sc.Dockerfiles = u.loadEnv(cfg, model.EnvDockerfile, rules.DockerfilePatterns)
 	}
 	if u.Terraform != nil {
-		sc.Terraform = u.loadTerraform()
+		sc.Terraform = u.loadTerraform(cfg)
 	}
 	var out []model.Finding
 	for _, r := range rules.ScanRules() {
@@ -69,7 +72,7 @@ func load(path string, read func() (*model.ClaudeSettings, error)) rules.Setting
 
 // loadEnv sucht Dateien zu den Mustern (sortiert, ohne Duplikate) und lädt sie.
 // Ein Fehler der Dateisuche selbst wird als nicht lesbare Quelle gemeldet.
-func (u Scan) loadEnv(kind model.EnvSourceKind, patterns []string) []rules.EnvSourceFile {
+func (u Scan) loadEnv(cfg model.Config, kind model.EnvSourceKind, patterns []string) []rules.EnvSourceFile {
 	var out []rules.EnvSourceFile
 	seen := map[string]bool{}
 	var rels []string
@@ -81,7 +84,7 @@ func (u Scan) loadEnv(kind model.EnvSourceKind, patterns []string) []rules.EnvSo
 			continue
 		}
 		for _, rel := range found {
-			if !seen[rel] {
+			if !seen[rel] && !cfg.Excluded(rel) {
 				seen[rel] = true
 				rels = append(rels, rel)
 			}
@@ -103,7 +106,7 @@ func (u Scan) loadEnv(kind model.EnvSourceKind, patterns []string) []rules.EnvSo
 	return out
 }
 
-func (u Scan) loadTerraform() rules.TerraformScan {
+func (u Scan) loadTerraform(cfg model.Config) rules.TerraformScan {
 	t := rules.TerraformScan{Searched: true}
 	rels, err := u.Terraform.Find()
 	if err != nil {
@@ -116,6 +119,9 @@ func (u Scan) loadTerraform() rules.TerraformScan {
 	}
 	sort.Strings(rels)
 	for _, rel := range rels {
+		if cfg.Excluded(rel) {
+			continue
+		}
 		f, err := u.Terraform.Read(rel)
 		st := rules.TerraformFileState{Path: rel, F: f}
 		if err != nil {
