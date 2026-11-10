@@ -10,18 +10,20 @@ Reihenfolge von Terminen. Die Wellen bilden die Versions-Stufen
 
 ## Aktuelle Welle
 
-Keine aktive Welle. welle-01, welle-02 und welle-03 sind abgeschlossen
-(2026-11-10, siehe [`../done/welle-01-results.md`](../done/welle-01-results.md),
-[`../done/welle-02-results.md`](../done/welle-02-results.md) und
-[`../done/welle-03-results.md`](../done/welle-03-results.md)); als Nächstes steht
-welle-04-output-ci an (Plan folgt).
+**Welle-ID:** welle-05-release
+**Start:** 2026-11-10
+**Plan:** [`../welle-05-release.md`](../welle-05-release.md) (Slices 014 bis 019: Version, Qualitätsgates, Docker-Image, Devcontainer-Feature, Nutzerdoku und Release, `exclude`)
+
+welle-01 bis welle-04 sind abgeschlossen (2026-11-10, siehe
+[`../done/welle-01-results.md`](../done/welle-01-results.md),
+[`../done/welle-02-results.md`](../done/welle-02-results.md),
+[`../done/welle-03-results.md`](../done/welle-03-results.md) und
+[`../done/welle-04-results.md`](../done/welle-04-results.md)). Tag und Veröffentlichung
+von Release 1.0 gibt es nur nach ausdrücklicher Freigabe beider Nutzer.
 
 ## Nächste Wellen
 
-| Welle | Version (LH-RM) | Trigger | Wichtigste Slices | Aufwand |
-|---|---|---|---|---|
-| welle-04-output-ci | v0.4 (`RM-004`) | Welle 3 done | JSON-/SARIF-Ausgabe, CI-Modus (`REP-002/003`, `MOD-005`) | M |
-| welle-05-release | v1.0 (`RM-005`) | Welle 4 done | Doku, Docker-Image, Devcontainer-Feature, Release-Artefakte (`QA-004`, `TECH-004/005`) | M |
+(keine weiteren Wellen geplant; Folgeslices der Qualitätsrunde siehe Plan von welle-05)
 
 ## Meilensteine
 
@@ -31,7 +33,7 @@ welle-04-output-ci an (Plan folgt).
 | M1 — erstes lauffähiges Tool | welle-01 | `bedrock-eu-check local` liefert PASS/WARN/FAIL + Exit-Codes | erreicht (2026-11-10) |
 | M2 — vollständiger statischer Scan | welle-02 | Config/Container/Terraform abgedeckt | erreicht (2026-11-10) |
 | M3 — AWS-Live-Checks | welle-03 | STS/Bedrock/IAM read-only | erreicht (2026-11-10) |
-| M4 — CI-fähig | welle-04 | SARIF + `--ci` + Exit-Code 1 bei FAIL | offen |
+| M4 — CI-fähig | welle-04 | SARIF + `--ci` + Exit-Code 1 bei FAIL | erreicht (2026-11-10) |
 | M5 — Release 1.0 | welle-05 | Docker-Image + Doku + Tests grün | offen |
 
 ## Abhängigkeitsgraph
@@ -49,6 +51,7 @@ flowchart LR
 - welle-01-lokaler-env-check, abgeschlossen 2026-11-10, siehe [`done/welle-01-results.md`](../done/welle-01-results.md).
 - welle-02-config-scanner, abgeschlossen 2026-11-10, siehe [`done/welle-02-results.md`](../done/welle-02-results.md).
 - welle-03-aws-checks, abgeschlossen 2026-11-10, siehe [`done/welle-03-results.md`](../done/welle-03-results.md).
+- welle-04-output-ci, abgeschlossen 2026-11-10, siehe [`done/welle-04-results.md`](../done/welle-04-results.md).
 
 ## Historische Trigger-Verschiebungen
 
