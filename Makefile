@@ -20,7 +20,7 @@ GO_NET = docker run --rm -u $(shell id -u):$(shell id -g) \
 	-e HOME=/tmp -e GOCACHE=/src/.tmp/gocache -e GOMODCACHE=/src/.tmp/gomod \
 	-e GOFLAGS=-mod=mod -v "$(CURDIR):/src" -w /src $(GO_IMAGE)
 
-.PHONY: help gates lint test build verify-clean deps deps-verify self-check image image-test
+.PHONY: help gates lint test build verify-clean deps deps-verify self-check image image-test feature-test
 help: ## Targets anzeigen
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  %-16s %s\n", $$1, $$2}'
@@ -62,6 +62,9 @@ image: ## Docker-Images bauen (slim, full); braucht Netz zum Ziehen der Basis-Im
 image-test: image ## Smoke-Tests der Images (Laufzeit ohne Netz); nicht Teil von make gates
 	tools/image-smoke.sh $(IMAGE):slim slim
 	tools/image-smoke.sh $(IMAGE):full full
+
+feature-test: ## Devcontainer-Feature gegen ein lokal gebautes Release testen (Docker, ohne Netz zur Laufzeit)
+	GO_IMAGE=$(GO_IMAGE) tools/feature-test.sh
 
 deps: ## go mod tidy + vendor/ neu erzeugen (mit Netz, nicht Teil der Gates)
 	@mkdir -p .tmp/gocache .tmp/gomod

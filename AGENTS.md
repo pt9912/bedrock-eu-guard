@@ -137,6 +137,7 @@ Nur real existierende Targets (keine halluzinierten Gates, Modul 13):
 | `make self-check` | `bedrock-eu-check local` und `terraform` gegen das eigene Repo (kontrollierte Umgebung, `bedrock-eu-check.yml` im Root); Exit 0 Pflicht |
 | `make image`     | Docker-Images `slim` und `full` bauen (mit Netz, nicht Teil der Gates)                 |
 | `make image-test` | Images bauen und Smoke-Tests (`tools/image-smoke.sh`, Laufzeit ohne Netz; CI-Job `image`) |
+| `make feature-test` | Devcontainer-Feature gegen ein lokal gebautes Release testen (Docker, Laufzeit ohne Netz; CI-Job `image`) |
 
 `make coverage-gate` entsteht in einem späteren Slice; es wird erst hier
 eingetragen, wenn es läuft.
