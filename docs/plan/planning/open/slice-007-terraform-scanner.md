@@ -34,7 +34,7 @@ Modell-IDs: aus allen String-Literalen nur Tokens extrahieren, die auf `(us|eu|a
 
 ## 3. Verhalten je Regel
 
-Datei vorhanden, aber kaputt → `FAIL` `FILE_INVALID`/`FILE_UNREADABLE` unter `LH-FA-TF-001`, Scan läuft weiter. Pro Datei und Regel höchstens ein Finding (Zeile des ersten Belegs), außer `LH-FA-TF-003` (ein Finding je riskantem Statement).
+Datei vorhanden, aber kaputt → `FAIL` `FILE_INVALID`/`FILE_UNREADABLE` unter [`LH-FA-TF-001`](../../../../spec/lastenheft.md#lh-fa-tf-001--terraform-dateien-finden), Scan läuft weiter. Pro Datei und Regel höchstens ein Finding (Zeile des ersten Belegs), außer [`LH-FA-TF-003`](../../../../spec/lastenheft.md#lh-fa-tf-003--bedrock-iam-policies-prüfen) (ein Finding je riskantem Statement).
 
 | Regel | Verhalten |
 |---|---|
