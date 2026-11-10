@@ -21,7 +21,7 @@ der Schlüssel `model` und die `env`-Einträge `ANTHROPIC_MODEL`,
 
 ## 2. Verträge
 
-- `app.CheckAWS` bekommt das optionale Feld `Settings` (`driven.ClaudeSettingsReader`, derselbe Port wie in `app.Scan`). `nil` = Verhalten wie bisher (nur Umgebung). Fehlende oder kaputte Settings-Dateien werden im `aws`-Modus nicht gemeldet (das tut `local`); ausgeschlossene Pfade (`exclude`, [`slice-019`](slice-019-scan-exclude.md)) zählen nicht.
+- `app.CheckAWS` bekommt das optionale Feld `Settings` (`driven.ClaudeSettingsReader`, derselbe Port wie in `app.Scan`). `nil` = Verhalten wie bisher (nur Umgebung). Fehlende oder kaputte Settings-Dateien werden im `aws`-Modus nicht gemeldet (das tut `local`); ausgeschlossene Pfade (`exclude`, [`slice-019`](../done/slice-019-scan-exclude.md)) zählen nicht.
 - `rules.SettingsModel{Source, Var, ID}` (Quelle = Dateipfad, `Var` = `model` bzw. Variablenname); `rules.AWSScan.Settings`. Secret-Einträge und leere Werte werden übergangen.
 - Zusammenführung: Umgebung zuerst, dann Settings; gleiche Variable mit gleicher ID nur einmal, abweichende IDs zusätzlich geprüft (beide sind potenziell wirksam).
 - Findings aus Settings tragen `File` = Quelle und nennen die Herkunft in der Meldung („… (in .claude/settings.json)“); die Zeile ist unbekannt (0).
