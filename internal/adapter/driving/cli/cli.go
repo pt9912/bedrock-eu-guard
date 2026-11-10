@@ -15,6 +15,7 @@ import (
 	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/envsource"
 	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/fs"
 	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/report"
+	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/terraform"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/core/app"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/core/model"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/port/driven"
@@ -61,6 +62,7 @@ func run(args []string, env driven.Environment, home string, stdout, stderr io.W
 			Settings:   claudesettings.New(opts.root, home),
 			EnvSources: envsource.New(opts.root),
 			Files:      fs.New(opts.root),
+			Terraform:  terraform.New(opts.root),
 		}.Run(cfg)
 		findings = append(findings, files...)
 	}

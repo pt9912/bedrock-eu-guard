@@ -24,7 +24,7 @@ func TestUsageErrors(t *testing.T) {
 
 func TestLocalPrintsSummary(t *testing.T) {
 	var out, errb bytes.Buffer
-	run([]string{"local"}, mapEnv{}, "", &out, &errb)
+	run([]string{"local", "--root", t.TempDir()}, mapEnv{}, "", &out, &errb)
 	if !strings.Contains(out.String(), "Summary:") {
 		t.Errorf("stdout=%q stderr=%q", out.String(), errb.String())
 	}
@@ -38,7 +38,7 @@ func TestAcceptanceCriticalMisconfiguration(t *testing.T) {
 		"ANTHROPIC_API_KEY": secret,
 	}
 	var out, errb bytes.Buffer
-	if code := run([]string{"local"}, env, "", &out, &errb); code != 1 {
+	if code := run([]string{"local", "--root", t.TempDir()}, env, "", &out, &errb); code != 1 {
 		t.Errorf("exit = %d, want 1; stdout=%q stderr=%q", code, out.String(), errb.String())
 	}
 	if n := strings.Count(out.String(), "[FAIL]"); n < 2 {
@@ -56,7 +56,7 @@ func TestAcceptanceEUMinimalEnvironment(t *testing.T) {
 		"CLAUDE_CODE_USE_BEDROCK": "1",
 	}
 	var out, errb bytes.Buffer
-	if code := run([]string{"local"}, env, "", &out, &errb); code != 0 {
+	if code := run([]string{"local", "--root", t.TempDir()}, env, "", &out, &errb); code != 0 {
 		t.Errorf("exit = %d, want 0; stdout=%q stderr=%q", code, out.String(), errb.String())
 	}
 	if strings.Contains(out.String(), "[FAIL]") {
@@ -213,6 +213,43 @@ func TestLocalEnvSourcesBad(t *testing.T) {
 	for _, s := range []string{out, e.String()} {
 		if strings.Contains(s, "GEHEIM") || strings.Contains(s, "sk-ant") {
 			t.Errorf("Secret-Wert in der Ausgabe:\n%s", s)
+		}
+	}
+}
+
+// slice-007: Terraform — Positivbeispiel.
+func TestLocalTerraformGood(t *testing.T) {
+	code, out, errs := localWith(t, euEnv)
+	if code != 0 || strings.Contains(out, "[FAIL]") {
+		t.Fatalf("exit=%d stdout=%q stderr=%q", code, out, errs)
+	}
+	for _, want := range []string{"LH-FA-TF-001", "LH-FA-TF-002", "LH-FA-TF-003", "LH-FA-TF-004"} {
+		if !strings.Contains(out, "[PASS] "+want) {
+			t.Errorf("kein PASS für %s:\n%s", want, out)
+		}
+	}
+}
+
+// Negativbeispiel: US-Region, Bedrock-Wildcard auf "*", blockierte Modell-ID → FAIL
+// mit Datei und Zeile, Exit 1, kein Wert aus variable/tfvars (LH-NF-004).
+func TestLocalTerraformBad(t *testing.T) {
+	args, home := scanArgs("testdata/bad")
+	var o, e bytes.Buffer
+	code := run(args, euEnv, home, &o, &e)
+	out := o.String()
+	if code != 1 {
+		t.Fatalf("exit=%d stdout=%q stderr=%q", code, out, e.String())
+	}
+	for _, want := range []string{
+		"[FAIL] LH-FA-TF-002", "[FAIL] LH-FA-TF-003", "[FAIL] LH-FA-TF-004", "main.tf:",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("Ausgabe enthält %q nicht:\n%s", want, out)
+		}
+	}
+	for _, s := range []string{out, e.String()} {
+		if strings.Contains(s, "GEHEIM") || strings.Contains(s, "sk-ant") {
+			t.Errorf("Wert aus variable/Secret in der Ausgabe:\n%s", s)
 		}
 	}
 }
