@@ -23,6 +23,9 @@ alle zusätzlich konfigurierten Modell-IDs erlaubt sind
 > bereits in slice-001 geliefert. Dieser Slice deckt stattdessen
 > [`LH-FA-LENV-005`](../../../../spec/lastenheft.md#lh-fa-lenv-005--prüfung-von-claude_code_use_mantle) ab.
 
+**Nicht-Ziel:** Das Config-Feld `mantle: warn|allow|block` bleibt für einen
+späteren Slice mit Config-Adapter (Welle 2) offen; hier gilt fest `warn`.
+
 ## 2. Definition of Done
 
 - [ ] Regel [`LH-FA-LENV-005`](../../../../spec/lastenheft.md#lh-fa-lenv-005--prüfung-von-claude_code_use_mantle): Mantle nicht gesetzt → kein Befund; aktiv ohne Modellvariablen → WARN; aktiv und alle gesetzten Modell-IDs `allowed` → PASS; blockierte ID → FAIL über LENV-006.
