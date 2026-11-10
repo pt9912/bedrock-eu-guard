@@ -132,6 +132,8 @@ Nur real existierende Targets (keine halluzinierten Gates, Modul 13):
 | `make build`     | Binary `bin/bedrock-eu-check` bauen                                |
 | `make gates`     | alle lauffähigen Gates: `doc-check`, `lint`, `test`                |
 | `make verify-clean` | `make gates` im frischen `git worktree` des committeten HEAD     |
+| `make deps`      | `go mod tidy` + `vendor/` neu erzeugen (mit Netz, nicht Teil der Gates, [`ADR-0004`](docs/plan/adr/0004-abhaengigkeiten-und-offline-gates.md)) |
+| `make deps-verify` | `go mod verify` + `vendor/` entspricht Upstream (mit Netz; CI-Job nur bei Änderungen an `vendor/`, `go.mod`, `go.sum`) |
 `make coverage-gate` und `make self-check` entstehen in späteren Slices;
 sie werden erst hier eingetragen, wenn sie laufen.
 werden erst hier eingetragen, wenn sie laufen.
