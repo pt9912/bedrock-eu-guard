@@ -298,7 +298,12 @@ func TestUnknownModeIsUsageError(t *testing.T) {
 }
 
 const (
-	awsOK = `echo '{"UserId":"AIDAEXAMPLE","Account":"123456789012","Arn":"arn:aws:iam::123456789012:user/tester"}'`
+	awsOK = `case "$1 $2" in
+  "sts get-caller-identity") echo '{"UserId":"AIDAEXAMPLE","Account":"123456789012","Arn":"arn:aws:iam::123456789012:user/tester"}' ;;
+  "bedrock list-inference-profiles") echo '{"inferenceProfileSummaries":[{"inferenceProfileId":"eu.anthropic.claude-sonnet-4-6","inferenceProfileName":"EU Sonnet","type":"SYSTEM_DEFINED"},{"inferenceProfileId":"us.anthropic.claude-sonnet-4-6","inferenceProfileName":"US Sonnet","type":"SYSTEM_DEFINED"}]}' ;;
+  "bedrock list-foundation-models") echo '{"modelSummaries":[{"modelId":"anthropic.claude-sonnet-4-6"}]}' ;;
+  *) echo "unerwarteter Aufruf" >&2; exit 2 ;;
+esac`
 	// stderr enthält absichtlich Text, der nie in der Ausgabe erscheinen darf.
 	awsNoCreds = `echo 'Unable to locate credentials LEAK-STDERR-TEXT' >&2; exit 255`
 )
@@ -374,5 +379,36 @@ func TestAWSBinaryMissing(t *testing.T) {
 	code, out, errs := modeRun(t, "all", "good", euEnv)
 	if code != 2 || !strings.Contains(errs, "AWS_CLI_MISSING") || !strings.Contains(out, "LH-FA-LENV-001") {
 		t.Errorf("all: exit=%d stdout=%q stderr=%q", code, out, errs)
+	}
+}
+
+// slice-009: verwendete Modelle (Umgebung) gegen Allowlist und Verfügbarkeit.
+func TestAWSModeBedrockProfiles(t *testing.T) {
+	useFakeAWS(t, awsOK)
+
+	// EU-Profil, verfügbar, nur das US-Profil ist sichtbar → WARN, Exit 0.
+	code, out, errs := awsRun(t, mapEnv{"AWS_PROFILE": "dev", "ANTHROPIC_MODEL": "eu.anthropic.claude-sonnet-4-6"})
+	if code != 0 || !strings.Contains(out, "LH-FA-BEDROCK-001") || !strings.Contains(out, "[WARN] LH-FA-BEDROCK-002") ||
+		!strings.Contains(out, "[PASS] LH-FA-BEDROCK-003") || !strings.Contains(out, "[PASS] LH-FA-BEDROCK-004") {
+		t.Errorf("exit=%d stdout=%q stderr=%q", code, out, errs)
+	}
+
+	// Verwendetes US-Profil → FAIL, Exit 1.
+	code, out, _ = awsRun(t, mapEnv{"AWS_PROFILE": "dev", "ANTHROPIC_MODEL": "us.anthropic.claude-sonnet-4-6"})
+	if code != 1 || !strings.Contains(out, "[FAIL] LH-FA-BEDROCK-002") {
+		t.Errorf("US-Profil: exit=%d stdout=%q", code, out)
+	}
+}
+
+func TestAWSModeBedrockErrorsAreFindings(t *testing.T) {
+	useFakeAWS(t, `case "$1" in sts) echo '{"Account":"123456789012","Arn":"a","UserId":"u"}' ;; *) echo 'AccessDeniedException LEAK-STDERR-TEXT' >&2; exit 255 ;; esac`)
+	code, out, errs := awsRun(t, mapEnv{"AWS_PROFILE": "dev"})
+	if code != 1 || !strings.Contains(out, "[FAIL] LH-FA-BEDROCK-001") || !strings.Contains(out, "AWS_ACCESS_DENIED") {
+		t.Fatalf("exit=%d stdout=%q stderr=%q", code, out, errs)
+	}
+	for _, s := range []string{out, errs} {
+		if strings.Contains(s, "LEAK-STDERR-TEXT") {
+			t.Errorf("stderr-Text in der Ausgabe:\n%s", s)
+		}
 	}
 }

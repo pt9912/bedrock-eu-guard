@@ -71,7 +71,8 @@ func run(args []string, env driven.Environment, home string, stdout, stderr io.W
 	}
 	if err == nil && (mode == "aws" || mode == "all") {
 		var aws []model.Finding
-		aws, err = app.CheckAWS{AWS: awscli.New(awsBinary, cfg.AllowedRegions[0])}.Run(env, cfg)
+		reader := awscli.New(awsBinary, cfg.AllowedRegions[0])
+		aws, err = app.CheckAWS{AWS: reader, Bedrock: reader}.Run(env, cfg)
 		findings = append(findings, aws...)
 	}
 	sort.SliceStable(findings, func(i, j int) bool { return findings[i].RuleID < findings[j].RuleID })
