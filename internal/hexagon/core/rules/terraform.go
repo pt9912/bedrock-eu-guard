@@ -2,7 +2,6 @@ package rules
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/core/model"
 )
@@ -119,78 +118,14 @@ func CheckTerraformRegion(sc ScanContext, cfg model.Config) []model.Finding {
 	return out
 }
 
-func hasWildcardAction(s model.IAMStatement) bool {
-	for _, a := range s.Actions {
-		l := strings.ToLower(a)
-		if l == "*" || l == "bedrock:*" || strings.HasPrefix(l, "bedrock:invokemodel") {
-			return true
-		}
-	}
-	return false
-}
-
-func touchesBedrock(s model.IAMStatement) bool {
-	for _, a := range s.Actions {
-		l := strings.ToLower(a)
-		if l == "*" || strings.HasPrefix(l, "bedrock:") {
-			return true
-		}
-	}
-	return false
-}
-
-func hasStarResource(s model.IAMStatement) bool {
-	for _, r := range s.Resources {
-		if r == "*" {
-			return true
-		}
-	}
-	return false
-}
-
-// CheckTerraformIAM prüft Bedrock-IAM-Statements (LH-FA-TF-003): Allow mit
-// bedrock:*/InvokeModel* (oder *) auf Resource "*" ist FAIL ohne und WARN
-// mit Region-Condition; eng eingeschränkte Statements ergeben je Datei ein
-// PASS (WARN bei nicht auflösbaren Einträgen).
+// CheckTerraformIAM prüft Bedrock-IAM-Statements (LH-FA-TF-003) mit der
+// gemeinsamen Bewertung assessBedrockStatements.
 func CheckTerraformIAM(sc ScanContext, _ model.Config) []model.Finding {
 	var out []model.Finding
 	for _, f := range tfFiles(sc) {
-		bedrock, risky, dynamic := 0, 0, 0
-		var dynLine int
-		for _, s := range f.F.Statements {
-			if !strings.EqualFold(s.Effect, "Allow") || !touchesBedrock(s) {
-				continue
-			}
-			bedrock++
-			if hasWildcardAction(s) && hasStarResource(s) {
-				risky++
-				fd := model.Finding{RuleID: IDTerraformIAM, Subject: f.Path, File: f.Path, Line: s.Line}
-				if s.HasRegionCondition {
-					fd.Severity, fd.Reason = model.WARN, model.ReasonIAMWildcardCond
-					fd.Message = "Bedrock-Rechte auf \"*\" mit Region-Condition; Umfang prüfen"
-				} else {
-					fd.Severity, fd.Reason = model.FAIL, model.ReasonIAMWildcard
-					fd.Message = "Bedrock-Rechte (bedrock:*/InvokeModel) auf \"*\" ohne Region-Condition"
-					fd.Recommendation = "Resource einschränken oder aws:RequestedRegion-Condition setzen"
-				}
-				out = append(out, fd)
-			} else if s.Dynamic {
-				dynamic++
-				if dynLine == 0 {
-					dynLine = s.Line
-				}
-			}
-		}
-		switch {
-		case bedrock == 0 || risky > 0:
-			// nichts oder bereits gemeldet
-		case dynamic > 0:
-			out = append(out, model.Finding{RuleID: IDTerraformIAM, Severity: model.WARN, Reason: model.ReasonIAMDynamic,
-				Subject: f.Path, File: f.Path, Line: dynLine,
-				Message: "Bedrock-Policy enthält nicht auflösbare Einträge; manuell prüfen"})
-		default:
-			out = append(out, model.Finding{RuleID: IDTerraformIAM, Severity: model.PASS, Reason: model.ReasonOK,
-				Subject: f.Path, File: f.Path, Message: "Bedrock-Policies eng eingeschränkt"})
+		for _, fd := range assessBedrockStatements(f.F.Statements) {
+			fd.RuleID, fd.Subject, fd.File = IDTerraformIAM, f.Path, f.Path
+			out = append(out, fd)
 		}
 	}
 	return out
