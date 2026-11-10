@@ -21,7 +21,7 @@ wendet das auf `ANTHROPIC_DEFAULT_SONNET_MODEL`, `..._HAIKU_MODEL` und
 
 - [x] `model`: `Config` um `AllowedModelPatterns`/`BlockedModelPatterns` mit den Defaults aus [`SPEC-020`](../../../../spec/spezifikation.md#spec-020--konfigurationsschema-bedrock-eu-checkyml); Klassifikationstyp `allowed|blocked|unclassified`.
 - [x] `rules`: `Classify(id, cfg)` — Block hat Vorrang vor Allow, sonst `unclassified` (WARN).
-- [~] Regel [`LH-FA-LENV-006`](../../../../spec/lastenheft.md#lh-fa-lenv-006--prüfung-von-claude-default-modellvariablen): FAIL bei `us.`/`global.`-Präfix oder nicht erlaubter Region in der ID; ungesetzte Variable erzeugt kein FAIL. **Teilweise erfüllt:** Die Default-Blockmuster decken `us.`, `global.`, `us-east-1` und `us-west-2` ab ([`SPEC-020`](../../../../spec/spezifikation.md#spec-020--konfigurationsschema-bedrock-eu-checkyml)). Eine ID mit einer anderen nicht erlaubten Region (z. B. `ap-southeast-1`) wird nur als `unclassified` (WARN) gemeldet; die allgemeine Regionserkennung aus der ID gegen `allowedRegions` ist offen (Folgeaufgabe).
+- [x] Regel [`LH-FA-LENV-006`](../../../../spec/lastenheft.md#lh-fa-lenv-006--prüfung-von-claude-default-modellvariablen): FAIL bei `us.`/`global.`-Präfix oder nicht erlaubter Region in der ID; ungesetzte Variable erzeugt kein FAIL. Die allgemeine Regionserkennung aus der ID gegen `allowedRegions` kam nachträglich mit PR #10 ([`SPEC-010`](../../../../spec/spezifikation.md#spec-010--klassifikation-von-modell-profil-ids) Schritt 2).
 - [x] Unit-Tests je Zweig (blocked, allowed, unclassified, Block-vor-Allow, ungesetzt).
 - [x] `make gates` grün.
 - [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
@@ -52,7 +52,7 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 **Abgeschlossen:** 2026-11-10 (PR #5, w1).
 
 - **Funktioniert:** `Classify` (Block vor Allow, Default-Muster aus der Spec) und LENV-006 mit Tests; ungültige Regex werden übersprungen.
-- **Teilweise erfüllt:** LENV-006 „andere nicht erlaubte Regionen“ nur über die Default-Muster; allgemeine Region-Extraktion aus der ID gegen `allowedRegions` ist Folgeaufgabe.
+- **Nachgeliefert (PR #10):** Die allgemeine Region-Extraktion aus der ID gegen `allowedRegions` schließt die Lücke bei LENV-006; [`SPEC-010`](../../../../spec/spezifikation.md#spec-010--klassifikation-von-modell-profil-ids) ist um Schritt 2 ergänzt.
 - **Offen/Nicht-Ziel:** Muster aus einer Config-Datei (Welle 2) brauchen eigene Fehlerbehandlung für ungültige Regex.
 - **Steering-Loop:** siehe slice-001.
 
