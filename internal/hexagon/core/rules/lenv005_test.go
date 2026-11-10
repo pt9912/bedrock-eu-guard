@@ -52,3 +52,30 @@ func TestCheckMantle(t *testing.T) {
 		})
 	}
 }
+
+func TestMantleConfigModes(t *testing.T) {
+	env := fakeenv.Env{"CLAUDE_CODE_USE_MANTLE": "1"}
+	cases := []struct {
+		mode model.MantleMode
+		sev  model.Severity
+		rsn  string
+	}{
+		{model.MantleWarn, model.WARN, model.ReasonMantleUnverified},
+		{"", model.WARN, model.ReasonMantleUnverified},
+		{model.MantleAllow, model.PASS, model.ReasonMantleAllowed},
+		{model.MantleBlock, model.FAIL, model.ReasonMantleBlocked},
+	}
+	for _, c := range cases {
+		cfg := model.DefaultConfig()
+		cfg.Mantle = c.mode
+		fs := rules.CheckMantle(env, cfg)
+		if len(fs) != 1 || fs[0].Severity != c.sev || fs[0].Reason != c.rsn {
+			t.Errorf("mode %q: %+v", c.mode, fs)
+		}
+	}
+	cfg := model.DefaultConfig()
+	cfg.Mantle = model.MantleBlock
+	if fs := rules.CheckMantle(fakeenv.Env{}, cfg); len(fs) != 0 {
+		t.Errorf("Mantle nicht aktiv: %+v", fs)
+	}
+}

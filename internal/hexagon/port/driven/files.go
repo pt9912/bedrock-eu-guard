@@ -23,3 +23,11 @@ type ClaudeSettingsReader interface {
 	// z. B. ".claude/settings.json".
 	ReadProject(rel string) (*model.ClaudeSettings, error)
 }
+
+// ConfigLoader liefert den Inhalt von bedrock-eu-check.yml.
+//
+// Vertrag: Datei fehlt → (nil, nil) (Defaults gelten); vorhanden, aber
+// unlesbar oder ungültig (YAML, unbekannte Felder) → (nil, *model.FileError).
+type ConfigLoader interface {
+	Load() (*model.PartialConfig, error)
+}
