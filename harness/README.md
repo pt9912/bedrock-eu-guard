@@ -55,6 +55,8 @@ kanonische Quelle**, und diese Datei wird angepasst.
 | `make verify-clean` | `make gates` im frischen `git worktree` des committeten HEAD (fängt ungetrackte/ignorierte Dateien ab) | Handoff-Gate; CI führt `make gates` im frischen Checkout aus (`.github/workflows/gates.yml`) |
 | `make deps` | `go mod tidy` + `vendor/` neu erzeugen (mit Netz, nicht Teil der Gates) | [`ADR-0004`](../docs/plan/adr/0004-abhaengigkeiten-und-offline-gates.md): `vendor/` nie von Hand editieren |
 | `make deps-verify` | `go mod verify` + `vendor/` entspricht Upstream (mit Netz) | CI-Job `deps-verify`, nur bei Änderungen an `vendor/`, `go.mod`, `go.sum` |
+| `make image` | Docker-Images `slim` und `full` bauen (Basis-Images per Digest) | braucht Netz zum Ziehen der Basen; nicht Teil von `make gates` |
+| `make image-test` | `make image` plus Smoke-Tests (`tools/image-smoke.sh`: kein Root, `version`, `local` gut/schlecht, `terraform --format json`, `aws` je Variante) | CI-Job `image`, nur bei Änderungen, die das Image betreffen |
 
 **Aktueller Lauf-Status:** lokal `make gates` / `make help`; in CI das
 Pipeline-Ergebnis (Rang höher als diese Datei).

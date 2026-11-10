@@ -20,7 +20,7 @@ GO_NET = docker run --rm -u $(shell id -u):$(shell id -g) \
 	-e HOME=/tmp -e GOCACHE=/src/.tmp/gocache -e GOMODCACHE=/src/.tmp/gomod \
 	-e GOFLAGS=-mod=mod -v "$(CURDIR):/src" -w /src $(GO_IMAGE)
 
-.PHONY: help gates lint test build verify-clean deps deps-verify
+.PHONY: help gates lint test build verify-clean deps deps-verify image image-test
 help: ## Targets anzeigen
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  %-16s %s\n", $$1, $$2}'
@@ -45,6 +45,16 @@ LDFLAGS  = -s -w -X $(CLI_PKG).version=$(VERSION) -X $(CLI_PKG).commit=$(COMMIT)
 build: ## Binary nach bin/bedrock-eu-check bauen (VERSION=..., COMMIT=...)
 	@mkdir -p .tmp/gocache bin
 	$(GO_RUN) env CGO_ENABLED=0 go build -trimpath -buildvcs=false -ldflags "$(LDFLAGS)" -o bin/bedrock-eu-check ./cmd/bedrock-eu-check
+
+IMAGE ?= bedrock-eu-check
+
+image: ## Docker-Images bauen (slim, full); braucht Netz zum Ziehen der Basis-Images
+	docker build --target slim --build-arg VERSION=$(VERSION) --build-arg COMMIT=$(COMMIT) -t $(IMAGE):slim .
+	docker build --target full --build-arg VERSION=$(VERSION) --build-arg COMMIT=$(COMMIT) -t $(IMAGE):full .
+
+image-test: image ## Smoke-Tests der Images (Laufzeit ohne Netz); nicht Teil von make gates
+	tools/image-smoke.sh $(IMAGE):slim slim
+	tools/image-smoke.sh $(IMAGE):full full
 
 deps: ## go mod tidy + vendor/ neu erzeugen (mit Netz, nicht Teil der Gates)
 	@mkdir -p .tmp/gocache .tmp/gomod
