@@ -23,7 +23,7 @@ import (
 
 const exitToolError = 2
 
-const usage = "usage: bedrock-eu-check local [--root DIR] [--config FILE]\n"
+const usage = "usage: bedrock-eu-check (local|terraform|all) [--root DIR] [--config FILE]\n"
 
 // Run führt die CLI aus und liefert den Prozess-Exit-Code.
 func Run(args []string, stdout, stderr io.Writer) int {
@@ -32,10 +32,11 @@ func Run(args []string, stdout, stderr io.Writer) int {
 }
 
 func run(args []string, env driven.Environment, home string, stdout, stderr io.Writer) int {
-	if len(args) == 0 || args[0] != "local" {
+	if len(args) == 0 || (args[0] != "local" && args[0] != "terraform" && args[0] != "all") {
 		fmt.Fprint(stderr, usage)
 		return exitToolError
 	}
+	mode := args[0]
 	opts, ok := parseOptions(args[1:])
 	if !ok {
 		fmt.Fprint(stderr, usage)
@@ -54,20 +55,34 @@ func run(args []string, env driven.Environment, home string, stdout, stderr io.W
 	if err != nil {
 		return finish(nil, err, stdout, stderr)
 	}
-	// Modus local = Env-Regeln + Datei-Regeln (offline, SPEC-002).
-	findings, err := app.CheckLocal{}.Run(env, cfg)
-	if err == nil {
-		var files []model.Finding
-		files, err = app.Scan{
-			Settings:   claudesettings.New(opts.root, home),
-			EnvSources: envsource.New(opts.root),
-			Files:      fs.New(opts.root),
-			Terraform:  terraform.New(opts.root),
-		}.Run(cfg)
-		findings = append(findings, files...)
+	var findings []model.Finding
+	if mode == "local" || mode == "all" {
+		localFindings, lerr := runLocal(env, cfg, opts, home)
+		findings, err = append(findings, localFindings...), lerr
+	}
+	if err == nil && (mode == "terraform" || mode == "all") {
+		var tf []model.Finding
+		tf, err = app.Scan{Terraform: terraform.New(opts.root)}.Run(cfg)
+		findings = append(findings, tf...)
 	}
 	sort.SliceStable(findings, func(i, j int) bool { return findings[i].RuleID < findings[j].RuleID })
 	return finish(findings, err, stdout, stderr)
+}
+
+// runLocal ist der Modus local (LH-MOD-001): Env, Claude-Settings,
+// Devcontainer, Compose und Dockerfile — offline. Terraform gehört zum Modus
+// terraform (LH-MOD-003).
+func runLocal(env driven.Environment, cfg model.Config, opts options, home string) ([]model.Finding, error) {
+	findings, err := app.CheckLocal{}.Run(env, cfg)
+	if err != nil {
+		return nil, err
+	}
+	files, err := app.Scan{
+		Settings:   claudesettings.New(opts.root, home),
+		EnvSources: envsource.New(opts.root),
+		Files:      fs.New(opts.root),
+	}.Run(cfg)
+	return append(findings, files...), err
 }
 
 type options struct{ root, config string }
