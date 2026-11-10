@@ -1,7 +1,6 @@
 # Slice slice-021: „Verwendet“ in den Bedrock-Regeln auch aus Claude-Settings
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** Qualitätsrunde nach welle-04-output-ci (Folgepunkt aus slice-009).
 
@@ -39,10 +38,10 @@ der Schlüssel `model` und die `env`-Einträge `ANTHROPIC_MODEL`,
 
 ## 4. Definition of Done
 
-- [ ] Kern (w1): `CheckAWS.Settings`, `settingsModels`, Zusammenführung in `usedModels`, Herkunft in `File`/Meldung, Tests (alle drei Regeln, Dedup, Exclude, Secret-Einträge, Reader ohne/mit Fehler).
-- [ ] CLI (w2): `aws`/`all` übergeben den Settings-Reader; Akzeptanztest über die CLI mit Settings-Modell und Fake-`aws`.
-- [ ] `make verify-clean` und CI grün.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Kern (w1): `CheckAWS.Settings`, `settingsModels`, Zusammenführung in `usedModels`, Herkunft in `File`/Meldung, Tests (alle drei Regeln, Dedup, Exclude, Secret-Einträge, Reader ohne/mit Fehler).
+- [x] CLI (w2): `aws`/`all` übergeben den Settings-Reader; Akzeptanztest über die CLI mit Settings-Modell und Fake-`aws`.
+- [x] `make verify-clean` und CI grün.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 5. Plan (vor Code)
 
@@ -59,4 +58,10 @@ der Schlüssel `model` und die `env`-Einträge `ANTHROPIC_MODEL`,
 
 ## 7. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-10 (PRs #58 Kern/w1, #60 CLI-Verdrahtung/w2).
+
+- **Funktioniert:** Im `aws`-Modus zählen auch `model` und die `env`-Modellvariablen aus Benutzer- und Projekt-Settings als „verwendet“ für [`LH-FA-BEDROCK-002`](../../../../spec/lastenheft.md#lh-fa-bedrock-002--nicht-erlaubte-profile-erkennen) bis [`LH-FA-BEDROCK-004`](../../../../spec/lastenheft.md#lh-fa-bedrock-004--modellverfügbarkeit-prüfen). Findings aus Settings nennen die Datei in `File` und die Herkunft in der Meldung; ausgeschlossene Pfade und Secret-Einträge zählen nicht; fehlende oder kaputte Settings-Dateien werden im `aws`-Modus nicht gemeldet (das tut `local`). Die Zusammenführung mit der Umgebung entfernt Duplikate (gleiche Variable und ID). Der CLI-Teil beschränkte sich auf die Übergabe des vorhandenen Settings-Readers an `CheckAWS`, dazu ein Test mit blockiertem Modell in `.claude/settings.json`.
+- **Anders als geplant:** nichts Wesentliches; kein Adapter-Vertrag und keine Regel-ID wurden geändert.
+- **Offen:** Die tatsächliche Rangfolge zwischen Settings und Umgebung in Claude Code wird nicht nachgebildet (beide IDs werden geprüft). Modelle aus anderen Quellen (Devcontainer-, Compose-Umgebung, `.env`) zählen weiterhin nicht als „verwendet“; das hängt an der offenen Entscheidung zu `.env` (siehe Closure von slice-015). Im `aws`-Modus ohne `--root` ist der Scan-Root das aktuelle Verzeichnis.
+- **Steering-Loop:** Wo ein Port schon existiert (`ClaudeSettingsReader`), ihn im neuen Use-Case wiederverwenden statt neue Adapter-Verträge zu erfinden; die Änderung bleibt dann auf Kern und Verdrahtung beschränkt.
+- **Folge-Slices:** keine.
