@@ -2,6 +2,8 @@ package cli
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -273,11 +275,12 @@ func TestLocalModeExcludesTerraform(t *testing.T) {
 
 // Modus all = local + terraform.
 func TestAllModeRunsBoth(t *testing.T) {
+	useFakeAWS(t, awsOK)
 	code, out, errs := modeRun(t, "all", "good", euEnv)
 	if code != 0 {
 		t.Fatalf("exit=%d stdout=%q stderr=%q", code, out, errs)
 	}
-	for _, want := range []string{"LH-FA-LENV-001", "LH-FA-CLAUDE-001", "LH-FA-DEVCON-001", "LH-FA-TF-001"} {
+	for _, want := range []string{"LH-FA-LENV-001", "LH-FA-CLAUDE-001", "LH-FA-DEVCON-001", "LH-FA-TF-001", "[PASS] LH-FA-AWS-001"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("all enthält %s nicht:\n%s", want, out)
 		}
@@ -289,7 +292,87 @@ func TestAllModeRunsBoth(t *testing.T) {
 
 func TestUnknownModeIsUsageError(t *testing.T) {
 	var o, e bytes.Buffer
-	if code := run([]string{"aws"}, euEnv, "", &o, &e); code != 2 || !strings.Contains(e.String(), "usage:") {
+	if code := run([]string{"bogus"}, euEnv, "", &o, &e); code != 2 || !strings.Contains(e.String(), "usage:") {
 		t.Errorf("exit=%d stderr=%q", code, e.String())
+	}
+}
+
+const (
+	awsOK = `echo '{"UserId":"AIDAEXAMPLE","Account":"123456789012","Arn":"arn:aws:iam::123456789012:user/tester"}'`
+	// stderr enthält absichtlich Text, der nie in der Ausgabe erscheinen darf.
+	awsNoCreds = `echo 'Unable to locate credentials LEAK-STDERR-TEXT' >&2; exit 255`
+)
+
+// useFakeAWS ersetzt das aws-Binary durch ein Skript (nie echtes AWS).
+func useFakeAWS(t *testing.T, body string) {
+	t.Helper()
+	bin := filepath.Join(t.TempDir(), "aws")
+	if err := os.WriteFile(bin, []byte("#!/bin/sh\n"+body+"\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	old := awsBinary
+	awsBinary = bin
+	t.Cleanup(func() { awsBinary = old })
+}
+
+func awsRun(t *testing.T, env mapEnv, extra ...string) (code int, out, errs string) {
+	t.Helper()
+	var o, e bytes.Buffer
+	code = run(append([]string{"aws", "--root", t.TempDir()}, extra...), env, "", &o, &e)
+	return code, o.String(), e.String()
+}
+
+func TestAWSModeIdentityAndAccounts(t *testing.T) {
+	useFakeAWS(t, awsOK)
+	env := mapEnv{"AWS_PROFILE": "dev"}
+
+	code, out, errs := awsRun(t, env)
+	if code != 0 || !strings.Contains(out, "[PASS] LH-FA-AWS-001") || !strings.Contains(out, "123456789012") {
+		t.Errorf("exit=%d stdout=%q stderr=%q", code, out, errs)
+	}
+	if strings.Contains(out, "LH-FA-LENV") || strings.Contains(out, "LH-FA-TF-") {
+		t.Errorf("Modus aws darf keine anderen Regeln ausführen:\n%s", out)
+	}
+
+	code, out, _ = awsRun(t, env, "--allowed-account", "123456789012")
+	if code != 0 || !strings.Contains(out, "[PASS] LH-FA-AWS-003") {
+		t.Errorf("erlaubtes Konto: exit=%d stdout=%q", code, out)
+	}
+	code, out, _ = awsRun(t, env, "--allowed-account", "999999999999")
+	if code != 1 || !strings.Contains(out, "[FAIL] LH-FA-AWS-003") {
+		t.Errorf("nicht erlaubtes Konto: exit=%d stdout=%q", code, out)
+	}
+	code, _, errs = awsRun(t, env, "--allowed-account", "kein-konto")
+	if code != 2 || errs == "" {
+		t.Errorf("ungültige Konto-ID muss Exit 2 sein: exit=%d stderr=%q", code, errs)
+	}
+}
+
+// Keine Credentials → FAIL (Exit 1), kein stderr-Text und kein Credential-Wert in der Ausgabe.
+func TestAWSModeNoCredentials(t *testing.T) {
+	useFakeAWS(t, awsNoCreds)
+	code, out, errs := awsRun(t, mapEnv{"ANTHROPIC_API_KEY": "sk-ant-GEHEIM-AWS"})
+	if code != 1 || !strings.Contains(out, "[FAIL] LH-FA-AWS-001") || !strings.Contains(out, "[FAIL] LH-FA-AUTH-001") {
+		t.Fatalf("exit=%d stdout=%q stderr=%q", code, out, errs)
+	}
+	for _, s := range []string{out, errs} {
+		if strings.Contains(s, "LEAK-STDERR-TEXT") || strings.Contains(s, "GEHEIM") || strings.Contains(s, "sk-ant") {
+			t.Errorf("Fremdausgabe oder Secret in der Ausgabe:\n%s", s)
+		}
+	}
+}
+
+// aws-Binary fehlt → Tool-Fehler (Exit 2); bei "all" erscheinen die lokalen Befunde trotzdem.
+func TestAWSBinaryMissing(t *testing.T) {
+	old := awsBinary
+	awsBinary = filepath.Join(t.TempDir(), "gibt-es-nicht")
+	t.Cleanup(func() { awsBinary = old })
+
+	if code, _, errs := awsRun(t, mapEnv{}); code != 2 || !strings.Contains(errs, "AWS_CLI_MISSING") {
+		t.Errorf("aws: exit=%d stderr=%q", code, errs)
+	}
+	code, out, errs := modeRun(t, "all", "good", euEnv)
+	if code != 2 || !strings.Contains(errs, "AWS_CLI_MISSING") || !strings.Contains(out, "LH-FA-LENV-001") {
+		t.Errorf("all: exit=%d stdout=%q stderr=%q", code, out, errs)
 	}
 }
