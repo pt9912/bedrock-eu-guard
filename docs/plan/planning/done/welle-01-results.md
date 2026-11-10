@@ -20,7 +20,7 @@ Hexagon-Kern, Regeln LENV-001 bis -006, Konsolen-Reporter, CLI mit Exit-Codes, `
 
 ## Folgeaufgaben
 
-- `make verify-clean` oder CI-Workflow für `make gates`.
+- ~~`make verify-clean` oder CI-Workflow~~ erledigt (PR #9, `.github/workflows/gates.yml`).
 - Spec-Präzisierung LENV-002.
-- Region-Extraktion aus Modell-/Profil-IDs gegen `allowedRegions` ([`LH-FA-LENV-006`](../../../../spec/lastenheft.md#lh-fa-lenv-006--prüfung-von-claude-default-modellvariablen), derzeit nur Default-Blockmuster).
+- ~~Region-Extraktion aus Modell-IDs~~ erledigt (PR #10).
 - Welle 2: Config-Datei und Adapter, `mantle: warn|allow|block`, Fehlerbehandlung ungültiger Regex-Muster.
