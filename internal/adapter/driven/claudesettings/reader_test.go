@@ -206,3 +206,57 @@ func TestReaderFiles(t *testing.T) {
 		t.Errorf("ohne Home: got %+v, %v", s, err)
 	}
 }
+
+const helperSecret = "GEHEIM-HELPER-BEFEHL"
+
+// apiKeyHelper: nur die Zeile des Top-Level-Schlüssels; der Befehl erscheint nirgends.
+func TestAPIKeyHelperLineOnly(t *testing.T) {
+	in := `{
+  "model": "m",
+  "apiKeyHelper": "/usr/local/bin/get-key --token=` + helperSecret + `",
+  "env": {
+    "AWS_REGION": "eu-central-1"
+  }
+}`
+	s, ferr := claudesettings.Parse("p", []byte(in))
+	if ferr != nil {
+		t.Fatal(ferr)
+	}
+	if s.APIKeyHelperLine != 3 {
+		t.Errorf("APIKeyHelperLine = %d, want 3", s.APIKeyHelperLine)
+	}
+	if strings.Contains(dump(s), helperSecret) {
+		t.Errorf("Befehl im Ergebnis: %s", dump(s))
+	}
+	for _, e := range s.Env {
+		if strings.Contains(e.Value, helperSecret) || strings.Contains(e.Key, "apiKeyHelper") {
+			t.Errorf("apiKeyHelper darf nicht in Env stehen: %+v", e)
+		}
+	}
+}
+
+func TestAPIKeyHelperAbsentOrNotTopLevel(t *testing.T) {
+	cases := map[string]string{
+		"fehlt":            `{"model": "m"}`,
+		"nur im env-Block": `{"env": {"apiKeyHelper": "` + helperSecret + `"}}`,
+		"verschachtelt":    `{"other": {"apiKeyHelper": "x"}}`,
+	}
+	for name, in := range cases {
+		s, ferr := claudesettings.Parse("p", []byte(in))
+		if ferr != nil || s.APIKeyHelperLine != 0 {
+			t.Errorf("%s: line=%d err=%v", name, s.APIKeyHelperLine, ferr)
+		}
+	}
+	// Im env-Block bleibt der Schlüssel ein Secret: gesetzt, aber ohne Wert.
+	s, _ := claudesettings.Parse("p", []byte(cases["nur im env-Block"]))
+	if len(s.Env) != 1 || !s.Env[0].Secret || s.Env[0].Value != "" {
+		t.Errorf("env: %+v", s.Env)
+	}
+}
+
+func TestAPIKeyHelperNonStringValueAndCRLF(t *testing.T) {
+	s, ferr := claudesettings.Parse("p", []byte("{\r\n  \"apiKeyHelper\": [\"a\", {\"b\": 1}]\r\n}"))
+	if ferr != nil || s.APIKeyHelperLine != 2 {
+		t.Errorf("line=%d err=%v", s.APIKeyHelperLine, ferr)
+	}
+}
