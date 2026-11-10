@@ -47,10 +47,16 @@ Eingabe: eine Modell- oder Inference-Profil-ID. Ausgabe: `allowed` /
 `blocked` / `unclassified`. Schritte:
 
 1. Trifft ein Muster aus `blockedModelPatterns` → **blocked** (`FAIL`).
-2. Sonst trifft ein Muster aus `allowedModelPatterns` → **allowed** (`PASS`).
-3. Sonst → **unclassified** (`WARN`).
+2. Sonst enthält die ID eine AWS-Region (Muster `xx-name-N`, z. B.
+   `ap-southeast-1`, auch in ARNs; ohne Beachtung der Groß-/Kleinschreibung),
+   die nicht in `allowedRegions` steht → **blocked** (`FAIL`).
+3. Sonst trifft ein Muster aus `allowedModelPatterns` → **allowed** (`PASS`).
+4. Sonst → **unclassified** (`WARN`).
 
-Block hat Vorrang vor Allow. Default-Muster siehe `SPEC-020`.
+Block hat Vorrang vor Allow. Default-Muster siehe `SPEC-020`. Schritt 2
+setzt „nicht erlaubte Regionen“ aus
+[`LH-FA-LENV-006`](lastenheft.md#lh-fa-lenv-006--prüfung-von-claude-default-modellvariablen) allgemein um, nicht nur für die Block-Default-Muster;
+IDs ohne Region sind davon nicht berührt.
 Präzisiert [`LH-FA-LENV-006`](lastenheft.md#lh-fa-lenv-006--prüfung-von-claude-default-modellvariablen), [`LH-FA-BEDROCK-002`](lastenheft.md#lh-fa-bedrock-002--nicht-erlaubte-profile-erkennen)/[`LH-FA-BEDROCK-003`](lastenheft.md#lh-fa-bedrock-003--erlaubte-eu-profile-prüfen),
 [`LH-FA-TF-004`](lastenheft.md#lh-fa-tf-004--nicht-erlaubte-modell-ids-finden).
 

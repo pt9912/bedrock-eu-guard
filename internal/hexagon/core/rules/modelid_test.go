@@ -1,6 +1,7 @@
 package rules_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/core/model"
@@ -63,5 +64,47 @@ func TestDefaultModels(t *testing.T) {
 		if f.Severity != want[i] || f.RuleID != rules.IDDefaultModels {
 			t.Errorf("%d: %+v", i, f)
 		}
+	}
+}
+
+func TestClassifyRegionInID(t *testing.T) {
+	cfg := model.DefaultConfig()
+	for name, c := range map[string]struct {
+		id   string
+		want model.ModelClass
+	}{
+		"andere Region":                  {"anthropic.claude-opus-4-ap-southeast-1", model.ModelBlocked},
+		"EU-Region nicht erlaubt":        {"eu.anthropic.claude-sonnet-4-6-eu-west-1", model.ModelBlocked},
+		"erlaubte Region, Allow-Muster":  {"eu.anthropic.claude-eu-central-1", model.ModelAllowed},
+		"erlaubte Region, unclassified":  {"anthropic.claude-opus-4-eu-central-1", model.ModelUnclassified},
+		"ARN mit nicht erlaubter Region": {"arn:aws:bedrock:ap-northeast-1:123:inference-profile/eu.x", model.ModelBlocked},
+		"ARN mit erlaubter Region":       {"arn:aws:bedrock:eu-central-1:123:inference-profile/eu.x", model.ModelUnclassified}, // kein Allow-Muster trifft
+		"ohne Region":                    {"anthropic.claude-sonnet-4-6", model.ModelAllowed},
+		"Modellname ist keine Region":    {"anthropic.claude-opus-4-1", model.ModelUnclassified},
+		"mehrere, eine nicht erlaubt":    {"eu.x-eu-central-1-us-gov-west-1", model.ModelBlocked},
+		"Grossschreibung nicht erlaubt":  {"eu.x-AP-SOUTHEAST-1", model.ModelBlocked},
+		"Grossschreibung erlaubt":        {"eu.x-EU-CENTRAL-1", model.ModelAllowed},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if got := rules.Classify(c.id, cfg); got != c.want {
+				t.Errorf("Classify(%q)=%v want %v", c.id, got, c.want)
+			}
+		})
+	}
+}
+
+func TestClassifyRegionHonoursAllowedRegions(t *testing.T) {
+	cfg := model.DefaultConfig()
+	cfg.AllowedRegions = []string{"eu-central-1", "eu-west-1"}
+	if got := rules.Classify("eu.x-eu-west-1", cfg); got != model.ModelAllowed {
+		t.Errorf("got %v", got)
+	}
+}
+
+func TestDefaultModelsRegionMessage(t *testing.T) {
+	env := fakeenv.Env{"ANTHROPIC_DEFAULT_OPUS_MODEL": "anthropic.claude-opus-4-ap-southeast-1"}
+	fs := rules.CheckDefaultModels(env, model.DefaultConfig())
+	if len(fs) != 1 || fs[0].Severity != model.FAIL || !strings.Contains(fs[0].Message, "ap-southeast-1") {
+		t.Fatalf("got %+v", fs)
 	}
 }

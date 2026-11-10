@@ -27,6 +27,9 @@ func CheckDefaultModels(env driven.Environment, cfg model.Config) []model.Findin
 		case model.ModelBlocked:
 			f.Severity, f.Reason = model.FAIL, model.ReasonModelBlocked
 			f.Message = name + "=" + id + " ist nicht erlaubt"
+			if r, bad := DisallowedRegionInID(id, cfg); bad {
+				f.Message += " (Region " + r + ")"
+			}
 		case model.ModelAllowed:
 			f.Severity, f.Reason = model.PASS, model.ReasonModelAllowed
 			f.Message = name + "=" + id + " ist erlaubt"
