@@ -1,0 +1,6 @@
+{
+  "model": "us.anthropic.claude-sonnet-4-6",
+  "env": {
+    "AWS_REGION": "eu-central-1"
+  }
+}
