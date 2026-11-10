@@ -12,7 +12,7 @@ Reihenfolge von Terminen. Die Wellen bilden die Versions-Stufen
 
 Keine aktive Welle. welle-01-lokaler-env-check ist abgeschlossen
 (2026-11-10, siehe [`../done/welle-01-results.md`](../done/welle-01-results.md));
-als Nächstes steht welle-02-config-scanner an (Plan-Datei fehlt noch).
+als Nächstes steht [`welle-02-config-scanner`](../welle-02-config-scanner.md) an (Plan-Entwurf liegt vor, Start nach Abhängigkeits-ADR bzw. mit slice-004).
 
 ## Nächste Wellen
 
