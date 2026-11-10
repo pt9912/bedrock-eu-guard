@@ -8,6 +8,7 @@ eine Bequemlichkeits-Sicht — bei jedem neuen/akzeptierten ADR mitziehen.
 | [0001](0001-dokumentation-als-source-of-truth.md) | Dokumentation als Source of Truth (Greenfield-Harness-Adoption) | Accepted | — (Prozess) |
 | [0002](0002-implementierungssprache.md) | Implementierungssprache (Go empfohlen) | Accepted | [`LH-TECH-001`](../../../spec/lastenheft.md#lh-tech-001--programmiersprache) |
 | [0003](0003-hexagonale-architektur.md) | Hexagonale Architektur (Ports & Adapters) | Accepted | [`LH-NF-005`](../../../spec/lastenheft.md#lh-nf-005--offline-fähigkeit)/[`LH-NF-006`](../../../spec/lastenheft.md#lh-nf-006--erweiterbarkeit), [`LH-QA-002`](../../../spec/lastenheft.md#lh-qa-002--integration-tests) |
+| [0004](0004-abhaengigkeiten-und-offline-gates.md) | Abhängigkeiten (YAML, HCL) und Offline-Gates | Accepted | [`LH-NF-005`](../../../spec/lastenheft.md#lh-nf-005--offline-fähigkeit), [`LH-QA-004`](../../../spec/lastenheft.md#lh-qa-004--reproduzierbarer-build) |
 
 ## Konventionen
 
