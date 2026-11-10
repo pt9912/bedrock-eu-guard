@@ -70,3 +70,14 @@ type BedrockReader interface {
 	// ListFoundationModels entspricht `aws bedrock list-foundation-models`.
 	ListFoundationModels(region string) ([]model.FoundationModel, error)
 }
+
+// IAMReader liest die IAM-Sicht auf den aktuellen Principal (ARC-007,
+// lesend). principalARN ist der von STS gemeldete ARN; der Adapter löst ihn
+// bei Bedarf in den IAM-ARN auf (z. B. assumed-role → role). Fehler sind
+// *model.AWSError.
+type IAMReader interface {
+	// SimulateBedrock entspricht `aws iam simulate-principal-policy`.
+	SimulateBedrock(principalARN string, actions []string) ([]model.ActionDecision, error)
+	// PrincipalPolicies liefert die Statements der angehängten und Inline-Policies.
+	PrincipalPolicies(principalARN string) ([]model.IAMStatement, error)
+}

@@ -61,3 +61,19 @@ const (
 	ReasonModelUnavailable = "MODEL_UNAVAILABLE"
 	ReasonModelUnknown     = "MODEL_AVAILABILITY_UNKNOWN"
 )
+
+// ActionDecision ist das Ergebnis der Rechtesimulation für eine Aktion.
+type ActionDecision struct {
+	Action  string
+	Allowed bool
+}
+
+// Reason-Codes der IAM-Regeln.
+const (
+	ReasonIAMInvokeDenied           = "IAM_INVOKE_DENIED"
+	ReasonIAMDiscoveryDenied        = "IAM_DISCOVERY_DENIED"
+	ReasonIAMUnknown                = "IAM_UNKNOWN"
+	ReasonRegionConditionMissing    = "IAM_NO_REGION_CONDITION"
+	ReasonRegionConditionNotAllowed = "IAM_REGION_CONDITION_NOT_ALLOWED"
+	ReasonRegionConditionUnknown    = "IAM_REGION_CONDITION_UNKNOWN"
+)

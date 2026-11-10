@@ -23,6 +23,10 @@ type AWSScan struct {
 	// Bedrock ist nil, wenn kein BedrockReader konfiguriert ist (Regeln
 	// LH-FA-BEDROCK-* laufen dann nicht).
 	Bedrock *BedrockScan
+
+	// IAM ist nil, wenn kein IAMReader konfiguriert ist (Regeln LH-FA-IAM-*
+	// laufen dann nicht).
+	IAM *IAMScan
 }
 
 // AWSRule wertet AWS-Fakten gegen die Config aus.
@@ -31,7 +35,8 @@ type AWSRule func(s AWSScan, cfg model.Config) []model.Finding
 // AWSRules liefert die AWS-Regeln in stabiler Reihenfolge.
 func AWSRules() []AWSRule {
 	return []AWSRule{CheckAWSIdentity, CheckAWSProfile, CheckAWSAccount, CheckAuthMethod,
-		CheckBedrockProfiles, CheckBedrockBlocked, CheckBedrockAllowlist, CheckBedrockAvailability}
+		CheckBedrockProfiles, CheckBedrockBlocked, CheckBedrockAllowlist, CheckBedrockAvailability,
+		CheckIAMRights, CheckIAMBroad, CheckIAMRegionCondition}
 }
 
 func awsErrorFinding(id, subject string, e *model.AWSError) model.Finding {

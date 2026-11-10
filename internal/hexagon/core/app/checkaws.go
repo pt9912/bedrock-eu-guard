@@ -16,6 +16,8 @@ type CheckAWS struct {
 	AWS driven.AWSReader
 	// Bedrock ist optional (nil = keine Bedrock-Regeln).
 	Bedrock driven.BedrockReader
+	// IAM ist optional (nil = keine IAM-Regeln).
+	IAM driven.IAMReader
 }
 
 // Run ermittelt die AWS-Fakten einmal und wertet alle AWS-Regeln aus; die
@@ -37,6 +39,9 @@ func (u CheckAWS) Run(env driven.Environment, cfg model.Config) ([]model.Finding
 	}
 	if u.Bedrock != nil {
 		s.Bedrock = u.readBedrock(env, cfg, s.IdentityErr)
+	}
+	if u.IAM != nil {
+		s.IAM = u.readIAM(s.Identity, s.IdentityErr)
 	}
 	var out []model.Finding
 	for _, r := range rules.AWSRules() {
@@ -81,4 +86,27 @@ func asAWSError[T any](op string, call func() ([]T, error)) ([]T, *model.AWSErro
 		ae = &model.AWSError{Op: op, Reason: model.AWSUnreachable}
 	}
 	return nil, ae
+}
+
+// readIAM liest die IAM-Sicht des Principals. Ohne ermittelte Identität wird
+// derselbe Fehler gemeldet, statt die Aufrufe zu wiederholen.
+func (u CheckAWS) readIAM(id *model.AWSIdentity, idErr *model.AWSError) *rules.IAMScan {
+	if id == nil {
+		reason := model.AWSUnreachable
+		if idErr != nil {
+			reason = idErr.Reason
+		}
+		return &rules.IAMScan{
+			DecisionsErr:  &model.AWSError{Op: "iam:SimulatePrincipalPolicy", Reason: reason},
+			StatementsErr: &model.AWSError{Op: "iam:GetPolicy", Reason: reason},
+		}
+	}
+	actions := append(append([]string{}, rules.IAMInvokeActions...), rules.IAMDiscoveryActions...)
+	d, derr := asAWSError("iam:SimulatePrincipalPolicy", func() ([]model.ActionDecision, error) {
+		return u.IAM.SimulateBedrock(id.ARN, actions)
+	})
+	st, serr := asAWSError("iam:GetPolicy", func() ([]model.IAMStatement, error) {
+		return u.IAM.PrincipalPolicies(id.ARN)
+	})
+	return &rules.IAMScan{Decisions: d, DecisionsErr: derr, Statements: st, StatementsErr: serr}
 }

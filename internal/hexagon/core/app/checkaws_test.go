@@ -168,3 +168,90 @@ func TestCheckAWSBedrockErrorsAreFindings(t *testing.T) {
 		t.Fatalf("prof=%v avail=%v: %+v", prof, avail, fs)
 	}
 }
+
+func allDecisions(denied ...string) []model.ActionDecision {
+	d := map[string]bool{}
+	for _, a := range denied {
+		d[a] = true
+	}
+	var out []model.ActionDecision
+	for _, a := range []string{"bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream", "bedrock:Converse", "bedrock:ConverseStream", "bedrock:ListInferenceProfiles", "bedrock:GetInferenceProfile"} {
+		out = append(out, model.ActionDecision{Action: a, Allowed: !d[a]})
+	}
+	return out
+}
+
+func TestCheckAWSWithIAM(t *testing.T) {
+	r := fakeaws.Reader{Ident: &model.AWSIdentity{Account: "1", ARN: "arn:aws:sts::1:assumed-role/r/s"}}
+	iam := fakeaws.IAM{
+		Decisions: allDecisions(),
+		Statements: []model.IAMStatement{{Effect: "Allow", Actions: []string{"bedrock:InvokeModel"}, Resources: []string{"*"},
+			HasRegionCondition: true, ConditionRegions: []string{"eu-central-1"}}},
+	}
+	fs, err := app.CheckAWS{AWS: r, IAM: iam}.Run(fakeenv.Env{"AWS_PROFILE": "p"}, model.DefaultConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	have := map[string]model.Severity{}
+	for _, f := range fs {
+		have[f.RuleID] = f.Severity
+	}
+	if have["LH-FA-IAM-001"] != model.PASS || have["LH-FA-IAM-003"] != model.PASS {
+		t.Fatalf("got %+v", fs)
+	}
+	if _, ok := have["LH-FA-IAM-002"]; !ok {
+		t.Fatalf("IAM-002 fehlt: %+v", fs)
+	}
+}
+
+func TestCheckAWSIAMFailuresAndSkips(t *testing.T) {
+	r := fakeaws.Reader{Ident: &model.AWSIdentity{Account: "1", ARN: "arn"}}
+	// Reader nil → keine IAM-Regeln
+	fs, _ := app.CheckAWS{AWS: r}.Run(fakeenv.Env{}, model.DefaultConfig())
+	for _, f := range fs {
+		if strings.HasPrefix(f.RuleID, "LH-FA-IAM") {
+			t.Errorf("IAM-Regel ohne Reader: %+v", f)
+		}
+	}
+	// Fehler: verweigert → WARN, unbekannter Fehler → FAIL ohne Fremdtext
+	iam := fakeaws.IAM{
+		DecisionsErr:  &model.AWSError{Op: "iam:SimulatePrincipalPolicy", Reason: model.AWSAccessDenied},
+		StatementsErr: errors.New("raw secret output"),
+	}
+	fs, err := app.CheckAWS{AWS: r, IAM: iam}.Run(fakeenv.Env{}, model.DefaultConfig())
+	if err != nil {
+		t.Fatalf("IAM-Fehler sind keine Tool-Fehler: %v", err)
+	}
+	var warn, fail bool
+	for _, f := range fs {
+		if f.RuleID == "LH-FA-IAM-001" && f.Severity == model.WARN {
+			warn = true
+		}
+		if f.RuleID == "LH-FA-IAM-002" && f.Severity == model.FAIL && f.Reason == model.AWSUnreachable {
+			fail = true
+		}
+		if strings.Contains(f.Message, "secret") {
+			t.Errorf("Fremdausgabe: %+v", f)
+		}
+	}
+	if !warn || !fail {
+		t.Fatalf("warn=%v fail=%v: %+v", warn, fail, fs)
+	}
+}
+
+func TestCheckAWSIAMNoIdentity(t *testing.T) {
+	r := fakeaws.Reader{Err: &model.AWSError{Op: "sts:GetCallerIdentity", Reason: model.AWSNoCredentials}}
+	fs, err := app.CheckAWS{AWS: r, IAM: fakeaws.IAM{Decisions: allDecisions()}}.Run(fakeenv.Env{}, model.DefaultConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	n := 0
+	for _, f := range fs {
+		if strings.HasPrefix(f.RuleID, "LH-FA-IAM") && f.Severity == model.FAIL && f.Reason == model.AWSNoCredentials {
+			n++
+		}
+	}
+	if n != 3 {
+		t.Fatalf("3 FAIL (IAM-001..003) erwartet, got %d: %+v", n, fs)
+	}
+}

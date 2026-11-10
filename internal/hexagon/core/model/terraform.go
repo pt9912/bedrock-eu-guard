@@ -32,8 +32,11 @@ type IAMStatement struct {
 	Actions            []string
 	Resources          []string
 	HasRegionCondition bool
-	Dynamic            bool
-	Line               int
+	// ConditionRegions sind die Werte der aws:RequestedRegion-Condition,
+	// soweit auswertbar (leer bei HasRegionCondition = Regionen unbekannt).
+	ConditionRegions []string
+	Dynamic          bool
+	Line             int
 }
 
 // ModelRef ist ein Fund einer Modell-/Profil-ID oder Bedrock-ARN in einem
