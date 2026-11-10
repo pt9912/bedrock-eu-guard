@@ -742,6 +742,23 @@ func TestSARIFUsesBuildVersion(t *testing.T) {
 	}
 }
 
+// slice-021: ein in den Claude-Settings konfiguriertes Modell zählt als „verwendet“ (aws-Modus).
+func TestAWSModeUsesModelFromSettings(t *testing.T) {
+	useFakeAWS(t, awsOK)
+	var o, e bytes.Buffer
+	args := []string{"aws", "--root", "testdata/usedmodel/project"}
+	code := run(args, mapEnv{"AWS_PROFILE": "dev"}, "", &o, &e)
+	out := o.String()
+	if code != 1 || !strings.Contains(out, "[FAIL] LH-FA-BEDROCK-002") || !strings.Contains(out, ".claude/settings.json") {
+		t.Fatalf("exit=%d stdout=%q stderr=%q", code, out, e.String())
+	}
+	// Ohne Modell in den Settings (leeres Root) bleibt es beim bisherigen Verhalten: kein FAIL.
+	o.Reset()
+	if code := run([]string{"aws", "--root", t.TempDir()}, mapEnv{"AWS_PROFILE": "dev"}, "", &o, &e); code != 0 || strings.Contains(o.String(), "[FAIL] LH-FA-BEDROCK-002") {
+		t.Errorf("ohne Settings-Modell: exit=%d stdout=%q", code, o.String())
+	}
+}
+
 // slice-020: apiKeyHelper → WARN (kein stilles PASS), Befehl erscheint nirgends.
 func TestAPIKeyHelperIsWarningWithoutCommand(t *testing.T) {
 	for _, format := range []string{"console", "json", "sarif"} {
