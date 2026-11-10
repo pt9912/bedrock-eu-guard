@@ -1,7 +1,6 @@
 # Slice slice-009: Bedrock-Inference-Profile, Allowlist und Modellverfügbarkeit
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** welle-03-aws-checks.
 
@@ -42,11 +41,11 @@ Claude-Modelle in der Primärregion verfügbar sind.
 
 ## 4. Definition of Done
 
-- [ ] Kern (w1): `model`-Typen, `driven.BedrockReader`, `rules/bedrock.go`, Erweiterung `app.CheckAWS`, Double `fakeaws.Bedrock`, Unit-Tests je Zweig und Fehlerart.
-- [ ] Adapter (w2): `awscli` implementiert `BedrockReader` inkl. Paginierung, Tests mit Fake-`aws`.
-- [ ] CLI (w2): Befehl `aws` übergibt `Bedrock`; Akzeptanztest ohne Credential-Werte in der Ausgabe.
-- [ ] `make verify-clean` und CI grün; Sensors-Doku aktuell.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Kern (w1): `model`-Typen, `driven.BedrockReader`, `rules/bedrock.go`, Erweiterung `app.CheckAWS`, Double `fakeaws.Bedrock`, Unit-Tests je Zweig und Fehlerart.
+- [x] Adapter (w2): `awscli` implementiert `BedrockReader` inkl. Paginierung, Tests mit Fake-`aws`.
+- [x] CLI (w2): Befehl `aws` übergibt `Bedrock`; Akzeptanztest ohne Credential-Werte in der Ausgabe.
+- [x] `make verify-clean` und CI grün; Sensors-Doku aktuell.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 5. Plan (vor Code)
 
@@ -73,7 +72,13 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 9. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-10 (PRs #36 Kern/w1, #38 Adapter/CLI/w2).
+
+- **Funktioniert:** `bedrock-eu-check aws` liest je erlaubter Region Inference-Profile und Basismodelle (`awscli`, Region je Aufruf, vollständige Paginierung) und prüft die per Umgebung verwendeten Modelle (`ANTHROPIC_MODEL`, `ANTHROPIC_DEFAULT_*_MODEL`, `ANTHROPIC_SMALL_FAST_MODEL`) gegen die Allowlist und die Verfügbarkeit in der Primärregion. Verwendete blockierte Profile sind FAIL, nur sichtbare blockierte Profile WARN; Fehler der AWS-Abfrage erscheinen als FAIL-Findings mit dem Reason des `AWSError`, nie mit CLI-Ausgabe. Alles gegen ein Fake-`aws`.
+- **Anders als geplant:** Die Bedrock-Methoden stehen in einer eigenen Schnittstelle (`BedrockReader`) statt im `AWSReader`, damit bestehende Adapter nicht brechen. Ein Probing nicht erlaubter Regionen für „sichtbare“ Profile entfiel (nur `allowedRegions` werden abgefragt).
+- **Offen:** „Verwendet“ stammt nur aus der Umgebung, nicht aus Claude-Settings oder Konfigurationsdateien (Zusammenführung bei `all`); kein Nicht-EU-Probing; `nextToken` wird nur als Fallback behandelt, weil die AWS-CLI die meisten Aufrufe selbst paginiert (nicht gegen echtes AWS geprüft).
+- **Steering-Loop:** Neue Fähigkeiten als zusätzliche, kleine Schnittstelle statt die bestehende zu erweitern. Aufruf-Logik im Adapter einmal zentral (`call`) halten, damit Fehlerklassifikation überall identisch ist.
+- **Folge-Slices:** slice-010 (IAM).
 
 ## 10. Sub-Area-Modus-Begründung
 
