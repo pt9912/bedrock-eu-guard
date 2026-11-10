@@ -134,11 +134,12 @@ Nur real existierende Targets (keine halluzinierten Gates, Modul 13):
 | `make verify-clean` | `make gates` im frischen `git worktree` des committeten HEAD     |
 | `make deps`      | `go mod tidy` + `vendor/` neu erzeugen (mit Netz, nicht Teil der Gates, [`ADR-0004`](docs/plan/adr/0004-abhaengigkeiten-und-offline-gates.md)) |
 | `make deps-verify` | `go mod verify` + `vendor/` entspricht Upstream (mit Netz; CI-Job nur bei Änderungen an `vendor/`, `go.mod`, `go.sum`) |
+| `make self-check` | `bedrock-eu-check local` und `terraform` gegen das eigene Repo (kontrollierte Umgebung, `bedrock-eu-check.yml` im Root); Exit 0 Pflicht |
 | `make image`     | Docker-Images `slim` und `full` bauen (mit Netz, nicht Teil der Gates)                 |
 | `make image-test` | Images bauen und Smoke-Tests (`tools/image-smoke.sh`, Laufzeit ohne Netz; CI-Job `image`) |
-`make coverage-gate` und `make self-check` entstehen in späteren Slices;
-sie werden erst hier eingetragen, wenn sie laufen.
-werden erst hier eingetragen, wenn sie laufen.
+
+`make coverage-gate` entsteht in einem späteren Slice; es wird erst hier
+eingetragen, wenn es läuft.
 
 ## 5. Dokumentations-Regeln
 
