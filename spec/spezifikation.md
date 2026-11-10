@@ -64,7 +64,24 @@ Präzisiert [`LH-FA-LENV-006`](lastenheft.md#lh-fa-lenv-006--prüfung-von-claude
 
 Eine Region ist erlaubt, gdw. sie in `allowedRegions` enthalten ist.
 Fehlende Region → `FAIL` (lokaler Env-Check) bzw. `WARN` (dynamische
-Terraform-Region, nicht auflösbar). Präzisiert [`LH-FA-LENV-001`](lastenheft.md#lh-fa-lenv-001--prüfung-von-aws_region)/[`LH-FA-LENV-002`](lastenheft.md#lh-fa-lenv-002--prüfung-von-aws_default_region),
+Terraform-Region, nicht auflösbar).
+
+Lokaler Env-Check, Auflösung von `AWS_REGION` und `AWS_DEFAULT_REGION`
+([`LH-FA-LENV-001`](lastenheft.md#lh-fa-lenv-001--prüfung-von-aws_region)/[`LH-FA-LENV-002`](lastenheft.md#lh-fa-lenv-002--prüfung-von-aws_default_region)):
+
+| `AWS_REGION` | `AWS_DEFAULT_REGION` | Ergebnis |
+|---|---|---|
+| gesetzt, erlaubt | beliebig | `PASS` |
+| gesetzt, nicht erlaubt | beliebig | `FAIL` |
+| fehlt | gesetzt, erlaubt | `WARN` (Fallback, Reason `REGION_FALLBACK_DEFAULT`) |
+| fehlt | gesetzt, nicht erlaubt | `FAIL` |
+| fehlt | fehlt | `FAIL` |
+
+Auflösung des Widerspruchs im Lastenheft: [`LH-FA-LENV-002`](lastenheft.md#lh-fa-lenv-002--prüfung-von-aws_default_region) nennt `PASS` für
+eine erlaubte `AWS_DEFAULT_REGION` und zugleich `WARN`, wenn `AWS_REGION`
+fehlt. Maßgeblich ist `WARN`: Der Fallback ist zulässig, aber die primäre
+Variable `AWS_REGION` fehlt, was die Region in AWS-Tools mehrdeutig macht.
+`PASS` gilt nur, wenn `AWS_REGION` selbst gesetzt und erlaubt ist. Präzisiert [`LH-FA-LENV-001`](lastenheft.md#lh-fa-lenv-001--prüfung-von-aws_region)/[`LH-FA-LENV-002`](lastenheft.md#lh-fa-lenv-002--prüfung-von-aws_default_region),
 [`LH-FA-TF-002`](lastenheft.md#lh-fa-tf-002--aws-provider-region-prüfen).
 
 ## 2. Datenstrukturen und Schemas
