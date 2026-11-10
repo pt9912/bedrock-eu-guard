@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 
 	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/claudesettings"
 	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/envos"
@@ -17,7 +18,7 @@ import (
 
 const exitToolError = 2
 
-const usage = "usage: bedrock-eu-check local\n       bedrock-eu-check scan [--root DIR]\n"
+const usage = "usage: bedrock-eu-check local [--root DIR]\n"
 
 // Run führt die CLI aus und liefert den Prozess-Exit-Code.
 func Run(args []string, stdout, stderr io.Writer) int {
@@ -26,28 +27,25 @@ func Run(args []string, stdout, stderr io.Writer) int {
 }
 
 func run(args []string, env driven.Environment, home string, stdout, stderr io.Writer) int {
-	if len(args) == 0 {
+	if len(args) == 0 || args[0] != "local" {
 		fmt.Fprint(stderr, usage)
 		return exitToolError
 	}
-	switch args[0] {
-	case "local":
-		if len(args) != 1 {
-			break
-		}
-		findings, err := app.CheckLocal{}.Run(env, model.DefaultConfig())
-		return finish(findings, err, stdout, stderr)
-	case "scan":
-		root, ok := scanRoot(args[1:])
-		if !ok {
-			break
-		}
-		scan := app.Scan{Settings: claudesettings.New(root, home)}
-		findings, err := scan.Run(model.DefaultConfig())
-		return finish(findings, err, stdout, stderr)
+	root, ok := scanRoot(args[1:])
+	if !ok {
+		fmt.Fprint(stderr, usage)
+		return exitToolError
 	}
-	fmt.Fprint(stderr, usage)
-	return exitToolError
+	cfg := model.DefaultConfig()
+	// Modus local = Env-Regeln + Datei-Regeln (offline, SPEC-002).
+	findings, err := app.CheckLocal{}.Run(env, cfg)
+	if err == nil {
+		var files []model.Finding
+		files, err = app.Scan{Settings: claudesettings.New(root, home)}.Run(cfg)
+		findings = append(findings, files...)
+	}
+	sort.SliceStable(findings, func(i, j int) bool { return findings[i].RuleID < findings[j].RuleID })
+	return finish(findings, err, stdout, stderr)
 }
 
 // scanRoot wertet "[--root DIR]" aus; Default ist das aktuelle Verzeichnis.

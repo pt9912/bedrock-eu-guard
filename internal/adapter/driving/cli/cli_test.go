@@ -64,15 +64,18 @@ func TestAcceptanceEUMinimalEnvironment(t *testing.T) {
 	}
 }
 
+// euEnv ist die EU-konforme Minimalumgebung (LH-ABN-002).
+var euEnv = mapEnv{"AWS_REGION": "eu-central-1", "CLAUDE_CODE_USE_BEDROCK": "1"}
+
 func scanArgs(dir string) (args []string, home string) {
-	return []string{"scan", "--root", dir + "/project"}, dir + "/home"
+	return []string{"local", "--root", dir + "/project"}, dir + "/home"
 }
 
 // Positivbeispiel: EU-sichere Settings → kein FAIL, Exit 0.
-func TestScanGoodSettings(t *testing.T) {
+func TestLocalGoodSettings(t *testing.T) {
 	args, home := scanArgs("testdata/good")
 	var out, errb bytes.Buffer
-	if code := run(args, mapEnv{}, home, &out, &errb); code != 0 {
+	if code := run(args, euEnv, home, &out, &errb); code != 0 {
 		t.Fatalf("exit = %d; stdout=%q stderr=%q", code, out.String(), errb.String())
 	}
 	if strings.Contains(out.String(), "[FAIL]") {
@@ -82,7 +85,7 @@ func TestScanGoodSettings(t *testing.T) {
 
 // Negativbeispiel: direkte Anthropic-Konfiguration, US-Region, blockiertes
 // Modell → FAIL mit Datei und Zeile, Exit 1, kein Secret-Wert (LH-NF-004).
-func TestScanBadSettings(t *testing.T) {
+func TestLocalBadSettings(t *testing.T) {
 	args, home := scanArgs("testdata/bad")
 	var out, errb bytes.Buffer
 	if code := run(args, mapEnv{}, home, &out, &errb); code != 1 {
@@ -100,16 +103,16 @@ func TestScanBadSettings(t *testing.T) {
 	}
 }
 
-func TestScanMissingFilesAreFindingsNotErrors(t *testing.T) {
+func TestLocalMissingFilesAreFindingsNotErrors(t *testing.T) {
 	var out, errb bytes.Buffer
-	code := run([]string{"scan", "--root", t.TempDir()}, mapEnv{}, t.TempDir(), &out, &errb)
+	code := run([]string{"local", "--root", t.TempDir()}, euEnv, t.TempDir(), &out, &errb)
 	if code != 0 || !strings.Contains(out.String(), "FILE_MISSING") {
 		t.Errorf("exit=%d stdout=%q stderr=%q", code, out.String(), errb.String())
 	}
 }
 
-func TestScanBadArgs(t *testing.T) {
-	for _, args := range [][]string{{"scan", "--root"}, {"scan", "x"}, {"scan", "--root", ""}} {
+func TestLocalBadArgs(t *testing.T) {
+	for _, args := range [][]string{{"local", "--root"}, {"local", "x"}, {"scan"}, {"scan", "--root", "x"}} {
 		var out, errb bytes.Buffer
 		if code := run(args, mapEnv{}, "", &out, &errb); code != 2 {
 			t.Errorf("run(%v) = %d, want 2", args, code)
