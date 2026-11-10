@@ -63,17 +63,45 @@ func PrimaryRegion(env driven.Environment, cfg model.Config) string {
 var usedModelVars = []string{"ANTHROPIC_MODEL", "ANTHROPIC_DEFAULT_SONNET_MODEL",
 	"ANTHROPIC_DEFAULT_HAIKU_MODEL", "ANTHROPIC_DEFAULT_OPUS_MODEL", "ANTHROPIC_SMALL_FAST_MODEL"}
 
-type usedModel struct{ Var, ID string }
+// SettingsModel ist eine in Claude-Settings konfigurierte Modell-/Profil-ID
+// (Source = Dateipfad, Var = "model" bzw. Name der env-Variable).
+type SettingsModel struct{ Source, Var, ID string }
 
-// usedModels sind die per Umgebung konfigurierten Modell-/Profil-IDs.
-func usedModels(env driven.Environment) []usedModel {
+// UsedModelVars liefert die Umgebungsvariablen, die Modell-/Profil-IDs tragen.
+func UsedModelVars() []string { return append([]string(nil), usedModelVars...) }
+
+type usedModel struct{ Var, ID, Source string }
+
+// usedModels sind die konfigurierten Modell-/Profil-IDs: zuerst die der
+// Umgebung, dann die aus Claude-Settings (Duplikate gleicher Variable und ID
+// entfallen).
+func usedModels(s AWSScan) []usedModel {
 	var out []usedModel
-	for _, v := range usedModelVars {
-		if id, ok := env.Lookup(v); ok && id != "" {
-			out = append(out, usedModel{v, id})
+	seen := map[string]bool{}
+	add := func(u usedModel) {
+		k := u.Var + "\x00" + u.ID
+		if !seen[k] {
+			seen[k] = true
+			out = append(out, u)
 		}
 	}
+	for _, v := range usedModelVars {
+		if id, ok := s.Env.Lookup(v); ok && id != "" {
+			add(usedModel{v, id, ""})
+		}
+	}
+	for _, m := range s.Settings {
+		add(usedModel{m.Var, m.ID, m.Source})
+	}
 	return out
+}
+
+// label und finding-Hilfen: Herkunft aus Settings sichtbar machen.
+func (u usedModel) where() string {
+	if u.Source == "" {
+		return ""
+	}
+	return " (in " + u.Source + ")"
 }
 
 // CheckBedrockProfiles listet die Inference-Profile je Region
@@ -111,11 +139,11 @@ func CheckBedrockBlocked(s AWSScan, cfg model.Config) []model.Finding {
 	}
 	var out []model.Finding
 	usedBlocked := map[string]bool{}
-	for _, u := range usedModels(s.Env) {
+	for _, u := range usedModels(s) {
 		if Classify(u.ID, cfg) == model.ModelBlocked {
 			usedBlocked[u.ID] = true
 			out = append(out, model.Finding{RuleID: IDBedrockBlocked, Severity: model.FAIL, Reason: model.ReasonModelBlocked,
-				Subject: u.Var, Message: u.Var + "=" + u.ID + " ist nicht erlaubt",
+				Subject: u.Var, File: u.Source, Message: u.Var + "=" + u.ID + " ist nicht erlaubt" + u.where(),
 				Recommendation: "EU-Profil-ID (eu.*) verwenden"})
 		}
 	}
@@ -164,7 +192,7 @@ func CheckBedrockAllowlist(s AWSScan, cfg model.Config) []model.Finding {
 	if s.Bedrock == nil {
 		return nil
 	}
-	used := usedModels(s.Env)
+	used := usedModels(s)
 	if len(used) == 0 {
 		return nil
 	}
@@ -172,7 +200,7 @@ func CheckBedrockAllowlist(s AWSScan, cfg model.Config) []model.Finding {
 	for _, u := range used {
 		if !profileAllowed(u.ID, cfg) {
 			out = append(out, model.Finding{RuleID: IDBedrockAllowlist, Severity: model.FAIL, Reason: model.ReasonProfileNotListed,
-				Subject: u.Var, Message: u.Var + "=" + u.ID + " ist nicht durch die Allowlist abgedeckt",
+				Subject: u.Var, File: u.Source, Message: u.Var + "=" + u.ID + " ist nicht durch die Allowlist abgedeckt" + u.where(),
 				Recommendation: "allowedProfiles ergänzen oder ein erlaubtes Profil verwenden"})
 		}
 	}
@@ -205,7 +233,7 @@ func CheckBedrockAvailability(s AWSScan, _ model.Config) []model.Finding {
 	if s.Bedrock == nil {
 		return nil
 	}
-	used := usedModels(s.Env)
+	used := usedModels(s)
 	if len(used) == 0 {
 		return nil
 	}
@@ -217,21 +245,21 @@ func CheckBedrockAvailability(s AWSScan, _ model.Config) []model.Finding {
 	}
 	var out []model.Finding
 	for _, u := range used {
-		f := model.Finding{RuleID: IDBedrockAvailability, Subject: u.Var}
+		f := model.Finding{RuleID: IDBedrockAvailability, Subject: u.Var, File: u.Source}
 		base, ok := baseModelID(u.ID)
 		switch {
 		case rd == nil || (rd.ModelsErr != nil && rd.ProfilesErr != nil) || !ok:
 			f.Severity, f.Reason = model.WARN, model.ReasonModelUnknown
-			f.Message = u.Var + "=" + u.ID + ": Verfügbarkeit nicht eindeutig ermittelbar"
+			f.Message = u.Var + "=" + u.ID + ": Verfügbarkeit nicht eindeutig ermittelbar" + u.where()
 		case availableIn(rd, u.ID, base):
 			f.Severity, f.Reason = model.PASS, model.ReasonModelAvailable
-			f.Message = u.Var + "=" + u.ID + " ist in " + rd.Region + " verfügbar"
+			f.Message = u.Var + "=" + u.ID + " ist in " + rd.Region + " verfügbar" + u.where()
 		case rd.ModelsErr != nil || rd.ProfilesErr != nil:
 			f.Severity, f.Reason = model.WARN, model.ReasonModelUnknown
-			f.Message = u.Var + "=" + u.ID + ": Verfügbarkeit nicht eindeutig ermittelbar"
+			f.Message = u.Var + "=" + u.ID + ": Verfügbarkeit nicht eindeutig ermittelbar" + u.where()
 		default:
 			f.Severity, f.Reason = model.FAIL, model.ReasonModelUnavailable
-			f.Message = u.Var + "=" + u.ID + " ist in " + rd.Region + " nicht verfügbar"
+			f.Message = u.Var + "=" + u.ID + " ist in " + rd.Region + " nicht verfügbar" + u.where()
 			f.Recommendation = "Modell in der Region aktivieren oder eine andere Region/ein anderes Modell wählen"
 		}
 		out = append(out, f)

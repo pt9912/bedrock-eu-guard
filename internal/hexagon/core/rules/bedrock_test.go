@@ -157,3 +157,43 @@ func TestBedrockAvailability(t *testing.T) {
 		t.Errorf("Primärregion ohne Daten: %+v", f)
 	}
 }
+
+func withSettings(s rules.AWSScan, ms ...rules.SettingsModel) rules.AWSScan {
+	s.Settings = ms
+	return s
+}
+
+func TestBedrockUsedFromSettings(t *testing.T) {
+	cfg := model.DefaultConfig()
+	rd := rules.RegionData{Region: "eu-central-1", Profiles: prof("eu.anthropic.claude-sonnet-4-6"), Models: mods("anthropic.claude-sonnet-4-6")}
+	blocked := rules.SettingsModel{Source: ".claude/settings.json", Var: "model", ID: "us.anthropic.claude-opus-4"}
+
+	// BEDROCK-002: blockiertes Modell aus den Settings → FAIL mit Herkunft
+	fs := rules.CheckBedrockBlocked(withSettings(bedrock(fakeenv.Env{}, rd), blocked), cfg)
+	if len(fs) != 1 || fs[0].Severity != model.FAIL || fs[0].File != ".claude/settings.json" || !strings.Contains(fs[0].Message, "in .claude/settings.json") {
+		t.Errorf("002: %+v", fs)
+	}
+	// BEDROCK-003: nicht abgedeckt → FAIL; abgedeckt → PASS
+	fs = rules.CheckBedrockAllowlist(withSettings(bedrock(fakeenv.Env{}, rd), rules.SettingsModel{Source: "~/.claude/settings.json", Var: "model", ID: "anthropic.claude-opus-4"}), cfg)
+	if len(fs) != 1 || fs[0].Severity != model.FAIL || fs[0].File != "~/.claude/settings.json" {
+		t.Errorf("003: %+v", fs)
+	}
+	fs = rules.CheckBedrockAllowlist(withSettings(bedrock(fakeenv.Env{}, rd), rules.SettingsModel{Source: "s", Var: "model", ID: "eu.anthropic.claude-sonnet-4-6"}), cfg)
+	if len(fs) != 1 || fs[0].Severity != model.PASS {
+		t.Errorf("003 pass: %+v", fs)
+	}
+	// BEDROCK-004: Verfügbarkeit für Settings-Modell
+	fs = rules.CheckBedrockAvailability(withSettings(bedrock(fakeenv.Env{}, rd), rules.SettingsModel{Source: "s", Var: "model", ID: "eu.anthropic.claude-sonnet-4-6"}), cfg)
+	if len(fs) != 1 || fs[0].Severity != model.PASS || fs[0].File != "s" {
+		t.Errorf("004: %+v", fs)
+	}
+	// Env und Settings: gleiche Variable und ID nur einmal; andere ID zusätzlich
+	env := fakeenv.Env{"ANTHROPIC_MODEL": "eu.anthropic.claude-sonnet-4-6"}
+	s := withSettings(bedrock(env, rd),
+		rules.SettingsModel{Source: "s", Var: "ANTHROPIC_MODEL", ID: "eu.anthropic.claude-sonnet-4-6"},
+		rules.SettingsModel{Source: "s", Var: "ANTHROPIC_MODEL", ID: "anthropic.claude-opus-4"})
+	fs = rules.CheckBedrockAllowlist(s, cfg)
+	if len(fs) != 1 || fs[0].Severity != model.FAIL || !strings.Contains(fs[0].Message, "anthropic.claude-opus-4") {
+		t.Errorf("Dedup/Zusatz: %+v", fs)
+	}
+}

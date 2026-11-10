@@ -18,6 +18,10 @@ type CheckAWS struct {
 	Bedrock driven.BedrockReader
 	// IAM ist optional (nil = keine IAM-Regeln).
 	IAM driven.IAMReader
+	// Settings ist optional: Modell-IDs aus den Claude-Settings zählen dann
+	// für die Bedrock-Regeln ebenfalls als „verwendet“. Fehlende oder
+	// kaputte Dateien werden hier nicht gemeldet (das tut der Modus local).
+	Settings driven.ClaudeSettingsReader
 }
 
 // Run ermittelt die AWS-Fakten einmal und wertet alle AWS-Regeln aus; die
@@ -36,6 +40,9 @@ func (u CheckAWS) Run(env driven.Environment, cfg model.Config) ([]model.Finding
 		s.IdentityErr = ae
 	} else {
 		s.Identity = id
+	}
+	if u.Settings != nil {
+		s.Settings = u.settingsModels(cfg)
 	}
 	if u.Bedrock != nil {
 		s.Bedrock = u.readBedrock(env, cfg, s.IdentityErr)
@@ -109,4 +116,34 @@ func (u CheckAWS) readIAM(id *model.AWSIdentity, idErr *model.AWSError) *rules.I
 		return u.IAM.PrincipalPolicies(id.ARN)
 	})
 	return &rules.IAMScan{Decisions: d, DecisionsErr: derr, Statements: st, StatementsErr: serr}
+}
+
+// settingsModels sammelt die konfigurierten Modell-IDs aus Benutzer- und
+// Projekt-Settings (ohne ausgeschlossene Pfade). Secret-Einträge und leere
+// Werte werden übergangen.
+func (u CheckAWS) settingsModels(cfg model.Config) []rules.SettingsModel {
+	var out []rules.SettingsModel
+	collect := func(path string, s *model.ClaudeSettings, err error) {
+		if err != nil || s == nil {
+			return
+		}
+		if s.Model != "" {
+			out = append(out, rules.SettingsModel{Source: path, Var: "model", ID: s.Model})
+		}
+		for _, v := range rules.UsedModelVars() {
+			if e, ok := s.EnvEntry(v); ok && !e.Secret && e.Value != "" {
+				out = append(out, rules.SettingsModel{Source: path, Var: v, ID: e.Value})
+			}
+		}
+	}
+	s, err := u.Settings.ReadUser()
+	collect(rules.UserSettingsPath, s, err)
+	for _, rel := range rules.ProjectSettingsFiles {
+		if cfg.Excluded(rel) {
+			continue
+		}
+		s, err := u.Settings.ReadProject(rel)
+		collect(rel, s, err)
+	}
+	return out
 }
