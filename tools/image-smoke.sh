@@ -51,4 +51,25 @@ case "$variant" in
   *) fail "unbekannte Variante $variant" ;;
 esac
 
+# 6. all --ci auf dem Beispiel-Repository: slim -> Tool-Fehler (kein aws-Binary), full -> FAIL
+#    (keine Credentials). In beiden Fällen erscheinen die offline Befunde (local + terraform).
+errfile=$(mktemp)
+trap 'rm -f "$errfile"' EXIT
+set +e
+# shellcheck disable=SC2086
+out=$(run $envs -e AWS_EC2_METADATA_DISABLED=true -v "$good:/work:ro" "$img" all --ci --root /work 2>"$errfile")
+code=$?
+set -e
+err=$(cat "$errfile")
+echo "$out" | grep -q 'LH-FA-LENV-001' || fail "all --ci: keine local-Befunde"
+echo "$out" | grep -q 'LH-FA-TF-001' || fail "all --ci: keine terraform-Befunde"
+echo "$err" | grep -q '^bedrock-eu-check: .* (Exit ' || fail "all --ci: keine Zusammenfassung auf stderr: $err"
+case "$variant" in
+  slim) [ "$code" -eq 2 ] || fail "slim all --ci: Exit $code, erwartet 2" ;;
+  full)
+    [ "$code" -eq 1 ] || fail "full all --ci ohne Credentials: Exit $code, erwartet 1"
+    echo "$out" | grep -q 'LH-FA-AWS-001' || fail "full all --ci: keine aws-Befunde"
+    ;;
+esac
+
 echo "OK: $img ($variant)"
