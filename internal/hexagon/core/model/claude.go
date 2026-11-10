@@ -10,6 +10,7 @@ const (
 	ReasonDirectAnthropic  = "DIRECT_ANTHROPIC"
 	ReasonEndpointForeign  = "ENDPOINT_FOREIGN"
 	ReasonEndpointTextOnly = "ENDPOINT_TEXT_ONLY"
+	ReasonAPIKeyHelper     = "APIKEY_HELPER"
 	ReasonSettingsUnsafe   = "SETTINGS_UNSAFE"
 	ReasonSettingsReview   = "SETTINGS_REVIEW"
 )
@@ -62,6 +63,10 @@ type ClaudeSettings struct {
 	Model string
 	Env   []EnvEntry
 	Hits  []Hit
+	// APIKeyHelperLine ist die Zeile des Top-Level-Schlüssels "apiKeyHelper"
+	// (0 = nicht gesetzt). Der Befehl selbst wird nie gelesen oder
+	// weitergegeben, da er Secrets enthalten kann (LH-NF-004).
+	APIKeyHelperLine int
 }
 
 // EnvEntry liefert den Eintrag zu key (und ob er existiert).

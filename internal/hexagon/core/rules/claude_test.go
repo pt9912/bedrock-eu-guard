@@ -123,6 +123,10 @@ func TestClaudeEndpoints(t *testing.T) {
 		{"host", &model.ClaudeSettings{Hits: []model.Hit{{Pattern: model.HitAnthropicHost, Line: 4}}}, model.FAIL, model.ReasonDirectAnthropic},
 		{"fremder Host", settings(e("ANTHROPIC_BASE_URL", "https://proxy.example.eu", 3)), model.WARN, model.ReasonEndpointForeign},
 		{"nur Text API_KEY", &model.ClaudeSettings{Hits: []model.Hit{{Pattern: model.HitAPIKey, Line: 5}}}, model.WARN, model.ReasonEndpointTextOnly},
+		{"apiKeyHelper", &model.ClaudeSettings{APIKeyHelperLine: 3}, model.WARN, model.ReasonAPIKeyHelper},
+		{"apiKeyHelper mit Bedrock", &model.ClaudeSettings{APIKeyHelperLine: 3, Env: []model.EnvEntry{e("CLAUDE_CODE_USE_BEDROCK", "1", 2)}}, model.WARN, model.ReasonAPIKeyHelper},
+		{"API-Key schlaegt apiKeyHelper", &model.ClaudeSettings{APIKeyHelperLine: 3, Env: []model.EnvEntry{secret("ANTHROPIC_API_KEY", 4)}}, model.FAIL, model.ReasonDirectAnthropic},
+		{"apiKeyHelper schlaegt fremden Host", &model.ClaudeSettings{APIKeyHelperLine: 3, Env: []model.EnvEntry{e("ANTHROPIC_BASE_URL", "https://proxy.example.eu", 5)}}, model.WARN, model.ReasonAPIKeyHelper},
 		{"nur Text BASE_URL", &model.ClaudeSettings{Hits: []model.Hit{{Pattern: model.HitBaseURL, Line: 5}}}, model.WARN, model.ReasonEndpointTextOnly},
 	}
 	for _, c := range cases {
@@ -196,5 +200,17 @@ func TestClaudeNoSecretOrContentInFindings(t *testing.T) {
 		if strings.Contains(f.Message+f.Recommendation, "sk-") {
 			t.Fatalf("leak: %+v", f)
 		}
+	}
+}
+
+func TestAPIKeyHelperLineAndUserRule(t *testing.T) {
+	// CLAUDE-001 bleibt unverändert: ein Helper allein ist keine belegte direkte Konfiguration.
+	f := sole(t, rules.CheckClaudeUser(user(&model.ClaudeSettings{APIKeyHelperLine: 4, Env: []model.EnvEntry{e("CLAUDE_CODE_USE_BEDROCK", "1", 2)}}), model.DefaultConfig()))
+	if f.Severity != model.PASS {
+		t.Errorf("got %+v", f)
+	}
+	g := sole(t, rules.CheckClaudeEndpoints(user(&model.ClaudeSettings{APIKeyHelperLine: 4}), model.DefaultConfig()))
+	if g.Line != 4 || g.File != rules.UserSettingsPath || strings.Contains(g.Message+g.Recommendation, "echo") {
+		t.Errorf("got %+v", g)
 	}
 }

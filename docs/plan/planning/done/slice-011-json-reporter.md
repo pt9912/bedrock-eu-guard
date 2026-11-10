@@ -1,7 +1,6 @@
 # Slice slice-011: JSON-Reporter und Format-Auswahl
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** welle-04-output-ci.
 
@@ -28,11 +27,11 @@ Port `driven.Reporter` bleibt unverändert.
 
 ## 3. Definition of Done
 
-- [ ] `report.JSON` mit Tests: Pflichtfelder, `null` für fehlende Datei/Zeile/Empfehlung, leeres Array, Umlaute und Sonderzeichen korrekt kodiert, deterministische Ausgabe (zweimal identisch).
-- [ ] Secret-Regel: `message` und `recommendation` unverändert übernommen, keine zusätzlichen Felder mit Werten; Test mit Befunden aus der CLI (`bad`-Testdaten) ohne Secret in stdout/stderr.
-- [ ] CLI: `--format` in allen Modi; unbekanntes Format = Exit `2`; Akzeptanztest, dass die Ausgabe als JSON parsebar ist und die Exit-Codes unverändert bleiben (`0` ohne FAIL, `1` mit FAIL).
-- [ ] `make verify-clean` und CI grün; Sensors-Doku aktuell.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] `report.JSON` mit Tests: Pflichtfelder, `null` für fehlende Datei/Zeile/Empfehlung, leeres Array, Umlaute und Sonderzeichen korrekt kodiert, deterministische Ausgabe (zweimal identisch).
+- [x] Secret-Regel: `message` und `recommendation` unverändert übernommen, keine zusätzlichen Felder mit Werten; Test mit Befunden aus der CLI (`bad`-Testdaten) ohne Secret in stdout/stderr.
+- [x] CLI: `--format` in allen Modi; unbekanntes Format = Exit `2`; Akzeptanztest, dass die Ausgabe als JSON parsebar ist und die Exit-Codes unverändert bleiben (`0` ohne FAIL, `1` mit FAIL).
+- [x] `make verify-clean` und CI grün; Sensors-Doku aktuell.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 4. Plan (vor Code)
 
@@ -57,7 +56,12 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 8. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-10 (PRs #43 `Severity.Level()`/w1, #45 Adapter/CLI/SPEC/w2).
+
+- **Funktioniert:** `--format json` gibt `{"version": 1, "findings": [...]}` nach [`SPEC-021`](../../../../spec/spezifikation.md#spec-021--finding-schema-json---format-json) aus (`status`, `id`, `message`, `severity`, `reason`, `file`, `line`, `recommendation`; `null` für Fehlendes, leeres Array statt `null`, deterministisch, kein `subject`). `JSONVersion` ist eine Konstante und im Test fixiert. Bei einem Tool-Fehler bleibt stdout parsebar und die Meldung steht auf stderr; die Exit-Codes sind unverändert. [`SPEC-021`](../../../../spec/spezifikation.md#spec-021--finding-schema-json---format-json) wurde um `version`, das Top-Level-Objekt und `reason` fortgeschrieben (additive Abweichung vom Lastenheft-Beispiel, mit w1 abgestimmt).
+- **Offen:** `--output FILE` (statt Umleitung); weitere Felder (z. B. `subject`) bewusst nicht ausgegeben.
+- **Steering-Loop:** Eine additive Schemaänderung gehört im selben PR in die Spec. Die Schema-Version als einzelne, im Test fixierte Konstante macht spätere Änderungen bewusst.
+- **Folge-Slices:** slice-012 (SARIF), slice-013 (CI-Modus).
 
 ## 9. Sub-Area-Modus-Begründung
 
