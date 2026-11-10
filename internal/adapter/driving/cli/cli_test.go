@@ -177,3 +177,42 @@ func TestMissingDefaultConfigMeansDefaults(t *testing.T) {
 		t.Errorf("exit=%d stdout=%q stderr=%q", code, out, errs)
 	}
 }
+
+// slice-006: Devcontainer, Compose und Dockerfile — Positivbeispiel.
+func TestLocalEnvSourcesGood(t *testing.T) {
+	code, out, errs := localWith(t, euEnv)
+	if code != 0 || strings.Contains(out, "[FAIL]") {
+		t.Fatalf("exit=%d stdout=%q stderr=%q", code, out, errs)
+	}
+	for _, want := range []string{"LH-FA-DEVCON-001", "LH-FA-DOCKER-001", "LH-FA-DOCKER-002"} {
+		if !strings.Contains(out, "[PASS] "+want) {
+			t.Errorf("kein PASS für %s:\n%s", want, out)
+		}
+	}
+}
+
+// Negativbeispiel: direkter Anthropic-Zugang und US-/APAC-Regionen in allen
+// drei Quellen → FAIL mit Datei, Exit 1, kein Secret-Wert (LH-NF-004).
+func TestLocalEnvSourcesBad(t *testing.T) {
+	args, home := scanArgs("testdata/bad")
+	var o, e bytes.Buffer
+	code := run(args, euEnv, home, &o, &e)
+	out := o.String()
+	if code != 1 {
+		t.Fatalf("exit=%d stdout=%q stderr=%q", code, out, e.String())
+	}
+	for _, want := range []string{
+		"[FAIL] LH-FA-DEVCON-001", ".devcontainer/devcontainer.json:",
+		"[FAIL] LH-FA-DOCKER-001", "docker-compose.yml:",
+		"[FAIL] LH-FA-DOCKER-002", "Dockerfile:",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("Ausgabe enthält %q nicht:\n%s", want, out)
+		}
+	}
+	for _, s := range []string{out, e.String()} {
+		if strings.Contains(s, "GEHEIM") || strings.Contains(s, "sk-ant") {
+			t.Errorf("Secret-Wert in der Ausgabe:\n%s", s)
+		}
+	}
+}

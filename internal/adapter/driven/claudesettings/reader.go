@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/secretkey"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/core/model"
 )
 
@@ -143,7 +144,7 @@ func parseEnv(dec *json.Decoder, data []byte, s *model.ClaudeSettings) error {
 			return err
 		}
 		e := model.EnvEntry{Key: key, Line: line}
-		if isSecretKey(key) {
+		if secretkey.IsSecret(key) {
 			e.Secret = true
 		} else {
 			e.Value = stringify(v)
@@ -197,25 +198,4 @@ func findHits(data []byte) []model.Hit {
 		}
 	}
 	return hits
-}
-
-// secretNeedles sind Teilstrings (Großschreibung egal), bei denen ein
-// env-Schlüssel als Secret gilt. Bewusst großzügig: Fehlalarme (zu viel
-// geschwärzt) sind akzeptabel, Lücken nicht.
-var secretNeedles = []string{
-	"TOKEN", "SECRET", "PASSWORD", "CREDENTIAL", "API_KEY", "ACCESS_KEY",
-	"PRIVATE_KEY", "AWS_ACCESS_KEY_ID", "APIKEYHELPER",
-}
-
-func isSecretKey(key string) bool {
-	up := strings.ToUpper(key)
-	if strings.HasSuffix(up, "_KEY") {
-		return true
-	}
-	for _, n := range secretNeedles {
-		if strings.Contains(up, n) {
-			return true
-		}
-	}
-	return false
 }
