@@ -1,7 +1,6 @@
 # Slice slice-020: apiKeyHelper als Hinweis auf direkte Anthropic-Konfiguration
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** Qualitätsrunde nach welle-04-output-ci (Folgepunkt aus slice-004).
 
@@ -25,10 +24,10 @@ je zu lesen oder auszugeben.
 
 ## 3. Definition of Done
 
-- [ ] Kern (w1): Feld, Reason, Regel in `CheckClaudeEndpoints`, Tests inkl. Rangfolge, [`SPEC-012`](../../../../spec/spezifikation.md#spec-012--direkte-anthropic-konfiguration-in-claude-settings).
-- [ ] Adapter (w2): `claudesettings` liefert `APIKeyHelperLine`; Testdaten mit Helper, Test „Befehl erscheint nirgends in der Ausgabe“.
-- [ ] `make verify-clean` und CI grün.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Kern (w1): Feld, Reason, Regel in `CheckClaudeEndpoints`, Tests inkl. Rangfolge, [`SPEC-012`](../../../../spec/spezifikation.md#spec-012--direkte-anthropic-konfiguration-in-claude-settings).
+- [x] Adapter (w2): `claudesettings` liefert `APIKeyHelperLine`; Testdaten mit Helper, Test „Befehl erscheint nirgends in der Ausgabe“.
+- [x] `make verify-clean` und CI grün.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 4. Plan (vor Code)
 
@@ -44,4 +43,10 @@ je zu lesen oder auszugeben.
 
 ## 6. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-10 (PRs #56 Kern und Spec-Abschnitt/w1, #57 Adapter/w2).
+
+- **Funktioniert:** `apiKeyHelper` als Top-Level-Schlüssel einer Settings-Datei ergibt in [`LH-FA-CLAUDE-003`](../../../../spec/lastenheft.md#lh-fa-claude-003--erkennung-direkter-anthropic-endpunkte) ein `WARN` (`APIKEY_HELPER`) mit Datei und Zeile; der Befehl erscheint nirgends (der Adapter verwirft den Wert, Tests über Konsole, JSON und SARIF). Die Rangfolge je Datei steht in [`SPEC-012`](../../../../spec/spezifikation.md#spec-012--direkte-anthropic-konfiguration-in-claude-settings) (FAIL für API-Key/Token/`api.anthropic.com` vor `apiKeyHelper` vor fremdem Host vor Text-Fund). [`LH-FA-CLAUDE-001`](../../../../spec/lastenheft.md#lh-fa-claude-001--benutzerweite-claude-code-settings-prüfen) blieb unverändert.
+- **Anders als geplant:** nichts Wesentliches.
+- **Offen:** `WARN` statt `FAIL` ist eine Auslegung; eine Verschärfung (z. B. FAIL ohne Bedrock-Flag) wäre eine Änderung von [`SPEC-012`](../../../../spec/spezifikation.md#spec-012--direkte-anthropic-konfiguration-in-claude-settings) und Sache der Auftraggeber. Die Wechselwirkung von `apiKeyHelper` mit `CLAUDE_CODE_USE_BEDROCK=1` ist nicht verlässlich belegt.
+- **Steering-Loop:** Bei Werten, die Secrets enthalten können (Befehle), nur die Fundstelle transportieren und den Wert im Adapter verwerfen; einen Test „erscheint nirgends in der Ausgabe“ über alle Formate mitliefern. Auslegungsfragen als Spec-Abschnitt festhalten statt als Kommentar im Code.
+- **Folge-Slices:** keine.

@@ -1,7 +1,6 @@
 # Slice slice-019: Scan-Root-Ausschluss (`exclude`)
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** welle-05-release (Vorlauf für slice-015).
 
@@ -34,10 +33,10 @@ Datei-Discovery ausnehmen. Das ist Voraussetzung für den Self-Check
 
 ## 4. Definition of Done
 
-- [ ] Kern (w1): `Config.Exclude`, `PartialConfig.Exclude`, `Resolve`-Validierung, `Excluded`, Filter in `app.Scan`, Unit-Tests; [`SPEC-020`](../../../../spec/spezifikation.md#spec-020--konfigurationsschema-bedrock-eu-checkyml) fortgeschrieben.
-- [ ] Adapter (w2): `configyaml` mappt `exclude` (inkl. strikter Prüfung des Typs), Test mit Konfigurationsdatei; CLI-Test, dass ausgeschlossene Pfade nicht gemeldet werden.
-- [ ] `make verify-clean` und CI grün.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Kern (w1): `Config.Exclude`, `PartialConfig.Exclude`, `Resolve`-Validierung, `Excluded`, Filter in `app.Scan`, Unit-Tests; [`SPEC-020`](../../../../spec/spezifikation.md#spec-020--konfigurationsschema-bedrock-eu-checkyml) fortgeschrieben.
+- [x] Adapter (w2): `configyaml` mappt `exclude` (inkl. strikter Prüfung des Typs), Test mit Konfigurationsdatei; CLI-Test, dass ausgeschlossene Pfade nicht gemeldet werden.
+- [x] `make verify-clean` und CI grün.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 5. Plan (vor Code)
 
@@ -62,7 +61,13 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 9. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-10 (PRs #49 Kern/w1, #51 Adapter/CLI/w2).
+
+- **Funktioniert:** `exclude` in `bedrock-eu-check.yml` nimmt Pfade von der Datei-Discovery aus. Die Semantik liegt an einer Stelle (`Config.Excluded`: `path.Match`, relativ zum Scan-Root, trifft den Pfad oder ein Verzeichnis darüber, kein `**`); angewendet wird sie im Kern (`app.Scan` filtert Glob-Treffer, `TerraformReader.Find()` und die Projekt-Claude-Settings vor dem Lesen), die Benutzer-Settings bleiben unberührt. Ungültige Muster sind ein Konfigurationsfehler (Exit `2`) ohne Musterzitat. Der Adapter `configyaml` mappt nur das Feld; [`SPEC-020`](../../../../spec/spezifikation.md#spec-020--konfigurationsschema-bedrock-eu-checkyml) ist fortgeschrieben.
+- **Anders als geplant:** Die Anwendung im Kern statt in den Adaptern hat die Adapteränderungen auf das Mapping beschränkt. Die Adapter laufen weiterhin durch ausgeschlossene Verzeichnisse (nur Kosten).
+- **Offen:** `**` wird nicht unterstützt; `Files.Glob` ist nicht rekursiv (Env-Discovery findet nur Dateien im Scan-Root, Terraform rekursiv); die Ausgabe weist ausgeschlossene Pfade nicht aus (Folgepunkt: Hinweis auf stderr); frühes Überspringen in `terraform.Find()` ist eine mögliche Optimierung.
+- **Steering-Loop:** Querschnittsregeln im Kern einmal umsetzen, die Adapter dünn halten. Ein Skript, das Testdateien per Bereichslöschung bearbeitet, hat einen bestehenden Test zerstört; Bearbeitungen an Testdateien nur mit Ankern, die genau eine Stelle treffen, und danach Diff und Test prüfen.
+- **Folge-Slices:** keine.
 
 ## 10. Sub-Area-Modus-Begründung
 
