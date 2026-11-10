@@ -114,7 +114,7 @@ gilt das Lehrmaterial.
   | Architektur (Sicht)                          | `ARC-<NNN>`          | [`ARC-003`](../spec/architecture.md#2-schichten-und-constraints)                      |
   | ADR                                          | `ADR-<NNNN>`         | [`ADR-0001`](../docs/plan/adr/0001-dokumentation-als-source-of-truth.md)              |
   | Carveout                                     | `CO-<NNN>`           | `CO-001`                                                                              |
-  | Slice                                        | `slice-<NNN>`        | [`slice-001`](../docs/plan/planning/open/slice-001-hexagon-skelett-env-region.md)     |
+  | Slice                                        | `slice-<NNN>`        | [`slice-001`](../docs/plan/planning/done/slice-001-hexagon-skelett-env-region.md)     |
   | Adaption                                     | `MR-<NNN>`           | `MR-002`                                                                              |
 
   Die `<AREA>`-Codes des Lastenhefts: `LENV` (lokale Env), `CLAUDE`
