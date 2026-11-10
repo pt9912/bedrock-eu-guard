@@ -1,6 +1,6 @@
 # Welle welle-05-release: Release 1.0
 
-**Status:** open
+**Status:** in-progress (Release-Kandidat, Veröffentlichung ausstehend)
 
 **Zielmeilenstein:** M5 — Release 1.0
 
@@ -86,4 +86,4 @@ und die Qualitätsgates, die das Lastenheft für Pull Requests verlangt ([`LH-QA
 
 ## 9. Closure-Notiz
 
-<!-- Erst nach Welle-Abschluss füllen. Verweis auf welle-05-results.md. -->
+Zwischenstand 2026-11-10: Release-Kandidat, siehe [`done/welle-05-results.md`](done/welle-05-results.md). Die Welle schließt erst mit dem ausdrücklich freigegebenen Release (M5).

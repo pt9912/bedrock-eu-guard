@@ -20,6 +20,7 @@ welle-01 bis welle-04 sind abgeschlossen (2026-11-10, siehe
 [`../done/welle-03-results.md`](../done/welle-03-results.md) und
 [`../done/welle-04-results.md`](../done/welle-04-results.md)). Tag und Veröffentlichung
 von Release 1.0 gibt es nur nach ausdrücklicher Freigabe beider Nutzer.
+Stand: Release-Kandidat, siehe [`../done/welle-05-results.md`](../done/welle-05-results.md).
 
 ## Nächste Wellen
 
@@ -34,7 +35,7 @@ von Release 1.0 gibt es nur nach ausdrücklicher Freigabe beider Nutzer.
 | M2 — vollständiger statischer Scan | welle-02 | Config/Container/Terraform abgedeckt | erreicht (2026-11-10) |
 | M3 — AWS-Live-Checks | welle-03 | STS/Bedrock/IAM read-only | erreicht (2026-11-10) |
 | M4 — CI-fähig | welle-04 | SARIF + `--ci` + Exit-Code 1 bei FAIL | erreicht (2026-11-10) |
-| M5 — Release 1.0 | welle-05 | Docker-Image + Doku + Tests grün | offen |
+| M5 — Release 1.0 | welle-05 | Docker-Image + Doku + Tests grün | offen (Release-Kandidat; wartet auf Freigabe beider Nutzer) |
 
 ## Abhängigkeitsgraph
 
