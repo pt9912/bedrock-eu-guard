@@ -1,7 +1,6 @@
 # Slice slice-015: Qualitätsgates (Architekturprüfung, Self-Check, Testdaten-Matrix)
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** welle-05-release.
 
@@ -38,12 +37,12 @@ Bis dahin gilt: kein Scanner, keine Testdaten, Lücke dokumentiert.
 
 ## 4. Definition of Done
 
-- [ ] `internal/arch` mit Regeln, Repository-Test und Tabellentest; Gates grün (w1, in diesem Slice umgesetzt).
-- [ ] Testdaten-Matrix als Test (w1, umgesetzt).
-- [ ] `make self-check` und `bedrock-eu-check.yml` im Repo, CI-Schritt (w2).
-- [ ] Sensors-Tabellen in `AGENTS.md` und `harness/README.md` um `self-check` ergänzt, sobald es läuft (w2).
-- [ ] Entscheidung zur Lücke `.env`/`iam-policy.json` dokumentiert (Auftraggeber).
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] `internal/arch` mit Regeln, Repository-Test und Tabellentest; Gates grün (w1, in diesem Slice umgesetzt).
+- [x] Testdaten-Matrix als Test (w1, umgesetzt).
+- [x] `make self-check` und `bedrock-eu-check.yml` im Repo, CI-Schritt (w2).
+- [x] Sensors-Tabellen in `AGENTS.md` und `harness/README.md` um `self-check` ergänzt, sobald es läuft (w2).
+- [x] Entscheidung zur Lücke `.env`/`iam-policy.json` dokumentiert (Auftraggeber).
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 5. Plan (vor Code)
 
@@ -69,7 +68,13 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 9. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-10 (PRs #52 Architekturprüfung und Testdaten-Matrix/w1, #54 Self-Check/w2, #62 Doku-Drift-Test/w1).
+
+- **Funktioniert:** `internal/arch` erzwingt die Schichtenregeln als Go-Test über alle Produktionsdateien (`core/model` nur Stdlib; Kern, Ports und Test-Doubles ohne Drittbibliotheken und Seiteneffekt-Pakete; `rules`/`app`/`port`/Adapter nur mit erlaubten Abhängigkeiten; `os/exec` und AWS-SDK nur in `adapter/driven/awscli`). Das Repository erfüllte die Regeln beim ersten Lauf ohne Verstoß; ein Tabellentest mit 29 Fällen belegt, dass jede Regel anschlägt. `make self-check` (w2) führt `local` und `terraform` mit kontrollierter Umgebung gegen das eigene Repository aus (Exit 0 Pflicht, `bedrock-eu-check.yml` mit `exclude`); ohne die Konfiguration meldete `terraform` drei FAIL aus den absichtlich schlechten Testdaten. Der Test `TestTestdataCoverage` hält die Matrix aus [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) fest, `TestDocsMatchReasonCodes` und `TestDocsListAllRules` verhindern Drift zwischen Regelkatalog und Code (Negativprobe: ein zusätzlicher Code oder ein erfundener Katalogeintrag bricht den Test).
+- **Anders als geplant:** Die Architekturprüfung liest Importe per `go/parser` statt per `go list` (kein Prozessstart, deterministisch, läuft in `make test`; ein eigenes Target `make arch-check` ist nicht nötig). Ein eigener Vorlauf-Slice (slice-019, `exclude`) war für den Self-Check nötig. Der Self-Check prüft derzeit kaum Zielartefakte im Repository (Dockerfile: WARN, Exit 0).
+- **Offen / Frage an die Auftraggeber:** [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) verlangt Testdaten für `.env` und `iam-policy.json`, aber keine funktionale Anforderung beschreibt Scanner dafür. Das Lastenheft ist bindend und wird nicht einseitig erweitert; der Test loggt die Lücke. **Entscheidung nötig:** (1) Anforderungen und Scanner ergänzen (kleiner Aufwand: `.env` über `EnvFile`, `iam-policy.json` über die vorhandene Policy-Bewertung) oder (2) die Anforderung zu den Testdaten streichen bzw. präzisieren. Weitere offene Punkte: Die Architekturregeln stehen im Code und in `spec/architecture.md` (Drift möglich, der Test ist maßgeblich); die Liste der Seiteneffekt-Pakete im Kern ist endlich.
+- **Steering-Loop:** (1) Architektur- und Doku-Regeln als ausführbare Tests statt als Review-Wunsch; jede Regel braucht eine Negativprobe, sonst ist ein grüner Test wertlos. (2) Beim Verketten von Gate-Aufruf und Commit/Push den Exitcode auswerten (`cmd && …` statt Pipe in `grep`): ein verschluckter Fehler hat zweimal einen roten Stand gepusht, der erst in `doc-check` auffiel. (3) Querschnittsfunktionen (Ausschluss) einmal im Kern anwenden statt in jedem Adapter.
+- **Folge-Slices:** Entscheidung zu `.env`/`iam-policy.json` abwarten; danach gegebenenfalls Scanner-Slice.
 
 ## 10. Sub-Area-Modus-Begründung
 
