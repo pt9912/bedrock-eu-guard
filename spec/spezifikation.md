@@ -57,6 +57,10 @@ Block hat Vorrang vor Allow. Default-Muster siehe `SPEC-020`. Schritt 2
 setzt „nicht erlaubte Regionen“ aus
 [`LH-FA-LENV-006`](lastenheft.md#lh-fa-lenv-006--prüfung-von-claude-default-modellvariablen) allgemein um, nicht nur für die Block-Default-Muster;
 IDs ohne Region sind davon nicht berührt.
+Bei ARNs (`arn:…`) werden die Muster aus den Schritten 1 und 3
+zusätzlich gegen den Resource-Teil nach dem letzten `/` geprüft (z. B.
+`foundation-model/<id>`, `inference-profile/<id>`); die Regionsprüfung
+(Schritt 2) läuft über den ganzen ARN.
 Präzisiert [`LH-FA-LENV-006`](lastenheft.md#lh-fa-lenv-006--prüfung-von-claude-default-modellvariablen), [`LH-FA-BEDROCK-002`](lastenheft.md#lh-fa-bedrock-002--nicht-erlaubte-profile-erkennen)/[`LH-FA-BEDROCK-003`](lastenheft.md#lh-fa-bedrock-003--erlaubte-eu-profile-prüfen),
 [`LH-FA-TF-004`](lastenheft.md#lh-fa-tf-004--nicht-erlaubte-modell-ids-finden).
 
