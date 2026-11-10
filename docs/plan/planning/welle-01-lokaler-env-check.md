@@ -1,6 +1,6 @@
 # Welle welle-01-lokaler-env-check: Lokaler Env- und Region-Check
 
-**Status:** open
+**Status:** done
 
 **Zielmeilenstein:** M1 — erstes lauffähiges Tool
 
@@ -35,9 +35,9 @@ erfüllt (`RM-001` / v0.1).
 
 | Slice | Titel | Status | Bezug |
 |---|---|---|---|
-| slice-001 | Hexagon-Gerüst + Env-/Region-Check + Exit-Codes + Konsolen-Reporter | open | [`LH-FA-LENV-001`](../../../spec/lastenheft.md#lh-fa-lenv-001--prüfung-von-aws_region)/[`LH-FA-LENV-002`](../../../spec/lastenheft.md#lh-fa-lenv-002--prüfung-von-aws_default_region), `EXIT-*`, `REP-001` |
-| slice-002 | Modell-ID-Klassifikation (allow/block) + LENV-006 | open (Datei in `open/`) | [`LH-FA-LENV-006`](../../../spec/lastenheft.md#lh-fa-lenv-006--prüfung-von-claude-default-modellvariablen), [`SPEC-010`](../../../spec/spezifikation.md#spec-010--klassifikation-von-modell-profil-ids) |
-| slice-003 | Mantle-Prüfung (LENV-005); LENV-003/-004 bereits in slice-001 | open (Datei in `open/`) | [`LH-FA-LENV-005`](../../../spec/lastenheft.md#lh-fa-lenv-005--prüfung-von-claude_code_use_mantle) |
+| slice-001 | Hexagon-Gerüst + Env-/Region-Check + Exit-Codes + Konsolen-Reporter | done | [`LH-FA-LENV-001`](../../../spec/lastenheft.md#lh-fa-lenv-001--prüfung-von-aws_region)/[`LH-FA-LENV-002`](../../../spec/lastenheft.md#lh-fa-lenv-002--prüfung-von-aws_default_region), `EXIT-*`, `REP-001` |
+| slice-002 | Modell-ID-Klassifikation (allow/block) + LENV-006 | done | [`LH-FA-LENV-006`](../../../spec/lastenheft.md#lh-fa-lenv-006--prüfung-von-claude-default-modellvariablen), [`SPEC-010`](../../../spec/spezifikation.md#spec-010--klassifikation-von-modell-profil-ids) |
+| slice-003 | Mantle-Prüfung (LENV-005); LENV-003/-004 bereits in slice-001 | done | [`LH-FA-LENV-005`](../../../spec/lastenheft.md#lh-fa-lenv-005--prüfung-von-claude_code_use_mantle) |
 
 > slice-001 bis slice-003 sind als Dateien in `open/` angelegt (Plan-vor-Code,
 > Modul 5). slice-003 wurde am 2026-11-10 umdefiniert: LENV-003/-004 lieferte
@@ -56,4 +56,4 @@ erfüllt (`RM-001` / v0.1).
 
 ## 7. Closure-Notiz
 
-<!-- Erst nach Welle-Abschluss füllen. Verweis auf welle-01-results.md. -->
+Abgeschlossen am 2026-11-10, siehe [`done/welle-01-results.md`](done/welle-01-results.md).

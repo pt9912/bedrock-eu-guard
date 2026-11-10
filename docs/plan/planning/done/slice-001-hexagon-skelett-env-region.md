@@ -1,7 +1,6 @@
 # Slice slice-001: Hexagon-Gerüst + Env-/Region-Check + Exit-Codes + Konsolen-Reporter
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** welle-01-lokaler-env-check.
 
@@ -23,17 +22,17 @@ Env-Variablen prüft, `PASS`/`WARN`/`FAIL` auf der Konsole ausgibt und mit
 
 ## 2. Definition of Done
 
-- [ ] Paketstruktur nach [`ADR-0003`](../../adr/0003-hexagonale-architektur.md) angelegt: `internal/hexagon/core/{model,rules,app}`, `internal/hexagon/port/driven`, `internal/adapter/driving/cli`, `internal/adapter/driven/{envos,report}`.
-- [ ] `model`: `Finding`, `Severity` (`PASS/WARN/FAIL`), Reason-Codes, `Config` (importfreier Ring) — [`SPEC-001`](../../../../spec/spezifikation.md#spec-001--severity--und-aggregationsmodell).
-- [ ] `Environment`-Port + `envos`-Adapter + `coretest/fakeenv`-Double.
-- [ ] Regeln [`LH-FA-LENV-001`](../../../../spec/lastenheft.md#lh-fa-lenv-001--prüfung-von-aws_region) (AWS_REGION), `-002` (AWS_DEFAULT_REGION-Fallback), `-003` (CLAUDE_CODE_USE_BEDROCK), `-004` (ANTHROPIC_API_KEY) mit Unit-Tests je Regel ([`LH-QA-001`](../../../../spec/lastenheft.md#lh-qa-001--unit-tests)).
-- [ ] Region-Klassifikation gegen `allowedRegions` (Default `eu-central-1`) — [`SPEC-011`](../../../../spec/spezifikation.md#spec-011--regionsklassifikation).
-- [ ] Konsolen-Reporter ([`LH-FA-REP-001`](../../../../spec/lastenheft.md#lh-fa-rep-001--konsolenausgabe)); **kein Secret-Wert** in der Ausgabe ([`LH-NF-004`](../../../../spec/lastenheft.md#lh-nf-004--keine-secret-ausgabe)).
-- [ ] Exit-Codes `0/1/2` über `app`-Aggregation — [`SPEC-030`](../../../../spec/spezifikation.md#spec-030--exit-codes).
-- [ ] `make lint`, `make test` im `Makefile` verdrahtet und grün; in `harness/README.md`/`AGENTS.md`-Sensors-Tabelle nachgetragen (dann real).
-- [ ] `make gates` grün (inkl. `doc-check`).
-- [ ] Akzeptanz [`LH-ABN-001`](../../../../spec/lastenheft.md#lh-abn-001--kritische-lokale-fehlkonfiguration) und [`LH-ABN-002`](../../../../spec/lastenheft.md#lh-abn-002--eu-konforme-minimalumgebung) als Test reproduziert.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Paketstruktur nach [`ADR-0003`](../../adr/0003-hexagonale-architektur.md) angelegt: `internal/hexagon/core/{model,rules,app}`, `internal/hexagon/port/driven`, `internal/adapter/driving/cli`, `internal/adapter/driven/{envos,report}`.
+- [x] `model`: `Finding`, `Severity` (`PASS/WARN/FAIL`), Reason-Codes, `Config` (importfreier Ring) — [`SPEC-001`](../../../../spec/spezifikation.md#spec-001--severity--und-aggregationsmodell).
+- [x] `Environment`-Port + `envos`-Adapter + `coretest/fakeenv`-Double.
+- [x] Regeln [`LH-FA-LENV-001`](../../../../spec/lastenheft.md#lh-fa-lenv-001--prüfung-von-aws_region) (AWS_REGION), `-002` (AWS_DEFAULT_REGION-Fallback), `-003` (CLAUDE_CODE_USE_BEDROCK), `-004` (ANTHROPIC_API_KEY) mit Unit-Tests je Regel ([`LH-QA-001`](../../../../spec/lastenheft.md#lh-qa-001--unit-tests)).
+- [x] Region-Klassifikation gegen `allowedRegions` (Default `eu-central-1`) — [`SPEC-011`](../../../../spec/spezifikation.md#spec-011--regionsklassifikation).
+- [x] Konsolen-Reporter ([`LH-FA-REP-001`](../../../../spec/lastenheft.md#lh-fa-rep-001--konsolenausgabe)); **kein Secret-Wert** in der Ausgabe ([`LH-NF-004`](../../../../spec/lastenheft.md#lh-nf-004--keine-secret-ausgabe)).
+- [x] Exit-Codes `0/1/2` über `app`-Aggregation — [`SPEC-030`](../../../../spec/spezifikation.md#spec-030--exit-codes).
+- [x] `make lint`, `make test` im `Makefile` verdrahtet und grün; in `harness/README.md`/`AGENTS.md`-Sensors-Tabelle nachgetragen (dann real).
+- [x] `make gates` grün (inkl. `doc-check`).
+- [x] Akzeptanz [`LH-ABN-001`](../../../../spec/lastenheft.md#lh-abn-001--kritische-lokale-fehlkonfiguration) und [`LH-ABN-002`](../../../../spec/lastenheft.md#lh-abn-002--eu-konforme-minimalumgebung) als Test reproduziert.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 3. Plan (vor Code)
 
@@ -62,7 +61,13 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 7. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-10 (PRs #1 Basis, #3 Kern, #2 Adapter/CLI, Hotfix #6).
+
+- **Funktioniert:** Hexagon-Gerüst nach [`ADR-0003`](../../adr/0003-hexagonale-architektur.md), LENV-001..004, Konsolen-Reporter, Exit-Codes 0/1/2; [`LH-ABN-001`](../../../../spec/lastenheft.md#lh-abn-001--kritische-lokale-fehlkonfiguration)/[`-002`](../../../../spec/lastenheft.md#lh-abn-002--eu-konforme-minimalumgebung) als CLI-Tests. Parallelarbeit w1 (Kern) / w2 (Adapter, CLI, Makefile) über einen frühen Schnittstellenvertrag (`model`, `Environment`, `Reporter`).
+- **Anders als geplant:** LENV-003/-004 kamen schon hier statt in slice-003. LENV-002: Die Spezifikation widerspricht sich (PASS bei erlaubter `AWS_DEFAULT_REGION` vs. WARN, wenn `AWS_REGION` fehlt); umgesetzt ist WARN (`REGION_FALLBACK_DEFAULT`). Klärungspunkt für eine Spec-Präzisierung.
+- **Vorfall:** `main` war kurz rot (PR #4 ohne `lenv005.go`), weil eine lokale Ignore-Regel Dateien beim `git add` ausschloss und die Gates im Arbeitsbaum liefen.
+- **Steering-Loop:** Gates vor dem Handoff im sauberen Checkout (frischer `git worktree`) oder in CI ausführen. `make gates` umfasst `doc-check`, `lint` und `test`, im Bericht aber lint/test explizit nennen. Folgeaufgabe: `make verify-clean` oder CI-Workflow.
+- **Folge-Slices:** slice-002, slice-003 (angelegt).
 
 ## 8. Sub-Area-Modus-Begründung
 

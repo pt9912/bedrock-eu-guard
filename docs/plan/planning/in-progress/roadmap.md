@@ -10,14 +10,9 @@ Reihenfolge von Terminen. Die Wellen bilden die Versions-Stufen
 
 ## Aktuelle Welle
 
-**Welle-ID:** welle-01-lokaler-env-check
-**Start:** 2026-06-24
-**Geplantes Ende:** offen (Schätzung folgt mit slice-001)
-
-**Closure-Trigger:** siehe [`../welle-01-lokaler-env-check.md`](../welle-01-lokaler-env-check.md).
-
-> **[`ADR-0002`](../../adr/0002-implementierungssprache.md) accepted (2026-11-10):** Sprachwahl Go bestätigt; der erste Code-Slice
-> (slice-001) kann starten und verdrahtet die Toolchain (`make lint/test/build`).
+Keine aktive Welle. welle-01-lokaler-env-check ist abgeschlossen
+(2026-11-10, siehe [`../done/welle-01-results.md`](../done/welle-01-results.md));
+als Nächstes steht welle-02-config-scanner an (Plan-Datei fehlt noch).
 
 ## Nächste Wellen
 
@@ -33,7 +28,7 @@ Reihenfolge von Terminen. Die Wellen bilden die Versions-Stufen
 | Meilenstein | Welle(n) | Trigger | Status |
 |---|---|---|---|
 | M0 — Harness bereit | — | Greenfield-Bootstrap abgeschlossen | erreicht (2026-06-24) |
-| M1 — erstes lauffähiges Tool | welle-01 | `bedrock-eu-check local` liefert PASS/WARN/FAIL + Exit-Codes | offen |
+| M1 — erstes lauffähiges Tool | welle-01 | `bedrock-eu-check local` liefert PASS/WARN/FAIL + Exit-Codes | erreicht (2026-11-10) |
 | M2 — vollständiger statischer Scan | welle-02 | Config/Container/Terraform abgedeckt | offen |
 | M3 — AWS-Live-Checks | welle-03 | STS/Bedrock/IAM read-only | offen |
 | M4 — CI-fähig | welle-04 | SARIF + `--ci` + Exit-Code 1 bei FAIL | offen |
@@ -51,7 +46,7 @@ flowchart LR
 
 ## Abgeschlossene Wellen
 
-(noch keine)
+- welle-01-lokaler-env-check, abgeschlossen 2026-11-10, siehe [`done/welle-01-results.md`](../done/welle-01-results.md).
 
 ## Historische Trigger-Verschiebungen
 

@@ -1,7 +1,6 @@
 # Slice slice-003: Mantle-Prüfung (CLAUDE_CODE_USE_MANTLE)
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** welle-01-lokaler-env-check.
 
@@ -28,11 +27,11 @@ späteren Slice mit Config-Adapter (Welle 2) offen; hier gilt fest `warn`.
 
 ## 2. Definition of Done
 
-- [ ] Regel [`LH-FA-LENV-005`](../../../../spec/lastenheft.md#lh-fa-lenv-005--prüfung-von-claude_code_use_mantle): Mantle nicht gesetzt → kein Befund; aktiv ohne Modellvariablen → WARN; aktiv und alle gesetzten Modell-IDs `allowed` → PASS; blockierte ID → FAIL über LENV-006.
-- [ ] Nutzt `Classify` aus slice-002 (keine eigene Klassifikation).
-- [ ] Unit-Tests je Zweig; Registrierung in `LocalRules()`.
-- [ ] `make gates` grün.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Regel [`LH-FA-LENV-005`](../../../../spec/lastenheft.md#lh-fa-lenv-005--prüfung-von-claude_code_use_mantle): Mantle nicht gesetzt → kein Befund; aktiv ohne Modellvariablen → WARN; aktiv und alle gesetzten Modell-IDs `allowed` → PASS; blockierte ID → FAIL über LENV-006.
+- [x] Nutzt `Classify` aus slice-002 (keine eigene Klassifikation).
+- [x] Unit-Tests je Zweig; Registrierung in `LocalRules()`.
+- [x] `make gates` grün.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 3. Plan (vor Code)
 
@@ -55,7 +54,12 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 7. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-10 (PR #4, Hotfix #6).
+
+- **Funktioniert:** `CheckMantle` (WARN bzw. PASS) mit Tests, nutzt `Classify` aus slice-002. Blockierte IDs meldet LENV-006 als FAIL, es gibt kein Doppel-FAIL.
+- **Anders als geplant:** PR #4 enthielt die Regeldatei nicht (siehe slice-001, Vorfall); nachgereicht in #6.
+- **Offen/Nicht-Ziel:** Config-Feld `mantle: warn|allow|block` mit dem Config-Adapter (Welle 2).
+- **Steering-Loop:** siehe slice-001.
 
 ## 8. Sub-Area-Modus-Begründung
 
