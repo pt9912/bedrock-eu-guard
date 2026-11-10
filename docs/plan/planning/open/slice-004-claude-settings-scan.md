@@ -32,8 +32,14 @@ und meldet Findings mit Datei und Zeile. Secret-Werte erreichen nie den Kern.
 |---|---|---|
 | [`LH-FA-CLAUDE-001`](../../../../spec/lastenheft.md#lh-fa-claude-001--benutzerweite-claude-code-settings-prüfen) (User-Settings) | `WARN` (`FILE_MISSING`) | `PASS`, wenn `CLAUDE_CODE_USE_BEDROCK=1` und keine direkte Anthropic-Konfiguration; `FAIL` bei direkter Konfiguration; sonst `WARN` (Bedrock nicht aktiviert) |
 | [`LH-FA-CLAUDE-002`](../../../../spec/lastenheft.md#lh-fa-claude-002--projektweite-claude-code-settings-prüfen) (Projekt: `settings.json`, `settings.local.json`) | kein Finding (optional) | `PASS`, wenn EU-safe; `FAIL` bei nicht erlaubtem Modell (Klassifikation aus [`SPEC-010`](../../../../spec/spezifikation.md#spec-010--klassifikation-von-modell-profil-ids)), nicht erlaubter Region oder API-Key |
-| [`LH-FA-CLAUDE-003`](../../../../spec/lastenheft.md#lh-fa-claude-003--erkennung-direkter-anthropic-endpunkte) (Endpunkte) | kein Finding | `FAIL` bei `api.anthropic.com` oder gesetztem `ANTHROPIC_API_KEY`; `ANTHROPIC_BASE_URL` auf anderen Host: `WARN` |
+| [`LH-FA-CLAUDE-003`](../../../../spec/lastenheft.md#lh-fa-claude-003--erkennung-direkter-anthropic-endpunkte) (Endpunkte) | kein Finding | `FAIL` bei gesetztem `ANTHROPIC_API_KEY`/`ANTHROPIC_AUTH_TOKEN` (Eintrag in `env`), bei Treffer `api.anthropic.com` oder bei `ANTHROPIC_BASE_URL` mit Host `api.anthropic.com`; reiner Textfund von `ANTHROPIC_API_KEY`/`ANTHROPIC_BASE_URL` außerhalb von `env` (z. B. in `permissions`, Kommentarstrings, Hooks) sowie `ANTHROPIC_BASE_URL` auf anderen Host: `WARN` |
 | [`LH-FA-CLAUDE-004`](../../../../spec/lastenheft.md#lh-fa-claude-004--claude-code-wizard-konfiguration-prüfen) (Wizard in User-Settings) | kein Finding (deckt 001 ab) | `PASS` bei Bedrock `1` und erlaubter `AWS_REGION`; `FAIL` bei fehlender oder nicht erlaubter Region oder parallelem direktem Anthropic-Zugang |
+
+Präzisierungen aus dem Review (w1):
+
+- **Aktiv konfiguriert** ([\`LH-FA-CLAUDE-003\`](../../../../spec/lastenheft.md#lh-fa-claude-003--erkennung-direkter-anthropic-endpunkte) verlangt `FAIL` nur bei aktiver Konfiguration): Textfunde außerhalb von `env` sind höchstens `WARN`.
+- **CLAUDE-002:** Das Modell stammt aus `model` bzw. aus `ANTHROPIC_*_MODEL` in `env` und wird mit `Classify` bewertet (`blocked` = `FAIL`, `unclassified` = `WARN`, `allowed` = `PASS`). Eine nicht erlaubte `AWS_REGION` ist `FAIL` ([`SPEC-011`](../../../../spec/spezifikation.md#spec-011--regionsklassifikation)). `settings.json` und `settings.local.json` werden einzeln bewertet, je Datei ein Finding pro Regel mit `File` und `Line`.
+- **Doppelmeldungen sind gewollt:** Dieselbe Ursache (z. B. API-Key in den User-Settings) erzeugt je Regel-ID ein Finding (001, 003 und 004). Nicht deduplizieren.
 
 Datei vorhanden, aber nicht lesbar oder ungültig: `FAIL` mit
 `FILE_UNREADABLE`/`FILE_INVALID`, Scan läuft weiter
