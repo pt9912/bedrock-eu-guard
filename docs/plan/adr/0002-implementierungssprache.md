@@ -60,4 +60,4 @@ gefordert wird.
 | Datum | Ereignis | Verweis |
 |---|---|---|
 | 2026-06-24 | Proposed | Bootstrap; Empfehlung Go nach Wahl der Hexagonal-/d-check-Architektur (ADR-0003) |
-| 2026-11-10 | Accepted | Sign-off durch den Auftraggeber; Go bestätigt, Toolchain-Verdrahtung in [`slice-001`](../planning/open/slice-001-hexagon-skelett-env-region.md) |
+| 2026-11-10 | Accepted | Sign-off durch den Auftraggeber; Go bestätigt, Toolchain-Verdrahtung in [`slice-001`](../planning/done/slice-001-hexagon-skelett-env-region.md) |
