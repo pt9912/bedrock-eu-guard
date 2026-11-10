@@ -1,7 +1,6 @@
 # Slice slice-017: Devcontainer-Feature
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** welle-05-release.
 
@@ -29,12 +28,12 @@ Prüfsumme wird nichts installiert.
 
 ## 3. Definition of Done
 
-- [ ] `devcontainer-feature.json` (gültiges JSON, `id` = Ordnername) und `install.sh` (POSIX-Shell, `set -eu`).
-- [ ] `tools/feature-test.sh` / `make feature-test`: Struktur, Syntax, **Installation gegen ein lokal gebautes „Release“** (per `file://`, Container ohne Netz), Aufruf von `version`; Negativfälle (manipulierte Prüfsumme, ungültige Version, unzulässige `baseUrl`).
-- [ ] CI: Schritt im Workflow `image` (Docker nötig), Pfadfilter um `devcontainer-feature/**` erweitert.
-- [ ] `docs/user/devcontainer.md` mit Nutzung und Hinweis auf den Stand (nicht mit der Devcontainer-CLI erprobt, noch nicht veröffentlicht).
-- [ ] `make verify-clean` und CI grün; Sensors-Doku aktuell.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] `devcontainer-feature.json` (gültiges JSON, `id` = Ordnername) und `install.sh` (POSIX-Shell, `set -eu`).
+- [x] `tools/feature-test.sh` / `make feature-test`: Struktur, Syntax, **Installation gegen ein lokal gebautes „Release“** (per `file://`, Container ohne Netz), Aufruf von `version`; Negativfälle (manipulierte Prüfsumme, ungültige Version, unzulässige `baseUrl`).
+- [x] CI: Schritt im Workflow `image` (Docker nötig), Pfadfilter um `devcontainer-feature/**` erweitert.
+- [x] `docs/user/devcontainer.md` mit Nutzung und Hinweis auf den Stand (nicht mit der Devcontainer-CLI erprobt, noch nicht veröffentlicht).
+- [x] `make verify-clean` und CI grün; Sensors-Doku aktuell.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 4. Plan (vor Code)
 
@@ -63,7 +62,13 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 8. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-10 (PR #64, w2).
+
+- **Funktioniert:** `devcontainer-feature/src/bedrock-eu-check` (`devcontainer-feature.json` mit `version`, `baseUrl` und `install.sh`) installiert das Release-Binary: Architektur erkennen, Binary und `SHA256SUMS` laden, Prüfsumme vergleichen, erst dann installieren. `baseUrl` darf nur mit `https://` oder `file://` beginnen. `make feature-test` installiert ein lokal gebautes „Release“ per `file://` in einen Container ohne Netz, prüft `version` und die Negativfälle (manipulierte Prüfsumme, ungültige Version, unzulässige `baseUrl`); der Test läuft im Workflow `image` grün. Nutzung und Variante „vorinstalliert“ (Multi-Stage-`COPY`) stehen in `docs/user/devcontainer.md`.
+- **Anders als geplant:** Auf Review wurde das Vertrauensmodell ehrlich benannt: `SHA256SUMS` stammt vom selben Ursprung wie das Binary und schützt vor Korruption, nicht vor einem kompromittierten Ursprung.
+- **Offen:** Nicht veröffentlicht (kein OCI-Feature) und nicht mit der Devcontainer-CLI erprobt; mit der Standard-`baseUrl` erst nach einem Release mit den erwarteten Artefaktnamen installierbar. Signaturen (Sigstore) sind ein Folgepunkt; nur Linux (`amd64`, `arm64`).
+- **Steering-Loop:** Ein Installationsskript gegen ein lokal gebautes „Release“ testen (inklusive Negativfälle) macht es ohne Veröffentlichung überprüfbar. Sicherheitsaussagen (was die Prüfsumme leistet) gehören ausdrücklich in die Doku.
+- **Folge-Slices:** slice-018.
 
 ## 9. Sub-Area-Modus-Begründung
 

@@ -1,7 +1,6 @@
 # Slice slice-016: Docker-Image und reproduzierbarer Build
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** welle-05-release.
 
@@ -31,12 +30,12 @@ aus gepinnten Basen und läuft ohne Root.
 
 ## 3. Definition of Done
 
-- [ ] `Dockerfile`, `.dockerignore`, `tools/image-smoke.sh`, Make-Targets, Workflow `image`.
-- [ ] Smoke-Test je Image: läuft nicht als Root; `version`; `local` auf Gut- und Schlecht-Beispiel (Exit `0` bzw. `1`); `terraform --format json`; `aws`: `slim` Exit `2` (kein `aws`-Binary), `full` Exit `1` (keine Credentials); `full` meldet die gepinnte AWS-CLI-Version.
-- [ ] Reproduzierbarkeit: Das Binary im Image, aus `make build` und aus einem Neubau ohne Cache hat dieselbe SHA256; Ergebnis in der Closure-Notiz.
-- [ ] Doku: welche Modi je Image funktionieren (siehe unten) in `docs/user/` bzw. im Release-Slice.
-- [ ] `make verify-clean` und CI grün (`gates`, `image`).
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] `Dockerfile`, `.dockerignore`, `tools/image-smoke.sh`, Make-Targets, Workflow `image`.
+- [x] Smoke-Test je Image: läuft nicht als Root; `version`; `local` auf Gut- und Schlecht-Beispiel (Exit `0` bzw. `1`); `terraform --format json`; `aws`: `slim` Exit `2` (kein `aws`-Binary), `full` Exit `1` (keine Credentials); `full` meldet die gepinnte AWS-CLI-Version.
+- [x] Reproduzierbarkeit: Das Binary im Image, aus `make build` und aus einem Neubau ohne Cache hat dieselbe SHA256; Ergebnis in der Closure-Notiz.
+- [x] Doku: welche Modi je Image funktionieren (siehe unten) in `docs/user/` bzw. im Release-Slice.
+- [x] `make verify-clean` und CI grün (`gates`, `image`).
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 | Image | Modi |
 |---|---|
@@ -69,7 +68,13 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 8. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-10 (PR #53, w2).
+
+- **Funktioniert:** Mehrstufiges `Dockerfile` mit zwei Zielen: `slim` (`FROM scratch`, rund 7 MB, Modi `local`/`terraform`) und `full` (`amazon/aws-cli` 2.39.7 per Tag und Digest, rund 660 MB, alle Modi). Basis-Images per Digest gepinnt, Build ohne Netz (`vendor/`), Nutzer `65532`, `/work`, Binary als `ENTRYPOINT`. `tools/image-smoke.sh` prüft je Image: kein Root, `version`, `local` auf Gut-/Schlecht-Beispiel (Exit 0 bzw. 1), `terraform --format json`, `aws` (`slim` Exit 2, `full` Exit 1 ohne Credentials), AWS-CLI-Version; alles mit `--network none` und `--read-only`. Das Binary ist bitgleich im Image, aus `make build` und aus einem Neubau ohne Cache. Der Workflow `image` lief auf GitHub grün.
+- **Anders als geplant:** Der Test deckte nicht auf, dass ein für uid 65532 nicht lesbares Mount zu Exit 2 führt (schon die Konfiguration ist nicht lesbar), sondern erst die Dokumentation am echten Image; das steht jetzt in `docs/user/docker.md`.
+- **Offen:** Die Image-ID kann wegen Ebenen-Zeitstempeln abweichen (bitgleiche Images über OCI-Export mit festem Zeitstempel sind ein Folgepunkt). Registry und Namen für die Veröffentlichung sind nicht festgelegt; nichts wurde veröffentlicht. Aktualisierung der gepinnten Basen bleibt ein bewusster Schritt.
+- **Steering-Loop:** Aussagen in der Nutzerdoku am echten Artefakt prüfen, nicht aus dem Code ableiten. Tests, die Netz brauchen (Basis-Images ziehen), laufen als eigener CI-Job und nicht in den netzlosen Gates.
+- **Folge-Slices:** slice-017, slice-018.
 
 ## 9. Sub-Area-Modus-Begründung
 
