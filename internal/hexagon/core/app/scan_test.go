@@ -8,6 +8,7 @@ import (
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/core/model"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/coretest/fakeenvsource"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/coretest/fakesettings"
+	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/coretest/faketerraform"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/coretest/memfs"
 )
 
@@ -149,5 +150,66 @@ func TestScanWithoutEnvSourcesIsUnchanged(t *testing.T) {
 	b, _ := app.Scan{Settings: fakesettings.Reader{}, EnvSources: fakeenvsource.Reader{}}.Run(model.DefaultConfig())
 	if len(a) != len(b) {
 		t.Fatalf("%d vs %d", len(a), len(b))
+	}
+}
+
+func TestScanTerraform(t *testing.T) {
+	r := faketerraform.Reader{
+		Files: map[string]*model.TerraformFile{
+			"main.tf":      {Providers: []model.AWSProvider{{Region: "us-east-1", Line: 3}}},
+			"mod/iam.tf":   {Statements: []model.IAMStatement{{Effect: "Allow", Actions: []string{"bedrock:*"}, Resources: []string{"*"}, Line: 7}}},
+			"mod/model.tf": {ModelRefs: []model.ModelRef{{Value: "eu.anthropic.claude-sonnet-4-6", Line: 1}}},
+		},
+		Errs: map[string]error{"broken.tf": &model.FileError{Path: "broken.tf", Reason: model.ReasonFileInvalid, Line: 2}},
+	}
+	fs, err := app.Scan{Settings: fakesettings.Reader{}, Terraform: r}.Run(model.DefaultConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]string{}
+	for _, f := range fs {
+		if f.File != "" && f.RuleID[:9] == "LH-FA-TF-" {
+			got[f.RuleID+"|"+f.File] = f.Severity.String()
+		}
+	}
+	want := map[string]string{
+		"LH-FA-TF-002|main.tf":      "FAIL",
+		"LH-FA-TF-003|mod/iam.tf":   "FAIL",
+		"LH-FA-TF-004|mod/model.tf": "PASS",
+		"LH-FA-TF-001|broken.tf":    "FAIL",
+	}
+	for k, v := range want {
+		if got[k] != v {
+			t.Errorf("%s: got %q want %q (alle: %v)", k, got[k], v, got)
+		}
+	}
+	if app.ExitCode(fs, nil) != 1 {
+		t.Error("exit != 1")
+	}
+}
+
+func TestScanTerraformNoFilesAndFindError(t *testing.T) {
+	fs, _ := app.Scan{Settings: fakesettings.Reader{}, Terraform: faketerraform.Reader{}}.Run(model.DefaultConfig())
+	var warn bool
+	for _, f := range fs {
+		if f.RuleID == "LH-FA-TF-001" && f.Severity == model.WARN {
+			warn = true
+		}
+	}
+	if !warn {
+		t.Errorf("WARN erwartet: %+v", fs)
+	}
+	fs, err := app.Scan{Settings: fakesettings.Reader{}, Terraform: faketerraform.Reader{FindErr: errors.New("boom")}}.Run(model.DefaultConfig())
+	if err != nil {
+		t.Fatalf("Suchfehler ist kein Tool-Fehler: %v", err)
+	}
+	var fail bool
+	for _, f := range fs {
+		if f.RuleID == "LH-FA-TF-001" && f.Severity == model.FAIL {
+			fail = true
+		}
+	}
+	if !fail {
+		t.Errorf("FAIL erwartet: %+v", fs)
 	}
 }
