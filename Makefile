@@ -13,7 +13,7 @@ GO_RUN = docker run --rm --network none -u $(shell id -u):$(shell id -g) \
 	-e HOME=/tmp -e GOCACHE=/src/.tmp/gocache -e GOFLAGS=-mod=mod \
 	-v "$(CURDIR):/src" -w /src $(GO_IMAGE)
 
-.PHONY: help gates lint test build
+.PHONY: help gates lint test build verify-clean
 help: ## Targets anzeigen
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  %-16s %s\n", $$1, $$2}'
@@ -31,5 +31,11 @@ test: ## Unit-Tests (go test)
 build: ## Binary nach bin/bedrock-eu-check bauen
 	@mkdir -p .tmp/gocache bin
 	$(GO_RUN) go build -o bin/bedrock-eu-check ./cmd/bedrock-eu-check
+
+verify-clean: ## gates in frischem git worktree des committeten HEAD (kein Arbeitsbaum-Ballast)
+	@mkdir -p .tmp && d=$$(mktemp -d "$(CURDIR)/.tmp/verify.XXXXXX") && chmod 755 "$$d" && \
+	git worktree add -q --detach "$$d/wt" HEAD && \
+	$(MAKE) -C "$$d/wt" gates; rc=$$?; \
+	git worktree remove --force "$$d/wt"; rm -rf "$$d"; exit $$rc
 
 gates: doc-check lint test ## alle lauffähigen Gates (doc-check, lint, test)

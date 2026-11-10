@@ -52,6 +52,7 @@ kanonische Quelle**, und diese Datei wird angepasst.
 | `make test` | `go test ./...` (Unit-Tests je Regel/Adapter, [`LH-QA-001`](../spec/lastenheft.md#lh-qa-001--unit-tests)) | wie `lint` |
 | `make build` | Binary `bin/bedrock-eu-check` bauen | wie `lint` |
 | `make gates` | alle lauffähigen Gates: `doc-check`, `lint`, `test` | — |
+| `make verify-clean` | `make gates` im frischen `git worktree` des committeten HEAD (fängt ungetrackte/ignorierte Dateien ab) | Handoff-Gate; CI führt `make gates` im frischen Checkout aus (`.github/workflows/gates.yml`) |
 
 **Aktueller Lauf-Status:** lokal `make gates` / `make help`; in CI das
 Pipeline-Ergebnis (Rang höher als diese Datei).
