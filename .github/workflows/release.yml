@@ -1,0 +1,38 @@
+name: release-artifacts
+
+# Baut die Release-Artefakte (Linux amd64/arm64 plus SHA256SUMS) und legt sie als
+# Workflow-Artefakt ab. Der Workflow VERÖFFENTLICHT NICHTS: kein Tag, kein
+# GitHub-Release, kein Registry-Push, kein Feature-Publish. Das sind eigene,
+# außenwirksame Schritte nach ausdrücklicher Freigabe beider Nutzer
+# (docs/user/releasing.md). Er läuft nur manuell.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release-Version x.y.z (ohne führendes v)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  artifacts:
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version prüfen
+        run: |
+          echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.-]+)?$' \
+            || { echo "ungültige Version: $VERSION" >&2; exit 1; }
+
+      - name: Artefakte bauen und Prüfsummen verifizieren
+        run: make dist VERSION="$VERSION"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bedrock-eu-check-${{ inputs.version }}
+          path: dist/v${{ inputs.version }}/
+          if-no-files-found: error

@@ -138,6 +138,7 @@ Nur real existierende Targets (keine halluzinierten Gates, Modul 13):
 | `make image`     | Docker-Images `slim` und `full` bauen (mit Netz, nicht Teil der Gates)                 |
 | `make image-test` | Images bauen und Smoke-Tests (`tools/image-smoke.sh`, Laufzeit ohne Netz; CI-Job `image`) |
 | `make feature-test` | Devcontainer-Feature gegen ein lokal gebautes Release testen (Docker, Laufzeit ohne Netz; CI-Job `image`) |
+| `make dist`      | Release-Artefakte (Linux amd64/arm64) und `SHA256SUMS` nach `dist/v<version>/` bauen und verifizieren (`VERSION=x.y.z`); veröffentlicht nichts |
 
 `make coverage-gate` entsteht in einem späteren Slice; es wird erst hier
 eingetragen, wenn es läuft.
