@@ -111,6 +111,9 @@ type Config struct {
 	AllowedAccounts      []string // leer = nicht geprüft (SPEC-020)
 	AllowedProfiles      []string // reguläre Ausdrücke (SPEC-020)
 	Mantle               MantleMode
+	// Exclude sind Glob-Muster (path.Match, relativ zum Scan-Root, "/"),
+	// die Pfade von der Datei-Discovery ausnehmen (siehe Excluded).
+	Exclude []string
 }
 
 // DefaultConfig liefert die Defaults (LH-NF-007: überschreibbar).

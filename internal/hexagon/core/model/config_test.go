@@ -80,3 +80,45 @@ func TestResolveCollectsAllErrorsWithIndex(t *testing.T) {
 		t.Fatalf("got %v", err)
 	}
 }
+
+func TestExcluded(t *testing.T) {
+	c := model.Config{Exclude: []string{"testdata", "docs/*/gen", "./build/", "*.tmp.tf", "  "}}
+	for rel, want := range map[string]bool{
+		"testdata":             true,
+		"testdata/bad/main.tf": true,
+		"a/testdata/main.tf":   false, // Muster ist relativ zum Scan-Root
+		"docs/x/gen/file.md":   true,
+		"docs/x/other/file.md": false,
+		"build/out/Dockerfile": true,
+		"./build/x":            true,
+		"main.tmp.tf":          true,
+		"sub/main.tmp.tf":      false, // '*' überschreitet kein '/'
+		"src/main.tf":          false,
+		`testdata\win\main.tf`: true,
+		"":                     false,
+	} {
+		if got := c.Excluded(rel); got != want {
+			t.Errorf("Excluded(%q)=%v want %v", rel, got, want)
+		}
+	}
+	if (model.Config{}).Excluded("anything") {
+		t.Error("ohne Muster nichts ausgeschlossen")
+	}
+}
+
+func TestResolveExclude(t *testing.T) {
+	c, err := model.Resolve(model.PartialConfig{Exclude: []string{"testdata", "docs/*/gen"}})
+	if err != nil || len(c.Exclude) != 2 {
+		t.Fatalf("got %+v, %v", c, err)
+	}
+	if c, err := model.Resolve(model.PartialConfig{}); err != nil || c.Exclude != nil {
+		t.Fatalf("Default: %+v, %v", c, err)
+	}
+	for name, pat := range map[string]string{"leer": "", "nur Slash": "/", "kaputt": "a[b"} {
+		_, err := model.Resolve(model.PartialConfig{Exclude: []string{"ok", pat}})
+		var ce *model.ConfigError
+		if !errors.As(err, &ce) || ce.Field != "exclude" || ce.Index != 1 {
+			t.Errorf("%s: %v", name, err)
+		}
+	}
+}
