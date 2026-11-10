@@ -27,6 +27,10 @@ type AWSScan struct {
 	// IAM ist nil, wenn kein IAMReader konfiguriert ist (Regeln LH-FA-IAM-*
 	// laufen dann nicht).
 	IAM *IAMScan
+
+	// Settings sind in Claude-Settings konfigurierte Modell-IDs (optional);
+	// sie zählen für die Bedrock-Regeln als „verwendet“.
+	Settings []SettingsModel
 }
 
 // AWSRule wertet AWS-Fakten gegen die Config aus.

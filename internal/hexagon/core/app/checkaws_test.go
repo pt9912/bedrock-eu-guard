@@ -9,6 +9,7 @@ import (
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/core/model"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/coretest/fakeaws"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/coretest/fakeenv"
+	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/coretest/fakesettings"
 )
 
 func TestCheckAWSHappyPath(t *testing.T) {
@@ -253,5 +254,46 @@ func TestCheckAWSIAMNoIdentity(t *testing.T) {
 	}
 	if n != 3 {
 		t.Fatalf("3 FAIL (IAM-001..003) erwartet, got %d: %+v", n, fs)
+	}
+}
+
+func TestCheckAWSUsesSettingsModels(t *testing.T) {
+	r := fakeaws.Reader{Ident: &model.AWSIdentity{Account: "1", ARN: "arn"}}
+	st := fakesettings.Reader{
+		User: &model.ClaudeSettings{Model: "eu.anthropic.claude-sonnet-4-6",
+			Env: []model.EnvEntry{{Key: "ANTHROPIC_API_KEY", Secret: true}, {Key: "ANTHROPIC_DEFAULT_HAIKU_MODEL", Value: "us.anthropic.claude-haiku-4-5"}}},
+		Project:    map[string]*model.ClaudeSettings{".claude/settings.json": {Model: "global.anthropic.claude-opus-4"}},
+		ProjectErr: map[string]error{".claude/settings.local.json": errors.New("kaputt")},
+	}
+	run := func(cfg model.Config) []model.Finding {
+		fs, err := app.CheckAWS{AWS: r, Bedrock: bedrockOK(), Settings: st}.Run(fakeenv.Env{}, cfg)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return fs
+	}
+	blocked := map[string]bool{}
+	for _, f := range run(model.DefaultConfig()) {
+		if f.RuleID == "LH-FA-BEDROCK-002" && f.Severity == model.FAIL {
+			blocked[f.Subject+"|"+f.File] = true
+		}
+	}
+	if !blocked["ANTHROPIC_DEFAULT_HAIKU_MODEL|~/.claude/settings.json"] || !blocked["model|.claude/settings.json"] || len(blocked) != 2 {
+		t.Fatalf("got %v", blocked)
+	}
+	// ausgeschlossene Projekt-Settings zählen nicht
+	cfg := model.DefaultConfig()
+	cfg.Exclude = []string{".claude"}
+	for _, f := range run(cfg) {
+		if f.File == ".claude/settings.json" {
+			t.Errorf("ausgeschlossen, aber gemeldet: %+v", f)
+		}
+	}
+	// ohne Settings-Reader: Verhalten wie bisher (nur Umgebung)
+	fs, _ := app.CheckAWS{AWS: r, Bedrock: bedrockOK()}.Run(fakeenv.Env{}, model.DefaultConfig())
+	for _, f := range fs {
+		if f.RuleID == "LH-FA-BEDROCK-002" && f.Severity == model.FAIL {
+			t.Errorf("ohne Reader kein FAIL: %+v", f)
+		}
 	}
 }
