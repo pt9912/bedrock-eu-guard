@@ -703,3 +703,41 @@ func TestExcludeInvalidPatternIsToolError(t *testing.T) {
 		t.Errorf("exit=%d stdout=%q stderr=%q", code, out, errs)
 	}
 }
+
+// slice-014: version
+func withBuildInfo(t *testing.T, v, c string) {
+	t.Helper()
+	oldV, oldC := version, commit
+	version, commit = v, c
+	t.Cleanup(func() { version, commit = oldV, oldC })
+}
+
+func TestVersionCommand(t *testing.T) {
+	var o, e bytes.Buffer
+	if code := run([]string{"version"}, euEnv, "", &o, &e); code != 0 || o.String() != "bedrock-eu-check dev (unknown)\n" || e.Len() != 0 {
+		t.Errorf("Defaults: exit=%d stdout=%q stderr=%q", code, o.String(), e.String())
+	}
+	withBuildInfo(t, "1.2.3", "abc123def456")
+	o.Reset()
+	if code := run([]string{"version"}, euEnv, "", &o, &e); code != 0 || o.String() != "bedrock-eu-check 1.2.3 (abc123def456)\n" {
+		t.Errorf("gesetzt: exit=%d stdout=%q", code, o.String())
+	}
+}
+
+func TestVersionRejectsExtraArguments(t *testing.T) {
+	for _, args := range [][]string{{"version", "--ci"}, {"version", "x"}} {
+		var o, e bytes.Buffer
+		if code := run(args, euEnv, "", &o, &e); code != 2 || o.Len() != 0 || !strings.Contains(e.String(), "usage:") {
+			t.Errorf("%v: exit=%d stdout=%q stderr=%q", args, code, o.String(), e.String())
+		}
+	}
+}
+
+func TestSARIFUsesBuildVersion(t *testing.T) {
+	withBuildInfo(t, "9.9.9", "deadbeef0000")
+	_, _, _, doc := sarifRun(t, "terraform", "good", mapEnv{})
+	drv := doc["runs"].([]any)[0].(map[string]any)["tool"].(map[string]any)["driver"].(map[string]any)
+	if drv["version"] != "9.9.9" {
+		t.Errorf("driver.version = %v (Version, nicht Commit)", drv["version"])
+	}
+}
