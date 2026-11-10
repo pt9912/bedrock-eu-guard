@@ -1,7 +1,6 @@
 # Slice slice-006: Devcontainer-, Compose- und Dockerfile-Scanner
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** welle-02-config-scanner.
 
@@ -38,11 +37,11 @@ Pro Datei und Regel ein Finding (Zeile des ersten Belegs); mehrere Dateien einer
 
 ## 4. Definition of Done
 
-- [ ] Kern (w1): `model.EnvFile`, `EnvSourceReader`, Regeln `rules/envsource.go`, Erweiterung `app.Scan` (Glob-Discovery), Double `coretest/fakeenvsource`, Unit-Tests je Zweig und Dateizustand.
-- [ ] Adapter (w2): Reader für alle drei Quellen (JSONC, Compose-Map/Liste, Dockerfile-Parser), Secret-Schwärzung, Zeilen, Tests inkl. Secret-Fälle.
-- [ ] CLI (w2): `local` übergibt `EnvSources` und `Files`; Testdaten good/bad je Quelle; Akzeptanztest ohne Secret-Wert in der Ausgabe.
-- [ ] `make verify-clean` und CI grün; Sensors-Doku aktuell.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Kern (w1): `model.EnvFile`, `EnvSourceReader`, Regeln `rules/envsource.go`, Erweiterung `app.Scan` (Glob-Discovery), Double `coretest/fakeenvsource`, Unit-Tests je Zweig und Dateizustand.
+- [x] Adapter (w2): Reader für alle drei Quellen (JSONC, Compose-Map/Liste, Dockerfile-Parser), Secret-Schwärzung, Zeilen, Tests inkl. Secret-Fälle.
+- [x] CLI (w2): `local` übergibt `EnvSources` und `Files`; Testdaten good/bad je Quelle; Akzeptanztest ohne Secret-Wert in der Ausgabe.
+- [x] `make verify-clean` und CI grün; Sensors-Doku aktuell.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 5. Plan (vor Code)
 
@@ -68,7 +67,16 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 9. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-10 (PRs #23 Kern/w1, #25 Adapter/CLI/w2).
+
+- **Funktioniert:** Devcontainer (JSONC), Compose (Map und Liste, Anker, Merge-Keys, Service als Scope) und Dockerfile (`ENV` alte und neue Form, Fortsetzungen, Stages) werden gelesen und gegen DEVCON-001, DOCKER-001 und DOCKER-002 geprüft; Findings tragen Datei und Zeile. Secrets werden im Adapter geschwärzt, Akzeptanztests prüfen, dass kein Wert in stdout/stderr erscheint. Variablenreferenzen (`$`) in Regionen erzeugen keinen Fehlalarm.
+- **Anders als geplant:** Die Secret-Erkennung liegt jetzt in einem gemeinsamen Paket (`secretkey`), das auch `claudesettings` nutzt (Duplikat vermieden).
+- **Offen:**
+  - Compose-Interpolation (`${VAR:-default}`) wird nicht aufgelöst; `env_file`, `.env`-Dateien und Dockerfile-`ARG` sind Folgepunkte.
+  - Die Dateisuche ist nicht rekursiv (nur Scan-Root bzw. `.devcontainer/`).
+  - Die Secret-Schlüsselliste bleibt eine großzügige Heuristik.
+- **Steering-Loop:** Gemeinsame Logik früh in ein geteiltes Paket ziehen, sobald ein zweiter Adapter sie braucht. Kern und Adapter parallel auf einem festen Vertrag funktionieren gut, solange der Vertrag im Plan steht und beide Seiten ihn vor dem Code bestätigen. Beim Mergen von Stapel-PRs vor jedem Schritt prüfen, ob die Basis bereits auf `main` ist.
+- **Folge-Slices:** slice-007 (Terraform-Scanner, HCL-Bibliothek per Vendoring), danach Abschluss von Welle 2.
 
 ## 10. Sub-Area-Modus-Begründung
 
