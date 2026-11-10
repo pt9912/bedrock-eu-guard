@@ -24,7 +24,7 @@ import (
 
 const exitToolError = 2
 
-const usage = "usage: bedrock-eu-check (local|terraform|aws|all) [--root DIR] [--config FILE] [--allowed-account ID]...\n"
+const usage = "usage: bedrock-eu-check (local|terraform|aws|all) [--root DIR] [--config FILE] [--allowed-account ID]... [--format console|json]\n"
 
 // awsBinary ist das aws-Binary (Name oder Pfad); Variable nur für Tests.
 var awsBinary = awscli.DefaultBinary
@@ -57,7 +57,7 @@ func run(args []string, env driven.Environment, home string, stdout, stderr io.W
 	// Eigene Konfiguration ungültig → Tool-Fehler, Exit 2 (SPEC-030).
 	cfg, err := app.LoadConfig(accountOverlay{configyaml.New(opts.configPath()), opts.accounts})
 	if err != nil {
-		return finish(nil, err, stdout, stderr)
+		return finish(nil, err, reporterFor(opts.format, stdout), stdout, stderr)
 	}
 	var findings []model.Finding
 	if mode == "local" || mode == "all" {
@@ -76,7 +76,7 @@ func run(args []string, env driven.Environment, home string, stdout, stderr io.W
 		findings = append(findings, aws...)
 	}
 	sort.SliceStable(findings, func(i, j int) bool { return findings[i].RuleID < findings[j].RuleID })
-	return finish(findings, err, stdout, stderr)
+	return finish(findings, err, reporterFor(opts.format, stdout), stdout, stderr)
 }
 
 // runLocal ist der Modus local (LH-MOD-001): Env, Claude-Settings,
@@ -97,7 +97,19 @@ func runLocal(env driven.Environment, cfg model.Config, opts options, home strin
 
 type options struct {
 	root, config string
+	format       string // "" = console
 	accounts     []string
+}
+
+// reporterFor wählt den Reporter für das Ausgabeformat (stdout trägt nur das
+// Ergebnis). Das Format wurde bereits in parseOptions geprüft.
+func reporterFor(format string, w io.Writer) driven.Reporter {
+	switch format {
+	case "json":
+		return report.NewJSON(w)
+	default:
+		return report.New(w)
+	}
 }
 
 // accountOverlay ergänzt die Konfiguration um --allowed-account (Vereinigung
@@ -140,6 +152,11 @@ func parseOptions(args []string) (options, bool) {
 			opts.root = args[1]
 		case "--config":
 			opts.config = args[1]
+		case "--format":
+			if args[1] != "console" && args[1] != "json" {
+				return options{}, false
+			}
+			opts.format = args[1]
 		case "--allowed-account":
 			opts.accounts = append(opts.accounts, args[1])
 		default:
@@ -150,15 +167,15 @@ func parseOptions(args []string) (options, bool) {
 	return opts, true
 }
 
-func finish(findings []model.Finding, err error, stdout, stderr io.Writer) int {
+func finish(findings []model.Finding, err error, rep driven.Reporter, stdout, stderr io.Writer) int {
 	if err != nil {
 		if len(findings) > 0 { // bereits ermittelte Befunde trotzdem zeigen
-			_ = report.New(stdout).Report(findings)
+			_ = rep.Report(findings)
 		}
 		fmt.Fprintf(stderr, "error: %v\n", err)
 		return app.ExitCode(nil, err)
 	}
-	if rerr := report.New(stdout).Report(findings); rerr != nil {
+	if rerr := rep.Report(findings); rerr != nil {
 		fmt.Fprintf(stderr, "error: %v\n", rerr)
 		return exitToolError
 	}
