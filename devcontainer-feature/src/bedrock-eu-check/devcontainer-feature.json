@@ -1,0 +1,19 @@
+{
+  "id": "bedrock-eu-check",
+  "version": "1.0.0",
+  "name": "bedrock-eu-check",
+  "description": "Installiert bedrock-eu-check (EU-Konformitätsprüfung für Claude Code auf Amazon Bedrock) aus einem Release-Binary mit geprüfter SHA256-Prüfsumme.",
+  "documentationURL": "https://github.com/pt9912/bedrock-eu-guard/blob/main/docs/user/devcontainer.md",
+  "options": {
+    "version": {
+      "type": "string",
+      "default": "1.0.0",
+      "description": "Version des Release-Binarys (ohne führendes v)."
+    },
+    "baseUrl": {
+      "type": "string",
+      "default": "https://github.com/pt9912/bedrock-eu-guard/releases/download",
+      "description": "Basis-URL der Release-Artefakte (für Spiegel oder Tests; file:// ist möglich)."
+    }
+  }
+}
