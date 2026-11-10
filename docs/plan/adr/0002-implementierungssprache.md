@@ -1,6 +1,6 @@
 # ADR-0002: Implementierungssprache
 
-**Status:** Proposed
+**Status:** Accepted
 
 **Datum:** 2026-06-24
 
@@ -27,8 +27,7 @@ Paket-Sichtbarkeit). Das verschiebt die Abwägung Richtung Go.
 
 ## Entscheidung
 
-Wir wählen **Go** *(Status: Proposed — Sign-off durch den Auftraggeber
-ausstehend)*.
+Wir wählen **Go** *(Status: Accepted — Sign-off durch den Auftraggeber 2026-11-10)*.
 
 ## Verglichene Alternativen
 
@@ -61,3 +60,4 @@ gefordert wird.
 | Datum | Ereignis | Verweis |
 |---|---|---|
 | 2026-06-24 | Proposed | Bootstrap; Empfehlung Go nach Wahl der Hexagonal-/d-check-Architektur (ADR-0003) |
+| 2026-11-10 | Accepted | Sign-off durch den Auftraggeber; Go bestätigt, Toolchain-Verdrahtung in [`slice-001`](../planning/open/slice-001-hexagon-skelett-env-region.md) |

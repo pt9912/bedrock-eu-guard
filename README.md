@@ -30,7 +30,7 @@ Env-/Modell-ID-Checks und Exit-Codes) ist als **Welle 1** geplant, siehe
 **hexagonal** ([ADR-0003](docs/plan/adr/0003-hexagonale-architektur.md),
 Vorbild [d-check](https://github.com/pt9912/d-check)); die Sprachwahl ist
 in [ADR-0002](docs/plan/adr/0002-implementierungssprache.md)
-(Status *Proposed*, Go empfohlen) offen.
+(Status *Accepted*, Go) bestätigt.
 
 ## Geplante Nutzung
 
