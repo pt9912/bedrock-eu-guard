@@ -523,11 +523,80 @@ func TestFormatJSONToolErrorKeepsStdoutParsable(t *testing.T) {
 
 func TestFormatInvalidIsUsageError(t *testing.T) {
 	for _, args := range [][]string{
-		{"local", "--format", "xml"}, {"local", "--format"}, {"local", "--format", ""}, {"local", "--format", "sarif"},
+		{"local", "--format", "xml"}, {"local", "--format"}, {"local", "--format", ""}, {"local", "--format", "SARIF"},
 	} {
 		var o, e bytes.Buffer
 		if code := run(args, euEnv, "", &o, &e); code != 2 || o.Len() != 0 || !strings.Contains(e.String(), "usage:") {
 			t.Errorf("%v: exit=%d stdout=%q stderr=%q", args, code, o.String(), e.String())
 		}
+	}
+}
+
+// slice-012: --format sarif
+func sarifRun(t *testing.T, mode, dir string, env mapEnv, extra ...string) (code int, out, errs string, doc map[string]any) {
+	t.Helper()
+	args, home := scanArgs("testdata/" + dir)
+	args[0] = mode
+	var o, e bytes.Buffer
+	code = run(append(args, append([]string{"--format", "sarif"}, extra...)...), env, home, &o, &e)
+	if o.Len() > 0 {
+		if err := json.Unmarshal(o.Bytes(), &doc); err != nil {
+			t.Fatalf("stdout ist kein SARIF-JSON: %v\n%s", err, o.String())
+		}
+	}
+	return code, o.String(), e.String(), doc
+}
+
+func TestFormatSARIFTerraformBad(t *testing.T) {
+	code, out, errs, doc := sarifRun(t, "terraform", "bad", mapEnv{})
+	if code != 1 || errs != "" || doc["version"] != "2.1.0" {
+		t.Fatalf("exit=%d stderr=%q version=%v", code, errs, doc["version"])
+	}
+	run0 := doc["runs"].([]any)[0].(map[string]any)
+	results := run0["results"].([]any)
+	var errors int
+	for _, r := range results {
+		m := r.(map[string]any)
+		if m["level"] == "error" {
+			errors++
+		}
+		loc := m["locations"].([]any)[0].(map[string]any)["physicalLocation"].(map[string]any)
+		if loc["artifactLocation"].(map[string]any)["uri"] != "main.tf" {
+			t.Errorf("Terraform-Findings verweisen auf main.tf: %v", loc)
+		}
+	}
+	if errors == 0 {
+		t.Errorf("keine error-Results:\n%s", out)
+	}
+	drv := run0["tool"].(map[string]any)["driver"].(map[string]any)
+	if drv["name"] != "bedrock-eu-check" || drv["version"] != "dev" {
+		t.Errorf("driver: %v", drv)
+	}
+	if strings.Contains(out, "GEHEIM") || strings.Contains(out, "sk-ant") {
+		t.Errorf("Secret in SARIF:\n%s", out)
+	}
+}
+
+// Findings ohne Fundstelle bekommen eine als Ersatz markierte Position.
+func TestFormatSARIFFallbackLocation(t *testing.T) {
+	_, out, _, doc := sarifRun(t, "local", "bad", euEnv)
+	results := doc["runs"].([]any)[0].(map[string]any)["results"].([]any)
+	var synthetic int
+	for _, r := range results {
+		m := r.(map[string]any)
+		if p, _ := m["properties"].(map[string]any); p != nil && p["synthetic"] == true {
+			synthetic++
+		}
+	}
+	if synthetic == 0 || !strings.Contains(out, `"uri": "README.md"`) {
+		t.Errorf("Ersatzposition erwartet (README.md, da keine Konfigurationsdatei):\n%s", out)
+	}
+}
+
+func TestFormatSARIFGoodHasNoResults(t *testing.T) {
+	code, _, _, doc := sarifRun(t, "terraform", "good", mapEnv{})
+	results := doc["runs"].([]any)[0].(map[string]any)["results"].([]any)
+	if code != 0 || len(results) != 0 {
+		t.Errorf("exit=%d results=%v", code, results)
 	}
 }

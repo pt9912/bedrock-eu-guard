@@ -24,7 +24,11 @@ import (
 
 const exitToolError = 2
 
-const usage = "usage: bedrock-eu-check (local|terraform|aws|all) [--root DIR] [--config FILE] [--allowed-account ID]... [--format console|json]\n"
+const usage = "usage: bedrock-eu-check (local|terraform|aws|all) [--root DIR] [--config FILE] [--allowed-account ID]... [--format console|json|sarif]\n"
+
+// toolVersion ist die Version des Werkzeugs (per -ldflags setzbar, Default
+// "dev"); sie erscheint im SARIF-Dokument.
+var toolVersion = "dev"
 
 // awsBinary ist das aws-Binary (Name oder Pfad); Variable nur für Tests.
 var awsBinary = awscli.DefaultBinary
@@ -57,7 +61,7 @@ func run(args []string, env driven.Environment, home string, stdout, stderr io.W
 	// Eigene Konfiguration ungültig → Tool-Fehler, Exit 2 (SPEC-030).
 	cfg, err := app.LoadConfig(accountOverlay{configyaml.New(opts.configPath()), opts.accounts})
 	if err != nil {
-		return finish(nil, err, reporterFor(opts.format, stdout), stdout, stderr)
+		return finish(nil, err, reporterFor(opts, stdout), stdout, stderr)
 	}
 	var findings []model.Finding
 	if mode == "local" || mode == "all" {
@@ -76,7 +80,7 @@ func run(args []string, env driven.Environment, home string, stdout, stderr io.W
 		findings = append(findings, aws...)
 	}
 	sort.SliceStable(findings, func(i, j int) bool { return findings[i].RuleID < findings[j].RuleID })
-	return finish(findings, err, reporterFor(opts.format, stdout), stdout, stderr)
+	return finish(findings, err, reporterFor(opts, stdout), stdout, stderr)
 }
 
 // runLocal ist der Modus local (LH-MOD-001): Env, Claude-Settings,
@@ -103,13 +107,24 @@ type options struct {
 
 // reporterFor wählt den Reporter für das Ausgabeformat (stdout trägt nur das
 // Ergebnis). Das Format wurde bereits in parseOptions geprüft.
-func reporterFor(format string, w io.Writer) driven.Reporter {
-	switch format {
+func reporterFor(opts options, w io.Writer) driven.Reporter {
+	switch opts.format {
 	case "json":
 		return report.NewJSON(w)
+	case "sarif":
+		return report.NewSARIF(w, toolVersion, opts.sarifFallback())
 	default:
 		return report.New(w)
 	}
+}
+
+// sarifFallback ist die Datei, die in SARIF als Ersatzposition für Findings
+// ohne Fundstelle dient: die Konfigurationsdatei, falls vorhanden, sonst README.md.
+func (o options) sarifFallback() string {
+	if _, err := os.Stat(filepath.Join(o.root, "bedrock-eu-check.yml")); err == nil {
+		return "bedrock-eu-check.yml"
+	}
+	return "README.md"
 }
 
 // accountOverlay ergänzt die Konfiguration um --allowed-account (Vereinigung
@@ -153,7 +168,7 @@ func parseOptions(args []string) (options, bool) {
 		case "--config":
 			opts.config = args[1]
 		case "--format":
-			if args[1] != "console" && args[1] != "json" {
+			if args[1] != "console" && args[1] != "json" && args[1] != "sarif" {
 				return options{}, false
 			}
 			opts.format = args[1]
