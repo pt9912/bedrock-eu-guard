@@ -26,6 +26,30 @@ func (s Severity) String() string {
 	}
 }
 
+// Level liefert den JSON-Schweregrad (SPEC-021): info | warning | error.
+func (s Severity) Level() string {
+	switch s {
+	case WARN:
+		return "warning"
+	case FAIL:
+		return "error"
+	default:
+		return "info"
+	}
+}
+
+// SARIFLevel liefert das SARIF-Level (SPEC-022): none | warning | error.
+func (s Severity) SARIFLevel() string {
+	switch s {
+	case WARN:
+		return "warning"
+	case FAIL:
+		return "error"
+	default:
+		return "none"
+	}
+}
+
 // Reason-Codes der Regeln.
 const (
 	ReasonOK                 = "OK"
