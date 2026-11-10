@@ -88,6 +88,26 @@ Variable `AWS_REGION` fehlt, was die Region in AWS-Tools mehrdeutig macht.
 `PASS` gilt nur, wenn `AWS_REGION` selbst gesetzt und erlaubt ist. Präzisiert [`LH-FA-LENV-001`](lastenheft.md#lh-fa-lenv-001--prüfung-von-aws_region)/[`LH-FA-LENV-002`](lastenheft.md#lh-fa-lenv-002--prüfung-von-aws_default_region),
 [`LH-FA-TF-002`](lastenheft.md#lh-fa-tf-002--aws-provider-region-prüfen).
 
+### SPEC-012 — Direkte Anthropic-Konfiguration in Claude-Settings
+
+Bewertung einer Claude-Code-Settings-Datei (Benutzer- und Projektebene) auf
+direkte Anthropic-Nutzung. Je Datei höchstens ein Finding der Regel
+[`LH-FA-CLAUDE-003`](lastenheft.md#lh-fa-claude-003--erkennung-direkter-anthropic-endpunkte), in dieser Rangfolge:
+
+| Befund in der Datei | Ergebnis |
+|---|---|
+| `env.ANTHROPIC_API_KEY` oder `env.ANTHROPIC_AUTH_TOKEN` gesetzt, `env.ANTHROPIC_BASE_URL` auf `api.anthropic.com` oder Text `api.anthropic.com` | `FAIL` (`DIRECT_ANTHROPIC`) |
+| Top-Level-Schlüssel `apiKeyHelper` gesetzt | `WARN` (`APIKEY_HELPER`) |
+| `env.ANTHROPIC_BASE_URL` auf einen anderen Host | `WARN` (`ENDPOINT_FOREIGN`) |
+| Text `ANTHROPIC_API_KEY` oder `ANTHROPIC_BASE_URL` ohne `env`-Eintrag | `WARN` (`ENDPOINT_TEXT_ONLY`) |
+| sonst | `PASS` |
+
+`apiKeyHelper` ist ein Befehl, der einen API-Key liefert. Ob er tatsächlich
+eine direkte Anthropic-Verbindung herstellt, hängt vom übrigen Aufbau ab
+(Bedrock, Gateway); deshalb `WARN` und kein `FAIL`. Der Befehl wird **nie**
+gelesen, gespeichert oder ausgegeben, nur die Fundstelle (Datei und Zeile),
+da er Secrets enthalten kann ([`LH-NF-004`](lastenheft.md#lh-nf-004--keine-secret-ausgabe)). Präzisiert [`LH-FA-CLAUDE-003`](lastenheft.md#lh-fa-claude-003--erkennung-direkter-anthropic-endpunkte).
+
 ## 2. Datenstrukturen und Schemas
 
 ### SPEC-020 — Konfigurationsschema `bedrock-eu-check.yml`
