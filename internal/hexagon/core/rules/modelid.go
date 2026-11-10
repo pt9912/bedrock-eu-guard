@@ -17,15 +17,29 @@ var regionInID = regexp.MustCompile(`(?i)(?:^|[^a-z0-9])([a-z]{2}(?:-[a-z]+)+-[0
 // dann Allow-Muster, sonst unclassified. Muster, die keine gültigen
 // regulären Ausdrücke sind, treffen nie (Config-Validierung gehört in den
 // Config-Adapter).
+//
+// Bei ARNs ("arn:…") werden die Muster zusätzlich gegen den Resource-Teil
+// nach dem letzten "/" geprüft (z. B. "foundation-model/<id>",
+// "inference-profile/<id>"), die Regionsprüfung läuft über den ganzen ARN.
 func Classify(id string, cfg model.Config) model.ModelClass {
-	if matchAny(cfg.BlockedModelPatterns, id) {
-		return model.ModelBlocked
+	subjects := []string{id}
+	if strings.HasPrefix(id, "arn:") {
+		if i := strings.LastIndex(id, "/"); i >= 0 && i < len(id)-1 {
+			subjects = append(subjects, id[i+1:])
+		}
+	}
+	for _, s := range subjects {
+		if matchAny(cfg.BlockedModelPatterns, s) {
+			return model.ModelBlocked
+		}
 	}
 	if _, bad := DisallowedRegionInID(id, cfg); bad {
 		return model.ModelBlocked
 	}
-	if matchAny(cfg.AllowedModelPatterns, id) {
-		return model.ModelAllowed
+	for _, s := range subjects {
+		if matchAny(cfg.AllowedModelPatterns, s) {
+			return model.ModelAllowed
+		}
 	}
 	return model.ModelUnclassified
 }

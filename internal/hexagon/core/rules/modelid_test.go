@@ -78,7 +78,7 @@ func TestClassifyRegionInID(t *testing.T) {
 		"erlaubte Region, Allow-Muster":  {"eu.anthropic.claude-eu-central-1", model.ModelAllowed},
 		"erlaubte Region, unclassified":  {"anthropic.claude-opus-4-eu-central-1", model.ModelUnclassified},
 		"ARN mit nicht erlaubter Region": {"arn:aws:bedrock:ap-northeast-1:123:inference-profile/eu.x", model.ModelBlocked},
-		"ARN mit erlaubter Region":       {"arn:aws:bedrock:eu-central-1:123:inference-profile/eu.x", model.ModelUnclassified}, // kein Allow-Muster trifft
+		"ARN mit erlaubter Region":       {"arn:aws:bedrock:eu-central-1:123:inference-profile/eu.x", model.ModelAllowed}, // Tail eu.x trifft ^eu\.
 		"ohne Region":                    {"anthropic.claude-sonnet-4-6", model.ModelAllowed},
 		"Modellname ist keine Region":    {"anthropic.claude-opus-4-1", model.ModelUnclassified},
 		"mehrere, eine nicht erlaubt":    {"eu.x-eu-central-1-us-gov-west-1", model.ModelBlocked},
@@ -120,6 +120,25 @@ func TestRegionDetectionNoFalsePositivesOnRealIDs(t *testing.T) {
 	} {
 		if r, bad := rules.DisallowedRegionInID(id, model.DefaultConfig()); bad {
 			t.Errorf("%q: false positive region %q", id, r)
+		}
+	}
+}
+
+func TestClassifyARNTail(t *testing.T) {
+	cfg := model.DefaultConfig()
+	for id, want := range map[string]model.ModelClass{
+		"arn:aws:bedrock:eu-central-1::foundation-model/anthropic.claude-sonnet-4-6":      model.ModelAllowed,
+		"arn:aws:bedrock:eu-central-1:123456789012:inference-profile/eu.anthropic.claude": model.ModelAllowed,
+		"arn:aws:bedrock:eu-central-1:123456789012:inference-profile/us.anthropic.claude": model.ModelBlocked,
+		"arn:aws:bedrock:eu-central-1::foundation-model/global.anthropic.claude":          model.ModelBlocked,
+		"arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-4-6":         model.ModelBlocked,
+		"arn:aws:bedrock:eu-central-1::foundation-model/anthropic.claude-opus-4":          model.ModelUnclassified,
+		"arn:aws:bedrock:eu-central-1::foundation-model/":                                 model.ModelUnclassified,
+		"arn:aws:bedrock:eu-central-1::foundation-model":                                  model.ModelUnclassified,
+		"foo/eu.anthropic.x": model.ModelUnclassified, // kein ARN: Tail-Regel gilt nicht
+	} {
+		if got := rules.Classify(id, cfg); got != want {
+			t.Errorf("Classify(%q)=%v want %v", id, got, want)
 		}
 	}
 }
