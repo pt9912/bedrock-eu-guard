@@ -71,6 +71,11 @@ type Finding struct {
 	Reason   string
 	Message  string
 	Subject  string
+
+	// Quelle des Findings (SPEC-021); Nullwerte = nicht dateibezogen.
+	File           string
+	Line           int
+	Recommendation string
 }
 
 // Config ist die Laufzeitkonfiguration (SPEC-020, hier nur der
