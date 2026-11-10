@@ -108,3 +108,18 @@ func TestDefaultModelsRegionMessage(t *testing.T) {
 		t.Fatalf("got %+v", fs)
 	}
 }
+
+// Reale Bedrock-IDs ohne Region dürfen nicht als Region erkannt werden.
+func TestRegionDetectionNoFalsePositivesOnRealIDs(t *testing.T) {
+	for _, id := range []string{
+		"amazon.nova-pro-v1:0",
+		"anthropic.claude-3-5-sonnet-20241022-v2:0",
+		"meta.llama3-1-70b-instruct-v1:0",
+		"anthropic.claude-sonnet-4-6",
+		"eu.anthropic.claude-haiku-4-5",
+	} {
+		if r, bad := rules.DisallowedRegionInID(id, model.DefaultConfig()); bad {
+			t.Errorf("%q: false positive region %q", id, r)
+		}
+	}
+}
