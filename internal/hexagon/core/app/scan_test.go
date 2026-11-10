@@ -213,3 +213,27 @@ func TestScanTerraformNoFilesAndFindError(t *testing.T) {
 		t.Errorf("FAIL erwartet: %+v", fs)
 	}
 }
+
+func TestScanOnlyTerraformSkipsClaudeRules(t *testing.T) {
+	r := faketerraform.Reader{Files: map[string]*model.TerraformFile{
+		"main.tf": {Providers: []model.AWSProvider{{Region: "eu-central-1", Line: 2}}}}}
+	fs, err := app.Scan{Terraform: r}.Run(model.DefaultConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, f := range fs {
+		if len(f.RuleID) >= 12 && f.RuleID[:12] == "LH-FA-CLAUDE" {
+			t.Errorf("Claude-Regel trotz nil-Reader: %+v", f)
+		}
+	}
+	if len(fs) == 0 {
+		t.Fatal("Terraform-Findings erwartet")
+	}
+}
+
+func TestScanAllReadersNilIsEmpty(t *testing.T) {
+	fs, err := app.Scan{}.Run(model.DefaultConfig())
+	if err != nil || len(fs) != 0 {
+		t.Fatalf("got %+v, %v", fs, err)
+	}
+}
