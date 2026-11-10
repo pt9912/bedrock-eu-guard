@@ -758,3 +758,22 @@ func TestAWSModeUsesModelFromSettings(t *testing.T) {
 		t.Errorf("ohne Settings-Modell: exit=%d stdout=%q", code, o.String())
 	}
 }
+
+// slice-020: apiKeyHelper → WARN (kein stilles PASS), Befehl erscheint nirgends.
+func TestAPIKeyHelperIsWarningWithoutCommand(t *testing.T) {
+	for _, format := range []string{"console", "json", "sarif"} {
+		var o, e bytes.Buffer
+		args := []string{"local", "--root", t.TempDir(), "--format", format}
+		code := run(args, euEnv, "testdata/helper/home", &o, &e)
+		out := o.String() + e.String()
+		if code != 0 {
+			t.Errorf("%s: exit=%d (WARN lässt den Lauf nicht scheitern): %s", format, code, out)
+		}
+		if !strings.Contains(out, "APIKEY_HELPER") {
+			t.Errorf("%s: WARN APIKEY_HELPER erwartet:\n%s", format, out)
+		}
+		if strings.Contains(out, "GEHEIM") || strings.Contains(out, "get-key") {
+			t.Errorf("%s: Befehl des Helpers in der Ausgabe:\n%s", format, out)
+		}
+	}
+}

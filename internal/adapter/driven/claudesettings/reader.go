@@ -93,6 +93,14 @@ func Parse(display string, data []byte) (*model.ClaudeSettings, *model.FileError
 			if str, ok := v.(string); ok {
 				s.Model = str
 			}
+		case "apiKeyHelper":
+			// Nur die Zeile des Schlüssels; der Wert (ein Befehl, der Secrets
+			// enthalten kann) wird gelesen und sofort verworfen (LH-NF-004).
+			s.APIKeyHelperLine = lineAt(data, dec.InputOffset())
+			var skip json.RawMessage
+			if err := dec.Decode(&skip); err != nil {
+				return nil, invalid(err)
+			}
 		case "env":
 			if err := parseEnv(dec, data, s); err != nil {
 				return nil, invalid(err)
