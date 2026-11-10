@@ -8,6 +8,8 @@ on:
       - Dockerfile
       - .dockerignore
       - tools/image-smoke.sh
+      - tools/feature-test.sh
+      - devcontainer-feature/**
       - cmd/**
       - internal/**
       - go.mod
@@ -24,3 +26,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: make image-test
+      - run: make feature-test
