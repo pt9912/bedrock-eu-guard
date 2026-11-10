@@ -2,13 +2,12 @@ package model
 
 // Reason-Codes der Terraform-Regeln.
 const (
-	ReasonNoTerraform      = "NO_TERRAFORM_FILES"
-	ReasonRegionDynamic    = "REGION_DYNAMIC"
-	ReasonIAMWildcard      = "IAM_WILDCARD"
-	ReasonIAMWildcardCond  = "IAM_WILDCARD_REGION_CONDITION"
-	ReasonIAMDynamic       = "IAM_DYNAMIC"
-	ReasonTerraformFound   = "TERRAFORM_FOUND"
-	ReasonModelRefsBlocked = "MODEL_REFS_BLOCKED"
+	ReasonNoTerraform     = "NO_TERRAFORM_FILES"
+	ReasonRegionDynamic   = "REGION_DYNAMIC"
+	ReasonIAMWildcard     = "IAM_WILDCARD"
+	ReasonIAMWildcardCond = "IAM_WILDCARD_REGION_CONDITION"
+	ReasonIAMDynamic      = "IAM_DYNAMIC"
+	ReasonTerraformFound  = "TERRAFORM_FOUND"
 )
 
 // AWSProvider ist ein `provider "aws"`-Block. Region ist nur gesetzt, wenn
