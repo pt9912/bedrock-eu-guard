@@ -20,7 +20,7 @@ GO_NET = docker run --rm -u $(shell id -u):$(shell id -g) \
 	-e HOME=/tmp -e GOCACHE=/src/.tmp/gocache -e GOMODCACHE=/src/.tmp/gomod \
 	-e GOFLAGS=-mod=mod -v "$(CURDIR):/src" -w /src $(GO_IMAGE)
 
-.PHONY: help gates lint test build verify-clean deps deps-verify self-check image image-test feature-test
+.PHONY: help gates lint test build verify-clean deps deps-verify self-check image image-test feature-test dist
 help: ## Targets anzeigen
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  %-16s %s\n", $$1, $$2}'
@@ -62,6 +62,19 @@ image: ## Docker-Images bauen (slim, full); braucht Netz zum Ziehen der Basis-Im
 image-test: image ## Smoke-Tests der Images (Laufzeit ohne Netz); nicht Teil von make gates
 	tools/image-smoke.sh $(IMAGE):slim slim
 	tools/image-smoke.sh $(IMAGE):full full
+
+DIST_ARCHS = amd64 arm64
+
+dist: ## Release-Artefakte (linux amd64/arm64) und SHA256SUMS nach dist/v$(VERSION)/ bauen; veroeffentlicht nichts (VERSION=x.y.z Pflicht)
+	@case "$(VERSION)" in dev|"") echo "VERSION=x.y.z angeben (Release-Version)"; exit 1;; esac
+	@mkdir -p .tmp/gocache dist/v$(VERSION)
+	@rm -f dist/v$(VERSION)/bedrock-eu-check_* dist/v$(VERSION)/SHA256SUMS
+	@for arch in $(DIST_ARCHS); do \
+		echo "bauen: linux/$$arch"; \
+		$(GO_RUN) env CGO_ENABLED=0 GOOS=linux GOARCH=$$arch go build -trimpath -buildvcs=false \
+			-ldflags "$(LDFLAGS)" -o dist/v$(VERSION)/bedrock-eu-check_$(VERSION)_linux_$$arch ./cmd/bedrock-eu-check || exit 1; \
+	done
+	@cd dist/v$(VERSION) && sha256sum bedrock-eu-check_$(VERSION)_linux_* > SHA256SUMS && sha256sum -c SHA256SUMS
 
 feature-test: ## Devcontainer-Feature gegen ein lokal gebautes Release testen (Docker, ohne Netz zur Laufzeit)
 	GO_IMAGE=$(GO_IMAGE) tools/feature-test.sh

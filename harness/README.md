@@ -59,6 +59,7 @@ kanonische Quelle**, und diese Datei wird angepasst.
 | `make image` | Docker-Images `slim` und `full` bauen (Basis-Images per Digest) | braucht Netz zum Ziehen der Basen; nicht Teil von `make gates` |
 | `make image-test` | `make image` plus Smoke-Tests (`tools/image-smoke.sh`: kein Root, `version`, `local` gut/schlecht, `terraform --format json`, `aws` je Variante) | CI-Job `image`, nur bei Änderungen, die das Image betreffen |
 | `make feature-test` | Devcontainer-Feature (`devcontainer-feature/`) gegen ein lokal gebautes „Release“ testen: Struktur, Syntax, Installation per `file://`, Negativfälle (Prüfsumme, Version) | CI-Job `image`; nicht Teil von `make gates` |
+| `make dist` | Release-Artefakte (Linux `amd64`/`arm64`) und `SHA256SUMS` nach `dist/v<version>/` bauen und verifizieren (`VERSION=x.y.z` Pflicht) | Workflow `release-artifacts` (nur manuell); veröffentlicht nichts |
 
 **Aktueller Lauf-Status:** lokal `make gates` / `make help`; in CI das
 Pipeline-Ergebnis (Rang höher als diese Datei).
