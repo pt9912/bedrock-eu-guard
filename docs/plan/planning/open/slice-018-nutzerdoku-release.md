@@ -44,7 +44,7 @@ ausdrücklicher Freigabe beider Nutzer erlaubt.
 
 ## 5. Trigger
 
-[`slice-014`](slice-014-version-befehl.md) bis [`slice-017`](slice-017-devcontainer-feature.md) gemerged.
+[`slice-014`](../done/slice-014-version-befehl.md) bis [`slice-017`](../done/slice-017-devcontainer-feature.md) gemerged.
 
 ## 6. Closure-Trigger
 
