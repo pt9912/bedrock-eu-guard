@@ -10,13 +10,11 @@ Reihenfolge von Terminen. Die Wellen bilden die Versions-Stufen
 
 ## Aktuelle Welle
 
-**Welle-ID:** welle-03-aws-checks
-**Start:** 2026-11-10
-**Plan:** [`../welle-03-aws-checks.md`](../welle-03-aws-checks.md) (Slices 008 bis 010: AWS-Identität, Bedrock-Profile, IAM)
-
-welle-01 und welle-02 sind abgeschlossen (2026-11-10, siehe
-[`../done/welle-01-results.md`](../done/welle-01-results.md) und
-[`../done/welle-02-results.md`](../done/welle-02-results.md)).
+Keine aktive Welle. welle-01, welle-02 und welle-03 sind abgeschlossen
+(2026-11-10, siehe [`../done/welle-01-results.md`](../done/welle-01-results.md),
+[`../done/welle-02-results.md`](../done/welle-02-results.md) und
+[`../done/welle-03-results.md`](../done/welle-03-results.md)); als Nächstes steht
+welle-04-output-ci an (Plan folgt).
 
 ## Nächste Wellen
 
@@ -32,7 +30,7 @@ welle-01 und welle-02 sind abgeschlossen (2026-11-10, siehe
 | M0 — Harness bereit | — | Greenfield-Bootstrap abgeschlossen | erreicht (2026-06-24) |
 | M1 — erstes lauffähiges Tool | welle-01 | `bedrock-eu-check local` liefert PASS/WARN/FAIL + Exit-Codes | erreicht (2026-11-10) |
 | M2 — vollständiger statischer Scan | welle-02 | Config/Container/Terraform abgedeckt | erreicht (2026-11-10) |
-| M3 — AWS-Live-Checks | welle-03 | STS/Bedrock/IAM read-only | offen |
+| M3 — AWS-Live-Checks | welle-03 | STS/Bedrock/IAM read-only | erreicht (2026-11-10) |
 | M4 — CI-fähig | welle-04 | SARIF + `--ci` + Exit-Code 1 bei FAIL | offen |
 | M5 — Release 1.0 | welle-05 | Docker-Image + Doku + Tests grün | offen |
 
@@ -50,6 +48,7 @@ flowchart LR
 
 - welle-01-lokaler-env-check, abgeschlossen 2026-11-10, siehe [`done/welle-01-results.md`](../done/welle-01-results.md).
 - welle-02-config-scanner, abgeschlossen 2026-11-10, siehe [`done/welle-02-results.md`](../done/welle-02-results.md).
+- welle-03-aws-checks, abgeschlossen 2026-11-10, siehe [`done/welle-03-results.md`](../done/welle-03-results.md).
 
 ## Historische Trigger-Verschiebungen
 

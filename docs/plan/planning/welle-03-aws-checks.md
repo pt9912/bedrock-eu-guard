@@ -1,6 +1,6 @@
 # Welle welle-03-aws-checks: AWS-Checks (STS, Bedrock, IAM)
 
-**Status:** open
+**Status:** done
 
 **Zielmeilenstein:** M3 — AWS-Live-Checks
 
@@ -85,4 +85,4 @@ den Adapter `awscli` (einzige AWS-Tür, siehe [`spec/architecture.md`](../../../
 
 ## 8. Closure-Notiz
 
-<!-- Erst nach Welle-Abschluss füllen. Verweis auf welle-03-results.md. -->
+Abgeschlossen am 2026-11-10, siehe [`done/welle-03-results.md`](done/welle-03-results.md).
