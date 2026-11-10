@@ -6,7 +6,7 @@ data "aws_iam_policy_document" "bedrock" {
   statement {
     effect    = "Allow"
     actions   = ["bedrock:InvokeModel"]
-    resources = ["arn:aws:bedrock:*::foundation-model/*"]
+    resources = ["arn:aws:bedrock:eu-central-1::foundation-model/anthropic.claude-sonnet-4-6"]
   }
 }
 
