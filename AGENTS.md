@@ -127,10 +127,12 @@ Nur real existierende Targets (keine halluzinierten Gates, Modul 13):
 | Target           | Zweck                                                              |
 | ---------------- | ------------------------------------------------------------------ |
 | `make doc-check` | Doku-Referenzen prüfen (Links/Anker, via d-check v0.29.0, netzlos) |
-| `make gates`     | alle aktuell lauffähigen Gates (heute nur `doc-check`)             |
-
-`make lint`, `make test`, `make coverage-gate`, `make self-check`
-entstehen mit dem ersten Code-Slice (Welle 1) und **[`ADR-0002`](docs/plan/adr/0002-implementierungssprache.md)**; sie
+| `make lint`      | `gofmt -l .` + `go vet ./...` (containerisiert, netzlos)           |
+| `make test`      | Unit-Tests (`go test ./...`, containerisiert, netzlos)             |
+| `make build`     | Binary `bin/bedrock-eu-check` bauen                                |
+| `make gates`     | alle lauffähigen Gates: `doc-check`, `lint`, `test`                |
+`make coverage-gate` und `make self-check` entstehen in späteren Slices;
+sie werden erst hier eingetragen, wenn sie laufen.
 werden erst hier eingetragen, wenn sie laufen.
 
 ## 5. Dokumentations-Regeln
