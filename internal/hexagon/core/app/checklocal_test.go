@@ -76,3 +76,14 @@ func TestExitCode(t *testing.T) {
 		}
 	}
 }
+
+func TestLocalIncludesDefaultModels(t *testing.T) {
+	env := fakeenv.Env{"ANTHROPIC_DEFAULT_SONNET_MODEL": "us.anthropic.claude-sonnet-4-6"}
+	fs, _ := app.CheckLocal{}.Run(env, model.DefaultConfig())
+	for _, f := range fs {
+		if f.RuleID == "LH-FA-LENV-006" && f.Severity == model.FAIL {
+			return
+		}
+	}
+	t.Fatalf("no LENV-006 FAIL: %+v", fs)
+}
