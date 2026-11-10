@@ -220,12 +220,12 @@ func TestLocalEnvSourcesBad(t *testing.T) {
 	}
 }
 
-func modeRun(t *testing.T, mode, dir string, env mapEnv) (code int, out, errs string) {
+func modeRun(t *testing.T, mode, dir string, env mapEnv, extra ...string) (code int, out, errs string) {
 	t.Helper()
 	args, home := scanArgs("testdata/" + dir)
 	args[0] = mode
 	var o, e bytes.Buffer
-	code = run(args, env, home, &o, &e)
+	code = run(append(args, extra...), env, home, &o, &e)
 	return code, o.String(), e.String()
 }
 
@@ -665,5 +665,79 @@ func TestCIFlagTakesNoValue(t *testing.T) {
 	var o, e bytes.Buffer
 	if code := run([]string{"local", "--ci", "--root", t.TempDir()}, euEnv, "", &o, &e); code == 2 && strings.Contains(e.String(), "usage:") {
 		t.Errorf("--ci vor weiteren Optionen muss gültig sein: %q", e.String())
+	}
+}
+
+// slice-019: exclude — ausgeschlossene Pfade werden nicht gemeldet.
+func TestExcludeSkipsPaths(t *testing.T) {
+	// Ohne exclude meldet der bad-Datensatz Terraform-FAILs.
+	if code, out, _ := modeRun(t, "terraform", "bad", mapEnv{}); code != 1 || !strings.Contains(out, "main.tf") {
+		t.Fatalf("Ausgangslage: exit=%d stdout=%q", code, out)
+	}
+	cfg := []string{"--config", "testdata/config/exclude-bad.yml"}
+	code, out, errs := modeRun(t, "terraform", "bad", mapEnv{}, cfg...)
+	if code != 0 || strings.Contains(out, "[FAIL]") || strings.Contains(out, "main.tf") || errs != "" {
+		t.Errorf("terraform mit exclude: exit=%d stdout=%q stderr=%q", code, out, errs)
+	}
+	// local: Projektdateien (Claude-Projekt-Settings, Devcontainer, Compose, Dockerfile) entfallen;
+	// die Benutzer-Settings im Home-Verzeichnis liegen außerhalb des Scan-Roots und bleiben.
+	_, out, _ = modeRun(t, "local", "bad", euEnv, cfg...)
+	for _, rule := range []string{"LH-FA-CLAUDE-002", "LH-FA-DEVCON-001", "LH-FA-DOCKER-001", "LH-FA-DOCKER-002"} {
+		if strings.Contains(out, rule) {
+			t.Errorf("%s betrifft nur ausgeschlossene Pfade, erscheint aber:\n%s", rule, out)
+		}
+	}
+	if !strings.Contains(out, "~/.claude/settings.json") {
+		t.Errorf("Benutzer-Settings außerhalb des Scan-Roots müssen bleiben:\n%s", out)
+	}
+}
+
+func TestExcludeInvalidPatternIsToolError(t *testing.T) {
+	dir := t.TempDir()
+	cfgFile := filepath.Join(dir, "c.yml")
+	if err := os.WriteFile(cfgFile, []byte("exclude: [\"[abc\"]\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	code, out, errs := modeRun(t, "terraform", "good", mapEnv{}, "--config", cfgFile)
+	if code != 2 || out != "" || errs == "" || strings.Contains(errs, "[abc") {
+		t.Errorf("exit=%d stdout=%q stderr=%q", code, out, errs)
+	}
+}
+
+// slice-014: version
+func withBuildInfo(t *testing.T, v, c string) {
+	t.Helper()
+	oldV, oldC := version, commit
+	version, commit = v, c
+	t.Cleanup(func() { version, commit = oldV, oldC })
+}
+
+func TestVersionCommand(t *testing.T) {
+	var o, e bytes.Buffer
+	if code := run([]string{"version"}, euEnv, "", &o, &e); code != 0 || o.String() != "bedrock-eu-check dev (unknown)\n" || e.Len() != 0 {
+		t.Errorf("Defaults: exit=%d stdout=%q stderr=%q", code, o.String(), e.String())
+	}
+	withBuildInfo(t, "1.2.3", "abc123def456")
+	o.Reset()
+	if code := run([]string{"version"}, euEnv, "", &o, &e); code != 0 || o.String() != "bedrock-eu-check 1.2.3 (abc123def456)\n" {
+		t.Errorf("gesetzt: exit=%d stdout=%q", code, o.String())
+	}
+}
+
+func TestVersionRejectsExtraArguments(t *testing.T) {
+	for _, args := range [][]string{{"version", "--ci"}, {"version", "x"}} {
+		var o, e bytes.Buffer
+		if code := run(args, euEnv, "", &o, &e); code != 2 || o.Len() != 0 || !strings.Contains(e.String(), "usage:") {
+			t.Errorf("%v: exit=%d stdout=%q stderr=%q", args, code, o.String(), e.String())
+		}
+	}
+}
+
+func TestSARIFUsesBuildVersion(t *testing.T) {
+	withBuildInfo(t, "9.9.9", "deadbeef0000")
+	_, _, _, doc := sarifRun(t, "terraform", "good", mapEnv{})
+	drv := doc["runs"].([]any)[0].(map[string]any)["tool"].(map[string]any)["driver"].(map[string]any)
+	if drv["version"] != "9.9.9" {
+		t.Errorf("driver.version = %v (Version, nicht Commit)", drv["version"])
 	}
 }
