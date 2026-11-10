@@ -38,6 +38,9 @@ type ScanContext struct {
 	Composes      []EnvSourceFile
 	Dockerfiles   []EnvSourceFile
 	Terraform     TerraformScan
+	// SkipClaude überspringt die vier Claude-Settings-Regeln (kein Reader
+	// konfiguriert); der Nullwert behält das bisherige Verhalten.
+	SkipClaude bool
 }
 
 // ScanRule wertet die geladenen Settings gegen die Config aus.
@@ -91,6 +94,9 @@ func bedrockEnabled(s *model.ClaudeSettings) bool {
 
 // CheckClaudeUser prüft ~/.claude/settings.json (LH-FA-CLAUDE-001).
 func CheckClaudeUser(sc ScanContext, _ model.Config) []model.Finding {
+	if sc.SkipClaude {
+		return nil
+	}
 	f := sc.User
 	switch {
 	case f.Err != nil:
@@ -131,6 +137,9 @@ func modelValues(s *model.ClaudeSettings) []string {
 // CheckClaudeProject prüft .claude/settings.json und settings.local.json
 // einzeln (LH-FA-CLAUDE-002); fehlende Dateien sind optional.
 func CheckClaudeProject(sc ScanContext, cfg model.Config) []model.Finding {
+	if sc.SkipClaude {
+		return nil
+	}
 	var out []model.Finding
 	for _, f := range sc.Projects {
 		if f.Err != nil {
@@ -190,6 +199,9 @@ func projectFinding(f SettingsFile, cfg model.Config) model.Finding {
 // vorhandenen Settings-Dateien (LH-FA-CLAUDE-003). FAIL nur bei aktiver
 // Konfiguration; reine Textfunde und fremde Hosts sind WARN.
 func CheckClaudeEndpoints(sc ScanContext, _ model.Config) []model.Finding {
+	if sc.SkipClaude {
+		return nil
+	}
 	files := append([]SettingsFile{sc.User}, sc.Projects...)
 	var out []model.Finding
 	for _, f := range files {
@@ -230,6 +242,9 @@ func textOnlyHit(s *model.ClaudeSettings) (model.Hit, bool) {
 // greift nur, wenn CLAUDE_CODE_USE_BEDROCK=1 dort gesetzt ist; sonst
 // meldet CLAUDE-001.
 func CheckClaudeWizard(sc ScanContext, cfg model.Config) []model.Finding {
+	if sc.SkipClaude {
+		return nil
+	}
 	f := sc.User
 	if f.Err != nil || f.S == nil || !bedrockEnabled(f.S) {
 		return nil

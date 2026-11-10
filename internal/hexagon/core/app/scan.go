@@ -9,7 +9,9 @@ import (
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/port/driven"
 )
 
-// Scan ist der Use-Case des Modus `scan` (Claude-Settings). Dateifehler
+// Scan ist der Use-Case der Datei-Prüfungen (Claude-Settings, Devcontainer,
+// Compose, Dockerfile, Terraform). Alle Reader sind optional: nil heißt, die
+// zugehörigen Regeln laufen nicht (kein Finding, kein „Datei fehlt“-WARN). Dateifehler
 // werden zu Findings (nie zu Exit 2, SPEC-030 bleibt unberührt).
 type Scan struct {
 	Settings driven.ClaudeSettingsReader
@@ -24,12 +26,17 @@ type Scan struct {
 // Run lädt die Settings einmal und wertet alle Scan-Regeln aus; Findings
 // stabil nach RuleID (SPEC-001), innerhalb einer Regel in Ladereihenfolge.
 func (u Scan) Run(cfg model.Config) ([]model.Finding, error) {
-	sc := rules.ScanContext{User: load(rules.UserSettingsPath, u.Settings.ReadUser)}
-	for _, rel := range rules.ProjectSettingsFiles {
-		rel := rel
-		sc.Projects = append(sc.Projects, load(rel, func() (*model.ClaudeSettings, error) {
-			return u.Settings.ReadProject(rel)
-		}))
+	var sc rules.ScanContext
+	if u.Settings != nil {
+		sc.User = load(rules.UserSettingsPath, u.Settings.ReadUser)
+		for _, rel := range rules.ProjectSettingsFiles {
+			rel := rel
+			sc.Projects = append(sc.Projects, load(rel, func() (*model.ClaudeSettings, error) {
+				return u.Settings.ReadProject(rel)
+			}))
+		}
+	} else {
+		sc.SkipClaude = true
 	}
 	if u.EnvSources != nil && u.Files != nil {
 		sc.Devcontainers = u.loadEnv(model.EnvDevcontainer, rules.DevcontainerPatterns)
