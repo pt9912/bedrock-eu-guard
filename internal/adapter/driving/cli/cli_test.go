@@ -302,6 +302,11 @@ const (
   "sts get-caller-identity") echo '{"UserId":"AIDAEXAMPLE","Account":"123456789012","Arn":"arn:aws:iam::123456789012:user/tester"}' ;;
   "bedrock list-inference-profiles") echo '{"inferenceProfileSummaries":[{"inferenceProfileId":"eu.anthropic.claude-sonnet-4-6","inferenceProfileName":"EU Sonnet","type":"SYSTEM_DEFINED"},{"inferenceProfileId":"us.anthropic.claude-sonnet-4-6","inferenceProfileName":"US Sonnet","type":"SYSTEM_DEFINED"}]}' ;;
   "bedrock list-foundation-models") echo '{"modelSummaries":[{"modelId":"anthropic.claude-sonnet-4-6"}]}' ;;
+  "iam simulate-principal-policy") echo '{"EvaluationResults":[{"EvalActionName":"bedrock:InvokeModel","EvalDecision":"allowed"},{"EvalActionName":"bedrock:InvokeModelWithResponseStream","EvalDecision":"allowed"},{"EvalActionName":"bedrock:Converse","EvalDecision":"allowed"},{"EvalActionName":"bedrock:ConverseStream","EvalDecision":"allowed"},{"EvalActionName":"bedrock:ListInferenceProfiles","EvalDecision":"allowed"},{"EvalActionName":"bedrock:GetInferenceProfile","EvalDecision":"allowed"}]}' ;;
+  "iam list-attached-user-policies") echo '{"AttachedPolicies":[]}' ;;
+  "iam list-user-policies") echo '{"PolicyNames":["p"]}' ;;
+  "iam get-user-policy") echo '{"PolicyDocument":{"Statement":[{"Effect":"Allow","Action":["bedrock:InvokeModel","bedrock:Converse"],"Resource":"arn:aws:bedrock:eu-central-1::foundation-model/*"}]}}' ;;
+  "iam list-groups-for-user") echo '{"Groups":[]}' ;;
   *) echo "unerwarteter Aufruf" >&2; exit 2 ;;
 esac`
 	// stderr enthält absichtlich Text, der nie in der Ausgabe erscheinen darf.
@@ -405,6 +410,45 @@ func TestAWSModeBedrockErrorsAreFindings(t *testing.T) {
 	code, out, errs := awsRun(t, mapEnv{"AWS_PROFILE": "dev"})
 	if code != 1 || !strings.Contains(out, "[FAIL] LH-FA-BEDROCK-001") || !strings.Contains(out, "AWS_ACCESS_DENIED") {
 		t.Fatalf("exit=%d stdout=%q stderr=%q", code, out, errs)
+	}
+	for _, s := range []string{out, errs} {
+		if strings.Contains(s, "LEAK-STDERR-TEXT") {
+			t.Errorf("stderr-Text in der Ausgabe:\n%s", s)
+		}
+	}
+}
+
+// slice-010: IAM-Rechte und -Policies des eigenen Principals.
+func TestAWSModeIAM(t *testing.T) {
+	useFakeAWS(t, awsOK)
+	code, out, errs := awsRun(t, mapEnv{"AWS_PROFILE": "dev"})
+	if code != 0 {
+		t.Fatalf("exit=%d stdout=%q stderr=%q", code, out, errs)
+	}
+	for _, want := range []string{"[PASS] LH-FA-IAM-001", "[PASS] LH-FA-IAM-002", "[PASS] LH-FA-IAM-003"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("%s fehlt:\n%s", want, out)
+		}
+	}
+}
+
+// Zu breite Bedrock-Policy ohne Region-Condition → FAIL (IAM-002, IAM-003).
+func TestAWSModeBroadPolicy(t *testing.T) {
+	broad := strings.Replace(awsOK, `"Resource":"arn:aws:bedrock:eu-central-1::foundation-model/*"`, `"Resource":"*"`, 1)
+	useFakeAWS(t, broad)
+	code, out, errs := awsRun(t, mapEnv{"AWS_PROFILE": "dev"})
+	if code != 1 || !strings.Contains(out, "[FAIL] LH-FA-IAM-002") || !strings.Contains(out, "[FAIL] LH-FA-IAM-003") {
+		t.Errorf("exit=%d stdout=%q stderr=%q", code, out, errs)
+	}
+}
+
+// Rechte-Simulation nicht erlaubt → WARN statt stillem Erfolg, kein stderr-Text.
+func TestAWSModeIAMSimulationDenied(t *testing.T) {
+	denied := strings.Replace(awsOK, `"iam simulate-principal-policy") echo`, `"iam simulate-principal-policy") echo 'AccessDenied LEAK-STDERR-TEXT' >&2; exit 255; echo`, 1)
+	useFakeAWS(t, denied)
+	code, out, errs := awsRun(t, mapEnv{"AWS_PROFILE": "dev"})
+	if code != 0 || !strings.Contains(out, "[WARN] LH-FA-IAM-001") {
+		t.Errorf("exit=%d stdout=%q stderr=%q", code, out, errs)
 	}
 	for _, s := range []string{out, errs} {
 		if strings.Contains(s, "LEAK-STDERR-TEXT") {
