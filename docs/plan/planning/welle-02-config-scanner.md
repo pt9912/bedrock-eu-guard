@@ -51,6 +51,14 @@ die in Welle 1 bewusst offen blieb (`RM-002` / v0.2).
 - Blockiert: welle-03 (AWS-Checks nutzen Konfiguration und Findings-Modell).
 - Wird blockiert von: Abhängigkeits-ADR (nur slice-005 bis slice-007).
 
+## 5a. Architektur-Entscheidungen (Entwurf, in slice-004 zu bestätigen)
+
+1. **Finding-Vertrag:** `model.Finding` bekommt additiv `File string`, `Line int`, `Recommendation string` (Nullwerte = bisheriges Verhalten; [`SPEC-021`](../../../spec/spezifikation.md#spec-021--finding-schema-json---format-json) und [`LH-FA-REP-002`](../../../spec/lastenheft.md#lh-fa-rep-002--json-ausgabe) verlangen sie). Eine einzige Vertragsänderung durch w1, vorher angekündigt. Der Konsolen-Reporter gibt optional `Datei:Zeile` aus (w2).
+2. **Parser im driven-Adapter:** Wie in [`spec/architecture.md`](../../../spec/architecture.md) vorgesehen, parsen die Adapter. Die Ports liefern geparste `model`-Typen (z. B. `driven.ClaudeSettingsReader` → `model.ClaudeSettings`); der Kern bleibt frei von Parsern, Regeln bleiben rein und mit Fakes testbar.
+3. **Filesystem-Port:** `ReadFile(path) ([]byte, error)`, `Exists(path) (bool, error)`, `Glob(pattern) ([]string, error)`; Test-Double `coretest/memfs` (w1).
+4. **Fehlerpolitik für gescannte Dateien** (Empfehlung): Datei fehlt → je nach Anforderung (z. B. `WARN` laut [`LH-FA-CLAUDE-001`](../../../spec/lastenheft.md#lh-fa-claude-001--benutzerweite-claude-code-settings-prüfen)). Datei vorhanden, aber nicht lesbar oder syntaktisch ungültig → `FAIL` mit Reason `FILE_UNREADABLE`/`FILE_INVALID` und Scan läuft weiter, weil EU-Konformität nicht belegbar ist. Exit `2` (Tool-Fehler) bleibt Fehlern des Tools selbst vorbehalten (Argumente, ungültige eigene Config, [`SPEC-030`](../../../spec/spezifikation.md#spec-030--exit-codes)).
+5. **Aufteilung:** w1 = Kern (`model`, Ports, Regeln, Doubles); w2 = Adapter (`fs`, `configyaml`, Parser), Abhängigkeits-ADR, Makefile/CI, Reporter.
+
 ## 6. Out-of-Scope für diese Welle
 
 - AWS-Live-Calls (Welle 3).
