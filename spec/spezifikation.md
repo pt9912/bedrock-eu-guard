@@ -106,17 +106,34 @@ Alle Felder optional; fehlende Felder fallen auf die Defaults zurück
 
 ### SPEC-021 — Finding-Schema (JSON, `--format json`)
 
+Die Ausgabe ist ein JSON-Objekt mit der Schema-Version und den Findings in der
+Reihenfolge der Aggregation ([`SPEC-001`](#spec-001--severity--und-aggregationsmodell)); ohne Findings ist `findings`
+ein leeres Array.
+
 ```json
 {
-  "status":   "PASS | WARN | FAIL",
-  "id":       "LH-FA-LENV-001",
-  "message":  "AWS_REGION=eu-central-1",
-  "severity": "info | warning | error",
-  "file":     "path or null",
-  "line":     0,
-  "recommendation": "string or null"
+  "version": 1,
+  "findings": [
+    {
+      "status":   "PASS | WARN | FAIL",
+      "id":       "LH-FA-LENV-001",
+      "message":  "AWS_REGION=eu-central-1",
+      "severity": "info | warning | error",
+      "reason":   "OK",
+      "file":     "path or null",
+      "line":     0,
+      "recommendation": "string or null"
+    }
+  ]
 }
 ```
+
+`severity` folgt dem Status (`PASS` → `info`, `WARN` → `warning`, `FAIL` →
+`error`). `reason` ist der stabile, maschinenlesbare Reason-Code der Regel
+(additiv gegenüber dem Lastenheft). `file` und `recommendation` sind `null`,
+wenn nicht vorhanden; `line` ist `null`, wenn die Zeile unbekannt ist (sonst
+eine Zahl ≥ 1). Die Ausgabe ist deterministisch (keine Zeitstempel oder
+Zufallswerte). Eine Änderung des Schemas erhöht `version`.
 
 Präzisiert [`LH-FA-REP-002`](lastenheft.md#lh-fa-rep-002--json-ausgabe). **Secrets erscheinen nie als Wert**
 (`message` trägt höchstens „set"/„not set", [`LH-NF-004`](lastenheft.md#lh-nf-004--keine-secret-ausgabe)).

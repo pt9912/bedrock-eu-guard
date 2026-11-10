@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -453,6 +454,80 @@ func TestAWSModeIAMSimulationDenied(t *testing.T) {
 	for _, s := range []string{out, errs} {
 		if strings.Contains(s, "LEAK-STDERR-TEXT") {
 			t.Errorf("stderr-Text in der Ausgabe:\n%s", s)
+		}
+	}
+}
+
+// slice-011: --format json
+func jsonRun(t *testing.T, mode, dir string, env mapEnv, extra ...string) (code int, out, errs string, doc map[string]any) {
+	t.Helper()
+	args, home := scanArgs("testdata/" + dir)
+	args[0] = mode
+	var o, e bytes.Buffer
+	code = run(append(args, extra...), env, home, &o, &e)
+	if o.Len() > 0 {
+		if err := json.Unmarshal(o.Bytes(), &doc); err != nil {
+			t.Fatalf("stdout ist kein JSON: %v\n%s", err, o.String())
+		}
+	}
+	return code, o.String(), e.String(), doc
+}
+
+func TestFormatJSONGoodAndBad(t *testing.T) {
+	code, out, errs, doc := jsonRun(t, "local", "good", euEnv, "--format", "json")
+	if code != 0 || errs != "" || doc["version"] != float64(1) {
+		t.Fatalf("good: exit=%d stderr=%q doc=%v", code, errs, doc["version"])
+	}
+	if fs, _ := doc["findings"].([]any); len(fs) == 0 {
+		t.Errorf("good: keine Findings:\n%s", out)
+	}
+
+	code, out, _, doc = jsonRun(t, "local", "bad", euEnv, "--format", "json")
+	if code != 1 {
+		t.Fatalf("bad: exit=%d", code)
+	}
+	var fails int
+	for _, f := range doc["findings"].([]any) {
+		m := f.(map[string]any)
+		if m["status"] == "FAIL" {
+			fails++
+			if m["severity"] != "error" {
+				t.Errorf("FAIL muss severity error haben: %v", m)
+			}
+		}
+	}
+	if fails == 0 {
+		t.Errorf("bad: kein FAIL im JSON:\n%s", out)
+	}
+	if strings.Contains(out, "GEHEIM") || strings.Contains(out, "sk-ant") {
+		t.Errorf("Secret im JSON:\n%s", out)
+	}
+	// Datei und Zeile erscheinen als eigene Felder.
+	if !strings.Contains(out, `"file": ".claude/settings.json"`) && !strings.Contains(out, `"file": "main.tf"`) {
+		t.Errorf("file-Feld fehlt:\n%s", out)
+	}
+}
+
+func TestFormatJSONToolErrorKeepsStdoutParsable(t *testing.T) {
+	old := awsBinary
+	awsBinary = filepath.Join(t.TempDir(), "gibt-es-nicht")
+	t.Cleanup(func() { awsBinary = old })
+	code, out, errs, doc := jsonRun(t, "all", "good", euEnv, "--format", "json")
+	if code != 2 || !strings.Contains(errs, "AWS_CLI_MISSING") || doc == nil {
+		t.Fatalf("exit=%d stderr=%q stdout=%q", code, errs, out)
+	}
+	if strings.Contains(out, "AWS_CLI_MISSING") {
+		t.Error("Fehlermeldung gehört auf stderr, nicht in die JSON-Ausgabe")
+	}
+}
+
+func TestFormatInvalidIsUsageError(t *testing.T) {
+	for _, args := range [][]string{
+		{"local", "--format", "xml"}, {"local", "--format"}, {"local", "--format", ""}, {"local", "--format", "sarif"},
+	} {
+		var o, e bytes.Buffer
+		if code := run(args, euEnv, "", &o, &e); code != 2 || o.Len() != 0 || !strings.Contains(e.String(), "usage:") {
+			t.Errorf("%v: exit=%d stdout=%q stderr=%q", args, code, o.String(), e.String())
 		}
 	}
 }
