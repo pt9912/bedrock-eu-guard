@@ -56,6 +56,8 @@ kanonische Quelle**, und diese Datei wird angepasst.
 | `make deps` | `go mod tidy` + `vendor/` neu erzeugen (mit Netz, nicht Teil der Gates) | [`ADR-0004`](../docs/plan/adr/0004-abhaengigkeiten-und-offline-gates.md): `vendor/` nie von Hand editieren |
 | `make deps-verify` | `go mod verify` + `vendor/` entspricht Upstream (mit Netz) | CI-Job `deps-verify`, nur bei Änderungen an `vendor/`, `go.mod`, `go.sum` |
 | `make self-check` | `bedrock-eu-check local` und `terraform` gegen das eigene Repository ([`LH-QA-005`](../spec/lastenheft.md#lh-qa-005--ci-prüfung)); Exit 0 Pflicht | `env -i` mit EU-Minimalumgebung; Ausschlüsse (Testdaten, `vendor/`) in `bedrock-eu-check.yml`; CI-Schritt in `gates.yml` |
+| `make image` | Docker-Images `slim` und `full` bauen (Basis-Images per Digest) | braucht Netz zum Ziehen der Basen; nicht Teil von `make gates` |
+| `make image-test` | `make image` plus Smoke-Tests (`tools/image-smoke.sh`: kein Root, `version`, `local` gut/schlecht, `terraform --format json`, `aws` je Variante) | CI-Job `image`, nur bei Änderungen, die das Image betreffen |
 
 **Aktueller Lauf-Status:** lokal `make gates` / `make help`; in CI das
 Pipeline-Ergebnis (Rang höher als diese Datei).
