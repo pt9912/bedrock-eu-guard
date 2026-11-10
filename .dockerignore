@@ -1,0 +1,8 @@
+# Nur das, was der Build braucht, gelangt in den Build-Kontext.
+*
+!go.mod
+!go.sum
+!vendor
+!cmd
+!internal
+**/testdata
