@@ -35,7 +35,31 @@ const (
 	ReasonBedrockNotEnabled  = "BEDROCK_NOT_ENABLED"
 	ReasonAnthropicKeySet    = "ANTHROPIC_API_KEY_SET"
 	ReasonAnthropicKeyNotSet = "ANTHROPIC_API_KEY_NOT_SET"
+	ReasonModelAllowed       = "MODEL_ALLOWED"
+	ReasonModelBlocked       = "MODEL_BLOCKED"
+	ReasonModelUnclassified  = "MODEL_UNCLASSIFIED"
 )
+
+// ModelClass ist das Ergebnis der Modell-/Profil-ID-Klassifikation (SPEC-010).
+type ModelClass int
+
+const (
+	ModelUnclassified ModelClass = iota
+	ModelAllowed
+	ModelBlocked
+)
+
+// String liefert "allowed", "blocked" oder "unclassified".
+func (c ModelClass) String() string {
+	switch c {
+	case ModelAllowed:
+		return "allowed"
+	case ModelBlocked:
+		return "blocked"
+	default:
+		return "unclassified"
+	}
+}
 
 // Finding ist das Ergebnis einer Regel. Message darf nie einen
 // Secret-Wert enthalten (LH-NF-004).
@@ -50,12 +74,18 @@ type Finding struct {
 // Config ist die Laufzeitkonfiguration (SPEC-020, hier nur der
 // Slice-001-Ausschnitt).
 type Config struct {
-	AllowedRegions []string
+	AllowedRegions       []string
+	AllowedModelPatterns []string // reguläre Ausdrücke (SPEC-020)
+	BlockedModelPatterns []string // reguläre Ausdrücke; Vorrang vor Allow (SPEC-010)
 }
 
 // DefaultConfig liefert die Defaults (LH-NF-007: überschreibbar).
 func DefaultConfig() Config {
-	return Config{AllowedRegions: []string{"eu-central-1"}}
+	return Config{
+		AllowedRegions:       []string{"eu-central-1"},
+		AllowedModelPatterns: []string{`^eu\.`, `^anthropic\.claude-sonnet-4-6$`, `^anthropic\.claude-haiku-4-5$`},
+		BlockedModelPatterns: []string{`^us\.`, `^global\.`, `us-east-1`, `us-west-2`},
+	}
 }
 
 // RegionAllowed meldet, ob region in AllowedRegions enthalten ist (SPEC-011).

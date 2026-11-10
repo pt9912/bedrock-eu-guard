@@ -13,6 +13,7 @@ const (
 	IDDefaultRegion = "LH-FA-LENV-002"
 	IDUseBedrock    = "LH-FA-LENV-003"
 	IDAnthropicKey  = "LH-FA-LENV-004"
+	IDDefaultModels = "LH-FA-LENV-006"
 )
 
 // Rule wertet die Umgebung gegen die Config aus (SPEC-002).
@@ -20,7 +21,7 @@ type Rule func(env driven.Environment, cfg model.Config) []model.Finding
 
 // LocalRules liefert die LENV-Regeln in stabiler Reihenfolge.
 func LocalRules() []Rule {
-	return []Rule{CheckAWSRegion, CheckAWSDefaultRegion, CheckUseBedrock, CheckAnthropicKey}
+	return []Rule{CheckAWSRegion, CheckAWSDefaultRegion, CheckUseBedrock, CheckAnthropicKey, CheckDefaultModels}
 }
 
 // CheckAWSRegion prüft AWS_REGION (LH-FA-LENV-001, SPEC-011). Fehlt
