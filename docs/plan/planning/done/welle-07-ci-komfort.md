@@ -1,6 +1,6 @@
 # Welle welle-07-ci-komfort: Komfort für CI und Auswertung
 
-**Status:** in-progress (gestartet; slice-026, -028, -029 done, slice-027 umgesetzt, Closure und Entscheidungsvorlage 1.1.0 offen)
+**Status:** done (abgeschlossen 2026-11-11, siehe [`welle-07-results.md`](welle-07-results.md))
 
 **Zielmeilenstein:** M7 — CI-Komfort (Werkzeug-Version 1.1.0)
 
@@ -32,9 +32,9 @@ Standardverhalten bleibt unverändert (Exit `1` nur bei `FAIL`).
 
 | Slice | Titel | Zuständig | Bezug / Dependency |
 |---|---|---|---|
-| slice-026 | `--fail-on warn` (Exit-Code-Schwelle) | Kern w1 (inkl. Spec), Flag und Doku w2 | [`SPEC-030`](../../../spec/spezifikation.md#spec-030--exit-codes), [`LH-FA-EXIT-001`](../../../spec/lastenheft.md#lh-fa-exit-001--erfolgreiche-prüfung)/[`LH-FA-EXIT-002`](../../../spec/lastenheft.md#lh-fa-exit-002--fehlgeschlagene-prüfung) |
+| slice-026 | `--fail-on warn` (Exit-Code-Schwelle) | Kern w1 (inkl. Spec), Flag und Doku w2 | [`SPEC-030`](../../../../spec/spezifikation.md#spec-030--exit-codes), [`LH-FA-EXIT-001`](../../../../spec/lastenheft.md#lh-fa-exit-001--erfolgreiche-prüfung)/[`LH-FA-EXIT-002`](../../../../spec/lastenheft.md#lh-fa-exit-002--fehlgeschlagene-prüfung) |
 | slice-027 | `--output FILE` für alle Ausgabeformate | w2 | — |
-| slice-028 | Zusätzliche Regionen für „sichtbare“ Bedrock-Profile | Kern w1, Adapter w2 | [`LH-FA-BEDROCK-002`](../../../spec/lastenheft.md#lh-fa-bedrock-002--nicht-erlaubte-profile-erkennen) |
+| slice-028 | Zusätzliche Regionen für „sichtbare“ Bedrock-Profile | Kern w1, Adapter w2 | [`LH-FA-BEDROCK-002`](../../../../spec/lastenheft.md#lh-fa-bedrock-002--nicht-erlaubte-profile-erkennen) |
 | slice-029 | Bewertung der `d-check`-Prüfziele (`doc-planning`, `doc-targets`, …) und gegebenenfalls Aufnahme in `make gates` | w2 | — |
 
 > Die Slice-Dateien entstehen vor dem jeweiligen Start (Plan-vor-Code) unter `open/`.
@@ -46,9 +46,9 @@ Standardverhalten bleibt unverändert (Exit `1` nur bei `FAIL`).
 
 ## 5a. Entscheidungen (Entwurf, in den Slices zu bestätigen)
 
-1. **`--fail-on warn`:** Schwelle als Wert (`fail` Default, `warn`); bei `warn` endet der Lauf mit Exit `1`, sobald mindestens ein `WARN` oder `FAIL` vorliegt. Der Default bleibt unverändert und erfüllt weiter [`LH-FA-EXIT-001`](../../../spec/lastenheft.md#lh-fa-exit-001--erfolgreiche-prüfung)/[`LH-FA-EXIT-002`](../../../spec/lastenheft.md#lh-fa-exit-002--fehlgeschlagene-prüfung); die Option ist eine Erweiterung, kein Widerspruch. Auswirkung auf die Zusammenfassungszeile im CI-Modus und auf SARIF/JSON (unverändert) prüfen. [`SPEC-030`](../../../spec/spezifikation.md#spec-030--exit-codes) wird fortgeschrieben.
+1. **`--fail-on warn`:** Schwelle als Wert (`fail` Default, `warn`); bei `warn` endet der Lauf mit Exit `1`, sobald mindestens ein `WARN` oder `FAIL` vorliegt. Der Default bleibt unverändert und erfüllt weiter [`LH-FA-EXIT-001`](../../../../spec/lastenheft.md#lh-fa-exit-001--erfolgreiche-prüfung)/[`LH-FA-EXIT-002`](../../../../spec/lastenheft.md#lh-fa-exit-002--fehlgeschlagene-prüfung); die Option ist eine Erweiterung, kein Widerspruch. Auswirkung auf die Zusammenfassungszeile im CI-Modus und auf SARIF/JSON (unverändert) prüfen. [`SPEC-030`](../../../../spec/spezifikation.md#spec-030--exit-codes) wird fortgeschrieben.
 2. **`--output FILE`:** Schreibt das gewählte Format in die Datei statt nach stdout; Fehlerfälle (Pfad nicht schreibbar) sind Tool-Fehler (Exit `2`); stdout bleibt dann leer, Meldungen gehen weiter auf stderr; keine Überschreibung außerhalb des angegebenen Pfads, Datei wird atomar ersetzt oder vollständig geschrieben.
-3. **Zusatzregionen:** Konfigurierbare Liste weiterer Regionen, in denen nur die Sichtbarkeit nicht erlaubter Profile geprüft wird (WARN laut [`LH-FA-BEDROCK-002`](../../../spec/lastenheft.md#lh-fa-bedrock-002--nicht-erlaubte-profile-erkennen)); mehr Aufrufe und mehr nötige IAM-Rechte werden dokumentiert (`aws-permissions.md`).
+3. **Zusatzregionen:** Konfigurierbare Liste weiterer Regionen, in denen nur die Sichtbarkeit nicht erlaubter Profile geprüft wird (WARN laut [`LH-FA-BEDROCK-002`](../../../../spec/lastenheft.md#lh-fa-bedrock-002--nicht-erlaubte-profile-erkennen)); mehr Aufrufe und mehr nötige IAM-Rechte werden dokumentiert (`aws-permissions.md`).
 4. **`d-check`-Ziele:** Zuerst bewerten (hermetisch, netzlos, Befunde auf unserem Repository), dann entscheiden; „nicht aufnehmen“ ist ein zulässiges Ergebnis.
 
 ## 6. Out-of-Scope für diese Welle

@@ -2,7 +2,7 @@
 
 **Status:** done.
 
-**Welle:** [`welle-07-ci-komfort`](../welle-07-ci-komfort.md).
+**Welle:** [`welle-07-ci-komfort`](welle-07-ci-komfort.md).
 
 **Bezug:** [`LH-FA-BEDROCK-001`](../../../../spec/lastenheft.md#lh-fa-bedrock-001--bedrock-inference-profile-auflisten), [`LH-FA-BEDROCK-002`](../../../../spec/lastenheft.md#lh-fa-bedrock-002--nicht-erlaubte-profile-erkennen), [`LH-NF-007`](../../../../spec/lastenheft.md#lh-nf-007--konfigurierbarkeit), [`SPEC-010`](../../../../spec/spezifikation.md#spec-010--klassifikation-von-modell-profil-ids), [`SPEC-020`](../../../../spec/spezifikation.md#spec-020--konfigurationsschema-bedrock-eu-checkyml), [`LH-SEC-003`](../../../../spec/lastenheft.md#lh-sec-003--read-only-aws-zugriff), [`ADR-0003`](../../adr/0003-hexagonale-architektur.md).
 

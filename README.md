@@ -15,17 +15,22 @@ schon" — die in der Praxis oft nicht stimmt.
 
 ## Stand
 
-`bedrock-eu-check` ist **funktionsfähig**; **Version 1.0.0** ist veröffentlicht
-(Commit `5f1b35cca776`): als [GitHub-Release](https://github.com/pt9912/bedrock-eu-guard/releases/tag/v1.0.0)
-mit Linux-Binaries und `SHA256SUMS`, als Docker-Images `ghcr.io/pt9912/bedrock-eu-check:1.0.0-slim`
-und `:1.0.0-full` und als Devcontainer-Feature. Alle Prüfmodi, die Ausgabeformate
+`bedrock-eu-check` ist **funktionsfähig**; **Version 1.1.0** ist veröffentlicht
+(Commit `5274f3dce55f`): als [GitHub-Release](https://github.com/pt9912/bedrock-eu-guard/releases/tag/v1.1.0)
+mit Linux-Binaries und `SHA256SUMS` und als Docker-Images `ghcr.io/pt9912/bedrock-eu-check:1.1.0-slim`
+und `:1.1.0-full`. Neu gegenüber 1.0.0 sind `--fail-on warn`, `--output FILE` und die Konfiguration
+`visibilityRegions` (siehe [`docs/user/reference.md`](docs/user/reference.md)); Exit-Codes und
+Standardverhalten sind unverändert. Das Devcontainer-Feature liegt in der Version 1.0.1 vor
+(Tag `feature-v1.0.1`, Commit `5274f3dce55f`); es installiert standardmäßig weiterhin das Werkzeug 1.0.0.
+Version 1.0.0 (Commit `5f1b35cca776`) bleibt unverändert abrufbar. Alle Prüfmodi, die Ausgabeformate
 (Konsole, JSON, SARIF) und der CI-Modus sind implementiert und getestet. Der Ablauf steht in
 [`docs/user/releasing.md`](docs/user/releasing.md).
 
-Nicht auf externen Plattformen erprobt sind der Beispiel-Workflow
-für GitHub Code Scanning und der scharfe Lauf des Workflows `release-create`; die
-Beispiel-IAM-Policy wurde nicht gegen ein echtes AWS-Konto getestet. Das Devcontainer-Feature
-ist mit der Devcontainer-CLI erprobt (`devcontainer build`; `devcontainer up` nicht).
+Nicht auf externen Plattformen erprobt ist der Beispiel-Workflow
+für GitHub Code Scanning; die Beispiel-IAM-Policy wurde nicht gegen ein echtes AWS-Konto getestet.
+Der Release-Ablauf (`release-create`, `publish`) ist scharf durchlaufen. Das Devcontainer-Feature
+ist mit der Devcontainer-CLI erprobt (`devcontainer build`; `devcontainer up` nicht, die Ursache
+des Hängens ist ungeklärt).
 Den Fahrplan zeigt die [Roadmap](docs/plan/planning/in-progress/roadmap.md).
 
 ## Schnellstart
@@ -91,9 +96,9 @@ Alle Felder und Defaults: [Referenz](docs/user/reference.md#konfigurationsdatei-
 
 | Weg | Stand | Dokumentation |
 |---|---|---|
-| Binary (Linux `amd64`/`arm64`, `make dist VERSION=x.y.z`) | [GitHub-Release v1.0.0](https://github.com/pt9912/bedrock-eu-guard/releases/tag/v1.0.0) | [`releasing.md`](docs/user/releasing.md) |
-| Docker-Image `slim` (`local`, `terraform`) und `full` (mit AWS-CLI, alle Modi) | `ghcr.io/pt9912/bedrock-eu-check:1.0.0-slim` / `:1.0.0-full` (lokal: `make image`) | [`docker.md`](docs/user/docker.md) |
-| Devcontainer-Feature | `ghcr.io/pt9912/bedrock-eu-guard/bedrock-eu-check:1` | [`devcontainer.md`](docs/user/devcontainer.md) |
+| Binary (Linux `amd64`/`arm64`, `make dist VERSION=x.y.z`) | [GitHub-Release v1.1.0](https://github.com/pt9912/bedrock-eu-guard/releases/tag/v1.1.0) | [`releasing.md`](docs/user/releasing.md) |
+| Docker-Image `slim` (`local`, `terraform`) und `full` (mit AWS-CLI, alle Modi) | `ghcr.io/pt9912/bedrock-eu-check:1.1.0-slim` / `:1.1.0-full` (lokal: `make image`) | [`docker.md`](docs/user/docker.md) |
+| Devcontainer-Feature | `ghcr.io/pt9912/bedrock-eu-guard/bedrock-eu-check:1` (Version 1.0.1) | [`devcontainer.md`](docs/user/devcontainer.md) |
 | CI-Einbindung | Beispiel-Workflow | [`ci.md`](docs/user/ci.md) |
 
 ## Dokumentation

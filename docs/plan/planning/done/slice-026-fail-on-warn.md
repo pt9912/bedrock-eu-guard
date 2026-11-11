@@ -2,7 +2,7 @@
 
 **Status:** done.
 
-**Welle:** [`welle-07-ci-komfort`](../welle-07-ci-komfort.md).
+**Welle:** [`welle-07-ci-komfort`](welle-07-ci-komfort.md).
 
 **Bezug:** [`SPEC-030`](../../../../spec/spezifikation.md#spec-030--exit-codes), [`LH-FA-EXIT-001`](../../../../spec/lastenheft.md#lh-fa-exit-001--erfolgreiche-prüfung), [`LH-FA-EXIT-002`](../../../../spec/lastenheft.md#lh-fa-exit-002--fehlgeschlagene-prüfung), [`LH-FA-EXIT-003`](../../../../spec/lastenheft.md#lh-fa-exit-003--tool-fehler), [`LH-MOD-005`](../../../../spec/lastenheft.md#lh-mod-005--ci-modus), [`ADR-0003`](../../adr/0003-hexagonale-architektur.md).
 

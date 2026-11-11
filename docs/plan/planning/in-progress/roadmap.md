@@ -12,16 +12,19 @@ Reihenfolge von Terminen. Die Wellen bilden die Versions-Stufen
 
 Keine aktive Welle (kein Slice in `in-progress/`; Ruhezustand im Sinne des Slice-Lifecycles).
 
-welle-01 bis welle-05 sind abgeschlossen. Release 1.0.0 ist am 2026-11-11 veröffentlicht
+welle-01 bis welle-07 sind abgeschlossen. Release 1.0.0 ist am 2026-11-11 veröffentlicht
 (Tag `v1.0.0` auf Commit `5f1b35cca776`, GitHub-Release, Images auf `ghcr.io`, Devcontainer-Feature),
+danach Werkzeug 1.1.0 (Tag `v1.1.0`, GitHub-Release, Images `1.1.0-slim` und `1.1.0-full`) und Feature 1.0.1
+(Tag `feature-v1.0.1`), beide auf Commit `5274f3dce55f`,
 siehe [`../done/welle-01-results.md`](../done/welle-01-results.md),
 [`../done/welle-02-results.md`](../done/welle-02-results.md),
 [`../done/welle-03-results.md`](../done/welle-03-results.md),
 [`../done/welle-04-results.md`](../done/welle-04-results.md) und
-[`../done/welle-05-results.md`](../done/welle-05-results.md). Die Pläne liegen unter
-[`../done/`](../done/), zuletzt [`../done/welle-05-release.md`](../done/welle-05-release.md).
+[`../done/welle-05-results.md`](../done/welle-05-results.md),
+[`../done/welle-06-results.md`](../done/welle-06-results.md) und [`../done/welle-07-results.md`](../done/welle-07-results.md). Die Pläne liegen unter
+[`../done/`](../done/), zuletzt [`../done/welle-07-ci-komfort.md`](../done/welle-07-ci-komfort.md).
 
-**Gestartet, aber ohne Slice in Arbeit:** welle-06 (Release-Härtung: slice-023, slice-024 und slice-025 sind done; offen ist die Veröffentlichung von Feature 1.0.1 nach dem Ja beider Nutzer) und welle-07 (CI-Komfort: slice-026 bis slice-029 sind done; für 1.1.0 fehlt die gemeinsame Entscheidungsvorlage). Sobald ein Slice nach `in-progress/` zieht, entfällt der Ruhe-Marker oben.
+Als Nächstes steht nur welle-08 an; sie startet erst nach einer Entscheidung der Auftraggeber. Sobald ein Slice nach `in-progress/` zieht, entfällt der Ruhe-Marker oben.
 
 ## Nächste Wellen
 
@@ -32,7 +35,7 @@ braucht das Ja beider Nutzer.
 |---|---|---|---|---|
 | welle-08-erweiterungen | Erweiterungen und Härtung (nach Entscheidung) | je Slice: Entscheidung der Auftraggeber bzw. ADR | 030 `iam-policy.json`, 031 `coverage-gate`, 032 Sigstore/SBOM, 033 macOS/Windows | M bis L |
 
-Pläne: [`../welle-06-release-haertung.md`](../welle-06-release-haertung.md), [`../welle-07-ci-komfort.md`](../welle-07-ci-komfort.md), [`../welle-08-erweiterungen.md`](../welle-08-erweiterungen.md).
+Pläne: [`../done/welle-06-release-haertung.md`](../done/welle-06-release-haertung.md), [`../done/welle-07-ci-komfort.md`](../done/welle-07-ci-komfort.md), [`../welle-08-erweiterungen.md`](../welle-08-erweiterungen.md).
 
 ## Meilensteine
 
@@ -44,8 +47,8 @@ Pläne: [`../welle-06-release-haertung.md`](../welle-06-release-haertung.md), [`
 | M3 — AWS-Live-Checks | welle-03 | STS/Bedrock/IAM read-only | erreicht (2026-11-10) |
 | M4 — CI-fähig | welle-04 | SARIF + `--ci` + Exit-Code 1 bei FAIL | erreicht (2026-11-10) |
 | M5 — Release 1.0 | welle-05 | Docker-Image + Doku + Tests grün | erreicht (2026-11-11, veröffentlicht) |
-| M6 — Release-Prozess erprobt | welle-06 | `release-artifacts` und Feature erprobt, `release-create` vorhanden | Slices done (023, 024, 025); offen: Veröffentlichung von Feature 1.0.1 (Entscheidung beider Nutzer) |
-| M7 — CI-Komfort (1.1.0) | welle-07 | `--fail-on warn`, `--output FILE`, Zusatzregionen, Gate-Bewertung | Slices done (026 bis 029); offen: Entscheidungsvorlage 1.1.0; nicht veröffentlicht |
+| M6 — Release-Prozess erprobt | welle-06 | `release-artifacts` und Feature erprobt, `release-create` vorhanden | erreicht (2026-11-11; Feature 1.0.1 veröffentlicht) |
+| M7 — CI-Komfort (1.1.0) | welle-07 | `--fail-on warn`, `--output FILE`, Zusatzregionen, Gate-Bewertung | erreicht (2026-11-11; 1.1.0 veröffentlicht) |
 | M8 — Erweiterungen | welle-08 | je Slice: Entscheidung der Auftraggeber bzw. ADR | offen (nicht freigegeben) |
 
 ## Abhängigkeitsgraph
