@@ -30,12 +30,13 @@ Jeder Anker HIGH, MEDIUM und LOW hat eine *konkrete* Liste. INFO ist bewusst kur
 - **ADR-Verstoß**, zum Beispiel eine Layer-Grenze nach [`ADR-0003`](../../docs/plan/adr/0003-hexagonale-architektur.md) (Importregeln, geprüft von `internal/arch`) oder eine Abhängigkeit am Vendoring vorbei ([`ADR-0004`](../../docs/plan/adr/0004-abhaengigkeiten-und-offline-gates.md))
 - **Sicherheits-Anti-Pattern: Secret-Wert in Ausgabe, Fehlertext, Log oder Testdaten** (Werte von AWS-Zugangsdaten, Anthropic-Schlüsseln, Token; Testdaten nur mit dem Marker `GEHEIM`). Anker: [`AGENTS.md`](../../AGENTS.md) §3.7 und [`LH-NF-004`](../../spec/lastenheft.md#lh-nf-004--keine-secret-ausgabe)
 - **Korrektheitsfehler im kritischen Pfad:** Ein Schweregrad oder Exit-Code weicht von [`SPEC-030`](../../spec/spezifikation.md#spec-030--exit-codes) und dem Regelkatalog ab, zum Beispiel eine nicht erlaubte Region oder der direkte Anthropic-Zugang ergibt `PASS` oder `WARN` statt `FAIL`, oder ein Tool-Fehler ergibt Exit `0`
-- **Suppression oder Lockerung eines Gates ohne ADR** (`//nolint`, ausgeschlossene Pfade, abgesenkte Schwellen). Anker: [`AGENTS.md`](../../AGENTS.md) §3.2 und §3.6
+- **Inline-Suppression von Lint-Findings** (`//nolint` und Verwandtes) statt einer begründeten Ausnahme in der zentralen Konfiguration. Anker: [`AGENTS.md`](../../AGENTS.md) §3.2
+- **Absenkung einer Schwelle oder Strenge eines Gates ohne ADR** (Coverage, Linter-Strenge, Architekturregel). Anker: [`AGENTS.md`](../../AGENTS.md) §3.6
 - **Repo-spezifisch #1 — Verschiebung und Inhaltsänderung in einem Commit:** `git mv` und Inhaltsänderung derselben Datei in einem Commit, auch bei den Moves des Slice-Lebenszyklus (`open → next → in-progress → done`). Anker: [`AGENTS.md`](../../AGENTS.md) §3.3
 - **Repo-spezifisch #2 — Änderung an einem Accepted-ADR in der Sache.** Anker: [`AGENTS.md`](../../AGENTS.md) §3.5
 - **Repo-spezifisch #3 — schreibender AWS-Zugriff oder Remediation** (das Werkzeug liest nur). Anker: [`AGENTS.md`](../../AGENTS.md) §3.8 und [`LH-SEC-003`](../../spec/lastenheft.md#lh-sec-003--read-only-aws-zugriff)
 - **Repo-spezifisch #4 — hartcodierte Allow- oder Blocklisten** statt konfigurierbarer Listen. Anker: [`AGENTS.md`](../../AGENTS.md) §3.9
-- **Repo-spezifisch #5 — Veröffentlichungsschritt** (Tag, Release, Image-Push, Feature-Publish) **oder neue Veröffentlichungsfähigkeit ohne dokumentierte Freigabe beider Nutzer.** Anker: [`docs/user/releasing.md`](../../docs/user/releasing.md)
+- **Repo-spezifisch #5 — Veröffentlichungsschritt** (Tag, Release, Image-Push, Feature-Publish) **oder neue Veröffentlichungsfähigkeit ohne dokumentierte Freigabe beider Nutzer.** Anker: [`docs/user/releasing.md`](../../docs/user/releasing.md) (Quelle im Rang 6 der Source Precedence, keine Harte Regel, aber verbindlicher Ablauf)
 
 **MEDIUM** (sollte vor dem Merge geklärt werden) — eines der folgenden:
 
@@ -72,7 +73,7 @@ Jedes Finding:
 
 Zusätzlich am Ende: eine Zeile „geprüft, ohne Befund“ pro betrachtetem Verzeichnis (Negativbefund-Zeile — sonst ist „keine Findings“ nicht von „nicht geprüft“ unterscheidbar). Report-Gerüst für den ganzen Lauf: [`docs/reviews/review-report.template.md`](../../docs/reviews/review-report.template.md), ein Report pro Lauf, Folgeläufe als neue Datei statt Überschreibung.
 
-Reports vor dem 2026-11-11 (`pr90`, `pr96`, `pr106`, `pr107` und der Nachlauf) tragen das ältere Format (`pfad` als `Datei:Zeile`, kein Feld `klasse`) und werden nicht umgeschrieben; sie sind Artefakte eines Laufs.
+Reports bis einschließlich des Nachlaufs zu PR #107 (`pr90`, `pr96`, `pr106`, `pr107` und der Nachlauf) tragen das ältere Format (`pfad` als `Datei:Zeile`, kein Feld `klasse`) und werden nicht umgeschrieben; sie sind Artefakte eines Laufs.
 
 ## Pflege (Steering-Loop)
 
