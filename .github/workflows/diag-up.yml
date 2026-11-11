@@ -20,19 +20,21 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: plain,        probe: "",     extra: "",                                  stdin: "" }
-          - { name: probe-none,   probe: "none", extra: "",                                  stdin: "" }
-          - { name: stdin-null,   probe: "",     extra: "",                                  stdin: "/dev/null" }
-          - { name: skip-hooks,   probe: "",     extra: "--skip-post-create --skip-post-attach", stdin: "" }
+          - { name: cli-0.72.0, cli: "0.72.0" }
+          - { name: cli-0.86.1, cli: "0.86.1" }
+          - { name: cli-0.90.0, cli: "0.90.0" }
     name: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - run: npm install --global "@devcontainers/cli@0.72.0"
+      - run: |
+          docker version --format 'Docker Client {{.Client.Version}} / Server {{.Server.Version}}'
+          npm install --global "@devcontainers/cli@${{ matrix.cli }}"
+          devcontainer --version
       - name: devcontainer up (Trace, 150 s)
         env:
-          PROBE: ${{ matrix.probe }}
-          EXTRA: ${{ matrix.extra }}
-          STDIN: ${{ matrix.stdin }}
+          PROBE: ""
+          EXTRA: ""
+          STDIN: ""
         run: |
           ws="$RUNNER_TEMP/diag"
           mkdir -p "$ws/.devcontainer"
