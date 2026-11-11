@@ -74,7 +74,7 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 - **Funktioniert:** Parser (`dotenv.go`) für Kommentare, `export`, Anführungszeichen (auch mehrzeilig), Inline-Kommentare und BOM; Secret-Werte werden im Adapter verworfen (nur gesetzt/nicht gesetzt); defekte Dateien ergeben `FILE_INVALID` nur mit Zeilennummer, ohne Inhalt. Rekursiver Finder (`finder.go`) überspringt `.git`, `.terraform`, `vendor`, `node_modules`, `.tmp` und Symlinks und lässt Beispieldateien (`.example`, `.sample`, `.template`) aus. Gilt nur im Modus `local`. CLI-Tests über alle Formate ohne Wert in der Ausgabe; Handbuch, README und Quickstart angepasst.
 - **Anders als geplant:** Die Suche ist rekursiv (nicht nur im Root), damit `.env`-Dateien in Unterprojekten nicht übersehen werden; `exclude` greift auch dort. Variablenreferenzen (`${X}`) als Region-Wert werden verworfen statt als Fehlalarm gemeldet. Die `.gitignore` bekam eine Ausnahme nur für `internal/**/testdata/**`; eine `.env` im Repository-Root bleibt ignoriert (mit `git check-ignore` geprüft).
-- **Offen:** Matrix-Test zu LH-QA-003 um `.env` (w1); `iam-policy.json` bleibt als eigenständige Policy-Datei ungeprüft.
+- **Offen:** Matrix-Test zu [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) um `.env` (w1); `iam-policy.json` bleibt als eigenständige Policy-Datei ungeprüft.
 - **Steering-Loop:** Testdaten, die von Ignore-Regeln geschützt sind, nach dem Anlegen mit `git ls-files` bzw. `git check-ignore` prüfen, bevor man dem grünen lokalen Lauf traut; ein Verhalten, das nur durch eine lokale Ausnahme läuft, fällt sonst erst in CI auf.
 
 
