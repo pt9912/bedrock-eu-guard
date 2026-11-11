@@ -53,11 +53,15 @@ jobs:
           echo "$COMMIT_INPUT" | grep -Eq '^[0-9a-f]{12,40}$' || { echo "ungültiger Commit: $COMMIT_INPUT" >&2; exit 1; }
           case "$TARGET" in tool|feature) ;; *) echo "ungültiges Ziel: $TARGET" >&2; exit 1;; esac
 
-      - name: Checkout (Commit, volle Historie)
+      # actions/checkout nimmt keine verkürzte SHA als ref: erst main mit voller Historie,
+      # dann lokal auf den freigegebenen Commit wechseln.
+      - name: Checkout (volle Historie)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.commit }}
           fetch-depth: 0
+
+      - name: Auf freigegebenen Commit wechseln
+        run: git checkout --quiet --detach "$COMMIT_INPUT"
 
       - name: Commit und Tag prüfen
         id: verify
