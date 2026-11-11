@@ -9,10 +9,21 @@
 # und cmd/ (nur main).
 set -eu
 
+# Untergrenze aus ADR-0005: Der Mindestwert darf nicht darunter liegen. Eine Aenderung
+# dieser Zahl ist eine neue ADR (AGENTS.md 3.6), kein gewoehnlicher PR.
+ADR_FLOOR=90
+
 min="${1:?usage: coverage-gate.sh <mindestwert-in-prozent>}"
-case "$min" in
-  ''|*[!0-9.]*) echo "coverage-gate: ungueltiger Mindestwert '$min'" >&2; exit 2 ;;
-esac
+# Strikt: Ganzzahl oder Dezimalzahl mit einem Punkt, nicht ueber 100.
+if ! printf '%s\n' "$min" | grep -Eq '^[0-9]+(\.[0-9]+)?$' || \
+   ! awk -v m="$min" 'BEGIN { exit !(m + 0 <= 100) }'; then
+  echo "coverage-gate: ungueltiger Mindestwert '$min'" >&2
+  exit 2
+fi
+if ! awk -v m="$min" -v f="$ADR_FLOOR" 'BEGIN { exit !(m + 0 >= f + 0) }'; then
+  echo "coverage-gate: Mindestwert $min % liegt unter der ADR-Untergrenze $ADR_FLOOR % (ADR-0005)" >&2
+  exit 2
+fi
 
 profile=.tmp/coverage.out
 mkdir -p .tmp
@@ -20,7 +31,12 @@ mkdir -p .tmp
 pkgs=$(go list ./... | grep -v -e '/hexagon/coretest' -e '/cmd/' | paste -sd, -)
 [ -n "$pkgs" ] || { echo "coverage-gate: keine Pakete gefunden" >&2; exit 2; }
 
-go test -coverpkg="$pkgs" -coverprofile="$profile" ./... >/dev/null
+# Testausgabe nur bei Fehlern zeigen (sonst stumm), damit ein Testfehler nicht ohne Meldung endet.
+if ! go test -coverpkg="$pkgs" -coverprofile="$profile" ./... >.tmp/coverage-test.log 2>&1; then
+  cat .tmp/coverage-test.log >&2
+  echo "coverage-gate: Tests fehlgeschlagen, Abdeckung nicht bewertet" >&2
+  exit 1
+fi
 
 # Je Paket: Anweisungen insgesamt und abgedeckt (Blöcke einmal zählen, höchster Zähler gewinnt).
 echo "Abdeckung je Paket (paketübergreifend gemessen):"

@@ -36,8 +36,9 @@ test: ## Unit-Tests (go test)
 	$(GO_RUN) go test ./...
 
 # Mindestabdeckung in Prozent (ADR-0005): paketübergreifend über die Produktionspakete.
-# Anheben ist ein gewöhnlicher PR; Senken unter den ADR-Mindestwert verlangt eine neue ADR.
-COVERAGE_MIN ?= 90
+# Anheben ist ein gewöhnlicher PR; unter 90 lässt das Skript nicht zu (neue ADR nötig).
+# Kein ?=: die Umgebung soll den Wert nicht überschreiben; nur ein ausdrücklicher Aufruf (make COVERAGE_MIN=...).
+COVERAGE_MIN = 90
 
 coverage-gate: ## Testabdeckung gegen COVERAGE_MIN prüfen (offline, ADR-0005)
 	@mkdir -p .tmp/gocache

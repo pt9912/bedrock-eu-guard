@@ -35,7 +35,7 @@ Wir wählen **paketübergreifende Messung mit festem Mindestwert und benannten A
    - `cmd/bedrock-eu-check` — enthält nur `main`; die Verdrahtung deckt der Test des Pakets `cli` ab.
    Jeder weitere Ausschluss braucht eine neue ADR.
 3. **Mindestwert:** **90 %** gesamt. Er liegt rund fünf Punkte unter dem Ist-Stand: normale Änderungen scheitern nicht an der Schwelle, ein spürbarer Einbruch fällt auf. Es gibt keine zusätzliche Paket-Schwelle, weil kleine Pakete ein Prozentziel verzerren.
-4. **Wirksamer Wert:** Er steht im `Makefile` (`COVERAGE_MIN`, Anfangswert 90). **Anheben** ist ein gewöhnlicher PR (strenger ist keine Lockerung); die Accepted-ADR wird dabei nicht verändert. **Jedes Senken** von `COVERAGE_MIN` — auch oberhalb von 90 % — und jeder neue Ausschluss ist nach `AGENTS.md` §3.6 eine neue ADR mit `Supersedes`.
+4. **Verbindliche Schwelle und wirksamer Wert:** Verbindlich ist der Mindestwert **90 %** dieser ADR. Der wirksame Wert steht im `Makefile` (`COVERAGE_MIN`, Anfangswert 90, nicht aus der Umgebung überschreibbar); `tools/coverage-gate.sh` führt die Untergrenze 90 als Konstante, lehnt ungültige Werte ab (Exit 2) und lässt keinen Wert unter 90 zu. Werte ab 90 setzt ein gewöhnlicher PR; ein Wert über 90 ist freiwilliger Abstand und keine eigene Schwelle, sein Senken bis auf 90 ist deshalb keine Lockerung im Sinn von `AGENTS.md` §3.6. **Senken unter 90 %** und jeder neue Ausschluss ist eine neue ADR mit `Supersedes`; die Konstante im Skript ändert sich nur zusammen mit ihr.
 5. **Einordnung:** `make coverage-gate` läuft offline im gepinnten Go-Image und ist Teil von `make gates` (und damit der CI).
 
 ## Verglichene Alternativen
@@ -50,7 +50,7 @@ Wir wählen **paketübergreifende Messung mit festem Mindestwert und benannten A
 ## Konsequenzen
 
 - Positiv: Sinkende Abdeckung fällt in der CI auf; Schwelle, Ausschlüsse und Änderungsweg sind nachvollziehbar festgehalten.
-- Negativ: Die Tests laufen im Gate ein zweites Mal (gemessen rund 3 s gegen rund 6 s); ein Gesamtwert kann Lücken in einzelnen Paketen verdecken.
+- Negativ: Die Tests laufen im Gate ein zweites Mal (gemessen rund 3 s gegen rund 6 s); ein Gesamtwert kann Lücken in einzelnen Paketen verdecken. Die Untergrenze steht an zwei Stellen (ADR und Konstante im Skript); beide ändern sich nur gemeinsam.
 - Folgepflicht: `AGENTS.md` §4 trägt das Target ein; `.tmp/coverage.out` bleibt außerhalb des Repositorys (`.tmp/` ist ignoriert).
 
 ## Fitness Function
