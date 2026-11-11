@@ -1,6 +1,6 @@
 # Entscheidungsvorlage: Release 1.0
 
-**Status:** teilweise entschieden (Nutzer 1, 2026-11-11); **Freigabe zur Veröffentlichung noch nicht erteilt** (Commit steht noch nicht fest, Antwort von Nutzer 2 fehlt). **Datum:** 2026-11-11.
+**Status:** abgeschlossen: Release 1.0.0 wurde nach dem ausdrücklichen Ja beider Nutzer auf Commit `5f1b35cca776` veröffentlicht (Tag und GitHub-Release, Docker-Images, Devcontainer-Feature), siehe [`welle-05-results.md`](welle-05-results.md). **Datum:** 2026-11-11.
 **Verfasser:** w2. **Gemeinsame Vorlage** mit w1: Die Entscheidung zur Lücke bei den Testdaten
 (`.env`, `iam-policy.json`) steht in [`release-1.0-entscheidung-qa003.md`](release-1.0-entscheidung-qa003.md).
 
@@ -12,7 +12,7 @@ Zielen (siehe [`releasing.md`](../../../user/releasing.md), Abschnitt „Release
 ## 1. Kurzfassung
 
 `bedrock-eu-check` ist als Release-Kandidat technisch fertig
-([`welle-05-results.md`](../done/welle-05-results.md)). Es ist **nichts veröffentlicht**: keine Tags,
+([`welle-05-results.md`](welle-05-results.md)). Es ist **nichts veröffentlicht**: keine Tags,
 keine Release-Artefakte, keine Images in einer Registry, kein veröffentlichtes Feature. Das
 GitHub-Repository ist **öffentlich**.
 
@@ -144,7 +144,7 @@ Empfehlung stehen in [`release-1.0-entscheidung-qa003.md`](release-1.0-entscheid
   nicht geprüft“) steht bereits im [Handbuch](../../../user/handbuch.md) und im README und gehört in die Release-Notizen.
 
 **Umsetzungsstand (2026-11-11):** Option 1b ist umgesetzt: Der `.env`-Scanner ist in `main`
-([`slice-022`](../done/slice-022-dotenv-scanner.md), PRs #76–#79, Matrix-Test #78). Offen bleibt nur die
+([`slice-022`](slice-022-dotenv-scanner.md), PRs #76–#79, Matrix-Test #78). Offen bleibt nur die
 eigenständige Policy-Datei `iam-policy.json` (Soll nach 1.0, gehört in die Release-Notizen).
 
 ## 9. Nicht erprobt und Risiken

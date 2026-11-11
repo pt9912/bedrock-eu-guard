@@ -1,6 +1,6 @@
 # Roadmap
 
-**Status:** Aktiv. **Letzte Änderung:** 2026-06-24.
+**Status:** Aktiv. **Letzte Änderung:** 2026-11-11.
 
 **Format-Regel:** Die Roadmap ist eine Reihenfolge von **Wellen**, keine
 Reihenfolge von Terminen. Die Wellen bilden die Versions-Stufen
@@ -10,21 +10,20 @@ Reihenfolge von Terminen. Die Wellen bilden die Versions-Stufen
 
 ## Aktuelle Welle
 
-**Welle-ID:** welle-05-release
-**Start:** 2026-11-10
-**Plan:** [`../welle-05-release.md`](../welle-05-release.md) (Slices 014 bis 019: Version, Qualitätsgates, Docker-Image, Devcontainer-Feature, Nutzerdoku und Release, `exclude`)
+(keine; alle geplanten Wellen sind abgeschlossen)
 
-welle-01 bis welle-04 sind abgeschlossen (2026-11-10, siehe
-[`../done/welle-01-results.md`](../done/welle-01-results.md),
+welle-01 bis welle-05 sind abgeschlossen. Release 1.0.0 ist am 2026-11-11 veröffentlicht
+(Tag `v1.0.0` auf Commit `5f1b35cca776`, GitHub-Release, Images auf `ghcr.io`, Devcontainer-Feature),
+siehe [`../done/welle-01-results.md`](../done/welle-01-results.md),
 [`../done/welle-02-results.md`](../done/welle-02-results.md),
-[`../done/welle-03-results.md`](../done/welle-03-results.md) und
-[`../done/welle-04-results.md`](../done/welle-04-results.md)). Tag und Veröffentlichung
-von Release 1.0 gibt es nur nach ausdrücklicher Freigabe beider Nutzer.
-Stand: Release-Kandidat, siehe [`../done/welle-05-results.md`](../done/welle-05-results.md).
+[`../done/welle-03-results.md`](../done/welle-03-results.md),
+[`../done/welle-04-results.md`](../done/welle-04-results.md) und
+[`../done/welle-05-results.md`](../done/welle-05-results.md). Die Pläne liegen unter
+[`../done/`](../done/), zuletzt [`../done/welle-05-release.md`](../done/welle-05-release.md).
 
 ## Nächste Wellen
 
-(keine weiteren Wellen geplant; Folgeslices der Qualitätsrunde siehe Plan von welle-05)
+(keine weiteren Wellen geplant; Folgeaufgaben der Qualitätsrunde siehe [`../done/welle-05-results.md`](../done/welle-05-results.md))
 
 ## Meilensteine
 
@@ -35,7 +34,7 @@ Stand: Release-Kandidat, siehe [`../done/welle-05-results.md`](../done/welle-05-
 | M2 — vollständiger statischer Scan | welle-02 | Config/Container/Terraform abgedeckt | erreicht (2026-11-10) |
 | M3 — AWS-Live-Checks | welle-03 | STS/Bedrock/IAM read-only | erreicht (2026-11-10) |
 | M4 — CI-fähig | welle-04 | SARIF + `--ci` + Exit-Code 1 bei FAIL | erreicht (2026-11-10) |
-| M5 — Release 1.0 | welle-05 | Docker-Image + Doku + Tests grün | offen (Release-Kandidat; wartet auf Freigabe beider Nutzer) |
+| M5 — Release 1.0 | welle-05 | Docker-Image + Doku + Tests grün | erreicht (2026-11-11, veröffentlicht) |
 
 ## Abhängigkeitsgraph
 

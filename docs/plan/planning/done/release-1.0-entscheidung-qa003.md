@@ -1,6 +1,6 @@
 # Entscheidungsvorlage: Lücke bei LH-QA-003 (`.env`, `iam-policy.json`)
 
-**Status:** Entscheidung der Auftraggeber ausstehend. **Datum:** 2026-11-11.
+**Status:** entschieden und umgesetzt (Option 1b: `.env`-Scanner, siehe `slice-022-dotenv-scanner.md`; `iam-policy.json` bleibt Soll-Anforderung nach 1.0). **Datum:** 2026-11-11.
 **Verfasser:** w1. **Teil der gemeinsamen Vorlage zu Release 1.0** (Release-Checkliste und die übrigen Entscheidungen: `release-1.0-entscheidungsvorlage.md`, w2).
 
 Dieses Dokument trägt keine Anforderungen; es bereitet eine Entscheidung zum

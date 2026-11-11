@@ -53,7 +53,7 @@ Bis dahin gilt: kein Scanner, keine Testdaten, Lücke dokumentiert.
 
 ## 6. Trigger
 
-[`welle-05-release`](../welle-05-release.md) gestartet; [`slice-019`](slice-019-scan-exclude.md) gemerged (für den Self-Check).
+[`welle-05-release`](welle-05-release.md) gestartet; [`slice-019`](slice-019-scan-exclude.md) gemerged (für den Self-Check).
 
 ## 7. Closure-Trigger
 
