@@ -27,7 +27,7 @@ Pakete bei der einfachen Messung: `rules` 97,2 %, `app` 97,5 %, `report` 97,0 %,
 
 ## 3. Definition of Done
 
-- [ ] **Neue ADR** `docs/plan/adr/0005-coverage-gate.md` (Status `Accepted` erst nach dem Review) legt fest: Messweise, Ausschlüsse mit Begründung, Schwelle mit Begründung, wie die Schwelle später geändert wird (nur per ADR, `AGENTS.md` §3.6). Der ADR-Index ist aktualisiert.
+- [ ] **Neue ADR** `docs/plan/adr/0005-coverage-gate.md` legt fest: Messweise, Ausschlüsse mit Begründung, den Mindestwert mit Begründung und die Regel für spätere Änderungen. Sie wird als `Proposed` eingereicht und erst nach dem Sign-off der Auftraggeber (beide Nutzer, wie bei [`ADR-0004`](../../adr/0004-abhaengigkeiten-und-offline-gates.md)) `Accepted`; der Sign-off liegt vor dem Merge des Implementierungs-PR. Der ADR-Index ist aktualisiert.
 - [ ] `make coverage-gate` läuft offline im gepinnten Image, schreibt das Profil nach `.tmp/` (nicht ins Repository), gibt die Gesamt- und die Paketwerte aus und endet mit einem Fehler unterhalb der Schwelle.
 - [ ] Negativprobe: eine absichtlich zu hohe Schwelle lässt das Target scheitern (Beleg in der Closure-Notiz); danach der echte Wert grün.
 - [ ] `coverage-gate` ist in `make gates` aufgenommen; `AGENTS.md` §4 trägt das Target in die Tabelle ein und streicht den Satz „entsteht in einem späteren Slice“.
@@ -41,8 +41,8 @@ Pakete bei der einfachen Messung: `rules` 97,2 %, `app` 97,5 %, `report` 97,0 %,
 
 1. **Messweise:** Paket-übergreifend (`-coverpkg`) über die Produktionspakete; die einfache Messung unterschätzt den Kern (`model` 77,7 % gegen die Wahrheit, dass `rules` und `app` ihn voll nutzen).
 2. **Ausschlüsse (jeder ist eine Lockerung und steht mit Begründung in der ADR):** `internal/hexagon/coretest/*` (Test-Doubles, selbst Testcode) und `cmd/bedrock-eu-check` (nur `main`, deckt die CLI-Verdrahtung über den Test des Pakets `cli` ab).
-3. **Schwelle:** Gesamt **90 %** (Ist-Stand 95,4 % mit Abstand von rund fünf Punkten, damit normale Änderungen nicht an der Schwelle scheitern, ein spürbarer Einbruch aber auffällt). Eine zusätzliche Paket-Schwelle wird nur eingeführt, wenn die ADR einen Grund nennt; Vorschlag: keine, weil kleine Pakete ein Prozentziel verzerren.
-4. **Änderung der Schwelle:** Anheben ist ein kleiner PR mit ADR-Anhang; Senken verlangt eine neue ADR (`Supersedes`), nie einen PR-Kommentar.
+3. **Mindestwert:** Gesamt **90 %** (Ist-Stand 95,4 % mit Abstand von rund fünf Punkten, damit normale Änderungen nicht an der Schwelle scheitern, ein spürbarer Einbruch aber auffällt). Die ADR nennt diesen Mindestwert; der **wirksame Wert** steht im `Makefile` (Variable `COVERAGE_MIN`, Anfangswert 90). Eine zusätzliche Paket-Schwelle wird nur eingeführt, wenn die ADR einen Grund nennt; Vorschlag: keine, weil kleine Pakete ein Prozentziel verzerren.
+4. **Änderung der Schwelle:** Anheben von `COVERAGE_MIN` ist ein gewöhnlicher PR (strenger ist keine Lockerung nach `AGENTS.md` §3.6); eine Accepted-ADR wird dabei nicht verändert (§3.5). Senken unter den Mindestwert der ADR oder ein neuer Ausschluss verlangt eine neue ADR mit `Supersedes`, nie einen PR-Kommentar.
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
@@ -64,7 +64,7 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 ## 7. Risiken und offene Punkte
 
 - Eine zu hohe Schwelle erzeugt Tests, die nur Prozente füllen; eine zu niedrige gibt keine Sicherheit. Deshalb steht die Begründung in der ADR und der Abstand zum Ist-Stand ist benannt.
-- `-coverpkg` verlängert die Testzeit etwas; die Messung steht in der Closure-Notiz (`make gates` bleibt offline und ohne Zusatzabhängigkeiten, [`ADR-0004`](../../adr/0004-abhaengigkeiten-und-offline-gates.md)).
+- `-coverpkg` führt die Tests ein zweites Mal aus: gemessen im gepinnten Image `go test ./...` rund 3 s, mit `-coverpkg` und Profil rund 6 s (Plan-Review); die Messung nach der Umsetzung steht in der Closure-Notiz (`make gates` bleibt offline und ohne Zusatzabhängigkeiten, [`ADR-0004`](../../adr/0004-abhaengigkeiten-und-offline-gates.md)).
 - Die Gesamtzahl hängt vom Messumfang ab; wer ein Paket ausschließt, senkt die Latte. Jeder Ausschluss braucht den Eintrag in der ADR.
 - Kein Einfluss auf Veröffentlichung oder Werkzeug-Version: das Gate betrifft nur Entwicklung und CI.
 
