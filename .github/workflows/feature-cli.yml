@@ -34,6 +34,7 @@ jobs:
         run: npm install --global "@devcontainers/cli@$CLI_VERSION"
 
       - name: Beispiel-Container bauen und Feature prüfen
+        timeout-minutes: 10
         run: |
           set -euo pipefail
           ws="$RUNNER_TEMP/case-a"
@@ -45,8 +46,10 @@ jobs:
             "features": { "./bedrock-eu-check": { "version": "1.0.0" } }
           }
           JSON
-          devcontainer up --workspace-folder "$ws"
-          out=$(devcontainer exec --workspace-folder "$ws" bedrock-eu-check version)
+          # build installiert das Feature mit der echten CLI; devcontainer up blieb auf dem
+          # Runner nach "Container started" hängen (Ursache nicht ermittelt, siehe slice-024).
+          devcontainer build --workspace-folder "$ws" --image-name "feature-case-a"
+          out=$(docker run --rm "feature-case-a" bedrock-eu-check version)
           echo "Ausgabe: $out"
           [ "$out" = "$EXPECTED" ] || { echo "unerwartete Ausgabe (erwartet: $EXPECTED)" >&2; exit 1; }
 
@@ -62,6 +65,7 @@ jobs:
         run: npm install --global "@devcontainers/cli@$CLI_VERSION"
 
       - name: Beispiel-Container bauen und Feature prüfen
+        timeout-minutes: 10
         run: |
           set -euo pipefail
           ws="$RUNNER_TEMP/case-b"
@@ -72,7 +76,9 @@ jobs:
             "features": { "ghcr.io/pt9912/bedrock-eu-guard/bedrock-eu-check:1": { "version": "1.0.0" } }
           }
           JSON
-          devcontainer up --workspace-folder "$ws"
-          out=$(devcontainer exec --workspace-folder "$ws" bedrock-eu-check version)
+          # build installiert das Feature mit der echten CLI; devcontainer up blieb auf dem
+          # Runner nach "Container started" hängen (Ursache nicht ermittelt, siehe slice-024).
+          devcontainer build --workspace-folder "$ws" --image-name "feature-case-b"
+          out=$(docker run --rm "feature-case-b" bedrock-eu-check version)
           echo "Ausgabe: $out"
           [ "$out" = "$EXPECTED" ] || { echo "unerwartete Ausgabe (erwartet: $EXPECTED)" >&2; exit 1; }
