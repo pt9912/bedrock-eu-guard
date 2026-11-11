@@ -1,7 +1,6 @@
 # Slice slice-028: Zusätzliche Regionen für die Sichtbarkeit nicht erlaubter Profile
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** [`welle-07-ci-komfort`](../welle-07-ci-komfort.md).
 
@@ -39,11 +38,11 @@ in ihnen wird ausschließlich die Sichtbarkeit nicht erlaubter Profile geprüft 
 
 ## 4. Definition of Done
 
-- [ ] Kern (w1): Konfigurationsfeld mit Validierung, `CheckAWS` liest Zusatzregionen, Regeländerung, Reason-Code, Unit-Tests je Zeile der Tabelle; [`SPEC-020`](../../../../spec/spezifikation.md#spec-020--konfigurationsschema-bedrock-eu-checkyml) und Regelkatalog (Doku-Drift-Test) ergänzt.
-- [ ] Adapter/CLI (w2): `configyaml` mappt das Feld strikt (Typprüfung), CLI-Test mit Fake-`aws`, Referenz und Handbuch ergänzt; `docs/user/aws-permissions.md` nennt die zusätzlichen Aufrufe je Zusatzregion.
-- [ ] Standardverhalten unverändert (Regressionstest).
-- [ ] `make verify-clean` und CI grün.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Kern (w1): Konfigurationsfeld mit Validierung, `CheckAWS` liest Zusatzregionen, Regeländerung, Reason-Code, Unit-Tests je Zeile der Tabelle; [`SPEC-020`](../../../../spec/spezifikation.md#spec-020--konfigurationsschema-bedrock-eu-checkyml) und Regelkatalog (Doku-Drift-Test) ergänzt.
+- [x] Adapter/CLI (w2): `configyaml` mappt das Feld strikt (Typprüfung), CLI-Test mit Fake-`aws`, Referenz und Handbuch ergänzt; `docs/user/aws-permissions.md` nennt die zusätzlichen Aufrufe je Zusatzregion.
+- [x] Standardverhalten unverändert (Regressionstest).
+- [x] `make verify-clean` und CI grün.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 5. Plan (vor Code)
 
@@ -68,7 +67,13 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 9. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-11 (PRs #90 Kern/w1, #95 Adapter/CLI/Doku/w2).
+
+- **Funktioniert:** Das optionale Konfigurationsfeld `visibilityRegions` (Default leer, dann unverändertes Verhalten) benennt Zusatzregionen, in denen der Modus `aws` nur `bedrock:ListInferenceProfiles` aufruft (kein Modell-Aufruf). Sichtbare, nach [`SPEC-010`](../../../../spec/spezifikation.md#spec-010--klassifikation-von-modell-profil-ids) blockierte Profile ergeben ein `WARN` `PROFILES_VISIBLE_NOT_ALLOWED` mit Region, nie ein `FAIL`; eine nicht lesbare Zusatzregion ein `WARN` `VISIBILITY_UNKNOWN`; ist die Identität unbrauchbar, wird ohne Aufruf `VISIBILITY_UNKNOWN` je Region gemeldet. Eine Region, die auch in `allowedRegions` steht, ist ein Konfigurationsfehler (`REGION_ALSO_ALLOWED`, Exit `2`, ohne Wert im Fehlertext). [`LH-FA-BEDROCK-001`](../../../../spec/lastenheft.md#lh-fa-bedrock-001--bedrock-inference-profile-auflisten) betrifft Zusatzregionen nicht, die Verfügbarkeitsprüfung bleibt in der Primärregion. `configyaml` bildet das Feld strikt ab (abwesend, leer, Nicht-String als `FILE_INVALID` ohne Wertzitat). [`SPEC-020`](../../../../spec/spezifikation.md#spec-020--konfigurationsschema-bedrock-eu-checkyml), Regelkatalog, Referenz, `aws-permissions.md` und Handbuch (Aufgabe 7) sind ergänzt. Tests: Config-Validierung, Regeln je Zeile der Verhaltenstabelle, `CheckAWS` mit Fake (der Fake schlägt fehl, wenn in einer Zusatzregion Modelle abgefragt würden), CLI-Tests mit Fake-`aws` (Warnungen, unveränderter Default, Überschneidung mit `allowedRegions`).
+- **Anders als geplant:** nichts Wesentliches. Der Doku-Drift-Test hat die zwei fehlenden Katalogeinträge (`VISIBILITY_UNKNOWN`, `REGION_ALSO_ALLOWED`) vor dem Merge gemeldet.
+- **Offen:** Je Zusatzregion ein weiterer lesender Aufruf; die Beispiel-IAM-Policy erlaubt `ListInferenceProfiles` nur in den erlaubten Regionen, in Zusatzregionen ergibt das `VISIBILITY_UNKNOWN` (dokumentiert). In Regionen wie `us-east-1` sind viele System-Profile sichtbar; die Meldung fasst sie zusammen (Anzahl und erstes Beispiel). Sichtbarkeit zeigt das Angebot, nicht, was ein Principal nutzen darf; durchsetzen lässt sich das nur per IAM/SCP.
+- **Steering-Loop:** Ein Test-Double, das bei einem nicht vorgesehenen Aufruf fehlschlägt, belegt „nur Profile, keine Modelle“ besser als eine Behauptung im Plan. Neue Reason-Codes und Konfigurationsfelder immer gemeinsam mit Katalog und Referenz einbringen; der Doku-Drift-Test erzwingt das.
+- **Folge-Slices:** keine.
 
 ## 10. Sub-Area-Modus-Begründung
 
