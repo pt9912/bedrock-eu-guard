@@ -1,4 +1,4 @@
-# Gates. Doc-Gate via d-check.mk (erzeugt mit `d-check --print-mk`, v0.29.0 —
+# Gates. Doc-Gate via d-check.mk (erzeugt mit `d-check --print-mk`, v0.91.0 —
 # bringt doc-check/doc-trace/doc-complete/doc-doctor/doc-repair/doc-help,
 # netzlos via --network none). Code-Gates (lint/test/build) sind
 # repo-spezifisch und wachsen mit dem Code (ADR-0002, Welle 1). Nur

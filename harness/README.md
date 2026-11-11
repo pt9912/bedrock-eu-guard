@@ -47,7 +47,7 @@ kanonische Quelle**, und diese Datei wird angepasst.
 
 | Target | Vertrag | Bindung |
 |---|---|---|
-| `make doc-check` | Doku-Referenzen lösen auf (Links + Anker; via d-check, netzlos `--network none`) | Reproduzierbarkeit (`:v0.29.0` in `d-check.mk`; `DCHECK_DIGEST` für Digest-Pin) |
+| `make doc-check` | Doku-Referenzen lösen auf (Links + Anker; via d-check, netzlos `--network none`) | Reproduzierbarkeit (`:v0.91.0` in `d-check.mk`; `DCHECK_DIGEST` für Digest-Pin) |
 | `make lint` | `gofmt -l .` (leer) + `go vet ./...` | Go-Image per Digest gepinnt (`GO_IMAGE` im `Makefile`), netzlos |
 | `make test` | `go test ./...` (Unit-Tests je Regel/Adapter, [`LH-QA-001`](../spec/lastenheft.md#lh-qa-001--unit-tests)) | wie `lint` |
 | `make build` | Binary `bin/bedrock-eu-check` bauen | wie `lint` |
