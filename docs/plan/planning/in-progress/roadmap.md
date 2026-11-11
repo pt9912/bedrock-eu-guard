@@ -10,7 +10,7 @@ Reihenfolge von Terminen. Die Wellen bilden die Versions-Stufen
 
 ## Aktuelle Welle
 
-Keine aktive Welle (kein Slice in `in-progress/`; Ruhezustand im Sinne des Slice-Lifecycles).
+welle-06 (Release-Härtung) ist aktiv: [`slice-024`](slice-024-devcontainer-feature-erproben.md) liegt in `in-progress/`.
 
 welle-01 bis welle-05 sind abgeschlossen. Release 1.0.0 ist am 2026-11-11 veröffentlicht
 (Tag `v1.0.0` auf Commit `5f1b35cca776`, GitHub-Release, Images auf `ghcr.io`, Devcontainer-Feature),
@@ -21,9 +21,7 @@ siehe [`../done/welle-01-results.md`](../done/welle-01-results.md),
 [`../done/welle-05-results.md`](../done/welle-05-results.md). Die Pläne liegen unter
 [`../done/`](../done/), zuletzt [`../done/welle-05-release.md`](../done/welle-05-release.md).
 
-**Gestartet, aber ohne Slice in Arbeit:** welle-06 (Release-Härtung: slice-023 und slice-025 sind done, slice-024 offen) und
-welle-07 (CI-Komfort: slice-026, slice-028 und slice-029 sind done, slice-027 ist umgesetzt, seine Closure steht aus; für 1.1.0
-fehlt die gemeinsame Entscheidungsvorlage). Sobald ein Slice nach `in-progress/` zieht, entfällt der Ruhe-Marker oben.
+**Weiter gestartet:** welle-06 (slice-023 und slice-025 sind done, slice-024 in Arbeit) und welle-07 (CI-Komfort: slice-026, slice-027, slice-028 und slice-029 sind done; für 1.1.0 fehlt die gemeinsame Entscheidungsvorlage). Sobald kein Slice mehr in `in-progress/` liegt, trägt dieser Block wieder den Ruhe-Marker für den Ruhezustand.
 
 ## Nächste Wellen
 
