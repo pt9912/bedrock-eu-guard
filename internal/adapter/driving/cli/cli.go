@@ -106,9 +106,11 @@ func runLocal(env driven.Environment, cfg model.Config, opts options, home strin
 	if err != nil {
 		return nil, err
 	}
+	envFiles := envsource.New(opts.root)
 	files, err := app.Scan{
 		Settings:   claudesettings.New(opts.root, home),
-		EnvSources: envsource.New(opts.root),
+		EnvSources: envFiles,
+		EnvFinder:  envFiles,
 		Files:      fs.New(opts.root),
 	}.Run(cfg)
 	return append(findings, files...), err

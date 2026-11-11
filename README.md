@@ -36,7 +36,7 @@ Container, ohne Netz):
 make build                          # erzeugt bin/bedrock-eu-check
 ./bin/bedrock-eu-check version
 
-./bin/bedrock-eu-check local        # Umgebung, Claude-Settings, Devcontainer, Compose, Dockerfile
+./bin/bedrock-eu-check local        # Umgebung, .env, Claude-Settings, Devcontainer, Compose, Dockerfile
 ./bin/bedrock-eu-check terraform    # Terraform-Dateien (rekursiv)
 ```
 
@@ -55,7 +55,7 @@ das [Handbuch](docs/user/handbuch.md).
 
 | Befehl | Prüft | Netz |
 |---|---|---|
-| `bedrock-eu-check local` | Umgebungsvariablen, Claude-Code-Settings, Devcontainer, Compose, Dockerfile | nein |
+| `bedrock-eu-check local` | Umgebungsvariablen, `.env`-Dateien, Claude-Code-Settings, Devcontainer, Compose, Dockerfile | nein |
 | `bedrock-eu-check terraform` | Provider-Region, IAM-Policies, Modell-IDs in `.tf`-Dateien | nein |
 | `bedrock-eu-check aws` | STS-Identität, Bedrock-Profile, IAM-Rechte (nur lesend, über die AWS-CLI) | ja |
 | `bedrock-eu-check all` | `local` + `terraform` + `aws` | ja |
