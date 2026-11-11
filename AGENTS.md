@@ -173,6 +173,8 @@ Pro Slice:
 9. Review: Ein **anderer** Agent als der Autor liest den Pull Request gegen
    und legt einen Review-Report nach
    [`docs/reviews/review-report.template.md`](docs/reviews/review-report.template.md)
-   unter `docs/reviews/<YYYY-MM-DD>-<ref>.md` ab (ein Report pro Lauf, nach dem
-   Gegenlesen und **vor** dem Merge). Findings der Kategorien `HIGH` und `MEDIUM`
-   blockieren den Merge; eine Abweichung wird im Verdikt begründet.
+   unter `docs/reviews/<YYYY-MM-DD>-pr<Nr>-<kurzname>.md` im selben PR-Branch ab
+   (ein Report pro Lauf, nach dem Gegenlesen und **vor** dem Merge). Findings der
+   Kategorien `HIGH` und `MEDIUM` blockieren den Merge; eine Abweichung wird im
+   Verdikt begründet. Der Report ersetzt weder die Verifikation noch die
+   DoD-Prüfung.
