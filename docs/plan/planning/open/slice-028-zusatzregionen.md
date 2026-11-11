@@ -24,7 +24,8 @@ in ihnen wird ausschließlich die Sichtbarkeit nicht erlaubter Profile geprüft 
 - **Regeln (w1):**
   - [`LH-FA-BEDROCK-001`](../../../../spec/lastenheft.md#lh-fa-bedrock-001--bedrock-inference-profile-auflisten) (Profile je Region) betrifft nur erlaubte Regionen, unverändert.
   - [`LH-FA-BEDROCK-002`](../../../../spec/lastenheft.md#lh-fa-bedrock-002--nicht-erlaubte-profile-erkennen): sichtbare, nach [`SPEC-010`](../../../../spec/spezifikation.md#spec-010--klassifikation-von-modell-profil-ids) blockierte Profile in Zusatzregionen führen zu einem `WARN` (`PROFILES_VISIBLE_NOT_ALLOWED`) mit Region in der Meldung; sie sind nie ein `FAIL` (das bleibt „verwendet“). Ein Fehler beim Lesen einer Zusatzregion (zum Beispiel Zugriff verweigert) ist ein `WARN` mit neuem Reason `VISIBILITY_UNKNOWN`, kein `FAIL`.
-- **Adapter (w2):** `awscli.Reader` nutzt bereits eine Region je Aufruf; keine Vertragsänderung nötig. Der Composition Root übergibt die Konfiguration unverändert. CLI-Test mit Fake-`aws` für eine Zusatzregion.
+- **Adapter (w2):** `awscli.Reader` nutzt bereits eine Region je Aufruf; keine Vertragsänderung nötig. `configyaml` mappt `visibilityRegions` 1:1 auf `PartialConfig` (Feld abwesend = `nil`, `visibilityRegions: []` = leer; strikt: ein Eintrag, der kein String ist, ergibt `FILE_INVALID` ohne Wertzitat). Der Composition Root übergibt die Konfiguration unverändert. CLI-Test mit Fake-`aws` für eine Zusatzregion.
+- **Doku:** `aws-permissions.md` (w2) nennt `bedrock:ListInferenceProfiles` in den Zusatzregionen als nötiges Recht; eine IAM-Policy mit Region-Condition nur für EU führt dort zu `VISIBILITY_UNKNOWN` (`WARN`); die Beispiel-Policy bekommt nur einen Hinweis. Regelkatalog und Referenz (`rules.md`, `reference.md`) mit den Reason-Codes `PROFILES_VISIBLE_NOT_ALLOWED` und `VISIBILITY_UNKNOWN` sowie dem Konfigurationsfeld pflegt w1 (Doku-Drift-Test).
 
 ## 3. Verhalten
 

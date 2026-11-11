@@ -20,7 +20,7 @@ ein `WARN` oder `FAIL` vorliegt. Ohne die Option bleibt das Verhalten **unverän
 
 - **Kern (w1):** `app.ExitCodeAt(findings, err, failOn model.Severity) int` mit der Semantik: Fehler → `2`; höchster Schweregrad `>= failOn` → `1`; sonst `0`. Die bestehende Funktion `app.ExitCode` bleibt und ist gleichbedeutend mit `failOn = FAIL`. Zulässige Schwellen: `FAIL` (Default) und `WARN`; `PASS` ist keine zulässige Schwelle.
 - **Spec (w1):** [`SPEC-030`](../../../../spec/spezifikation.md#spec-030--exit-codes) wird fortgeschrieben: Tabelle um die Bedingung „mit `--fail-on warn`: mindestens ein `WARN` oder `FAIL`“ ergänzt; Hinweis, dass die Option eine Erweiterung ist und [`LH-FA-EXIT-001`](../../../../spec/lastenheft.md#lh-fa-exit-001--erfolgreiche-prüfung)/[`LH-FA-EXIT-002`](../../../../spec/lastenheft.md#lh-fa-exit-002--fehlgeschlagene-prüfung) im Default erfüllt bleiben.
-- **CLI (w2):** Option `--fail-on fail|warn` für alle Prüfbefehle; ungültiger Wert oder fehlendes Argument ist ein Aufruffehler (Exit `2`, `usage`). Die Zusammenfassungszeile im CI-Modus zeigt weiterhin den tatsächlichen Exit-Code. Reporter, JSON und SARIF bleiben unverändert (der Schweregrad der Befunde ändert sich nicht, nur der Exit-Code).
+- **CLI (w2):** Option `--fail-on fail|warn` für die Prüfbefehle `local`, `terraform`, `aws` und `all`; beim Befehl `version` ist sie ein Aufruffehler (Exit `2`, `usage`), wie andere unpassende Optionen; ungültiger Wert oder fehlendes Argument ist ein Aufruffehler (Exit `2`, `usage`). Die Zusammenfassungszeile im CI-Modus zeigt weiterhin den tatsächlichen Exit-Code. Reporter, JSON und SARIF bleiben unverändert (der Schweregrad der Befunde ändert sich nicht, nur der Exit-Code).
 
 ## 3. Verhalten
 
@@ -31,10 +31,12 @@ ein `WARN` oder `FAIL` vorliegt. Ohne die Option bleibt das Verhalten **unverän
 | mindestens ein `FAIL` | `1` | `1` |
 | Tool-Fehler | `2` | `2` |
 
+Bei `all` mit fehlendem `aws`-Binary bleibt es bei Exit `2`; die Schwelle wird nur auf ein vollständiges Ergebnis angewendet (der Tool-Fehler hat Vorrang).
+
 ## 4. Definition of Done
 
 - [ ] Kern (w1): `ExitCodeAt` mit Tabellentest über alle Kombinationen; Spec fortgeschrieben.
-- [ ] CLI (w2): Option, Validierung, Tests je Modus (Default unverändert, `warn` greift, ungültiger Wert Exit `2`); Referenz, Handbuch (Aufgabe „In CI einbinden“), `ci.md` und Fehlersuche aktualisiert; der `jq`-Workaround verweist auf die Option.
+- [ ] CLI (w2): Option, Validierung (auch `version` mit der Option = Exit `2`), Tests je Modus (Default unverändert, `warn` greift, ungültiger Wert Exit `2`); Referenz (Option und Exit-Tabelle; Doku-Drift-Test beachten), Handbuch (Aufgabe „In CI einbinden“ und Fehlersuche: „`WARN` ändert den Exit-Code nur mit `--fail-on warn`“), `ci.md` (Beispiel „strenge Pipeline“), README-Optionsliste aktualisiert; der `jq`-Workaround verweist auf die Option.
 - [ ] Regressionstest: ohne Option unverändertes Verhalten in allen Modi.
 - [ ] `make verify-clean` und CI grün; Doku-Drift-Test grün.
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
