@@ -89,6 +89,9 @@ Workflow `release-artifacts` baut nur und veröffentlicht nichts.
 3. **Artefakte bauen:** Workflow `release-artifacts` manuell starten (Eingabe: Version,
    z. B. `1.0.0`) oder lokal `make dist VERSION=1.0.0`. Das Ergebnis liegt als
    Workflow-Artefakt bzw. unter `dist/v1.0.0/`; `sha256sum -c SHA256SUMS` muss „OK“ melden.
+   Der Workflow ist erprobt: Auf dem Tag-Ref `v1.0.0` (`gh workflow run release.yml --ref v1.0.0 -f version=1.0.0`)
+   liefert er `SHA256SUMS` bitgleich zum veröffentlichten Release. Beim Vergleich den Tag-Ref
+   verwenden: Version und Commit stecken im Binary, auf `main` ergäben sich andere Prüfsummen.
 4. **Veröffentlichen (manuell, außenwirksam):**
    - Tag setzen und pushen: `git tag -a v1.0.0 -m "bedrock-eu-check 1.0.0"`,
      `git push origin v1.0.0`.
