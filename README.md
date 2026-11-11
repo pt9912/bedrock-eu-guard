@@ -23,8 +23,9 @@ und `:1.0.0-full` und als Devcontainer-Feature. Alle Prüfmodi, die Ausgabeforma
 [`docs/user/releasing.md`](docs/user/releasing.md).
 
 Nicht auf externen Plattformen erprobt sind der Beispiel-Workflow
-für GitHub Code Scanning und das Devcontainer-Feature mit der Devcontainer-CLI; die
-Beispiel-IAM-Policy wurde nicht gegen ein echtes AWS-Konto getestet.
+für GitHub Code Scanning und der scharfe Lauf des Workflows `release-create`; die
+Beispiel-IAM-Policy wurde nicht gegen ein echtes AWS-Konto getestet. Das Devcontainer-Feature
+ist mit der Devcontainer-CLI erprobt (`devcontainer build`; `devcontainer up` nicht).
 Den Fahrplan zeigt die [Roadmap](docs/plan/planning/in-progress/roadmap.md).
 
 ## Schnellstart

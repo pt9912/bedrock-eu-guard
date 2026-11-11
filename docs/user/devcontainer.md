@@ -6,7 +6,12 @@ vorinstalliertes Tool bereitgestellt werden
 
 **Stand:** Das Feature ist als `ghcr.io/pt9912/bedrock-eu-guard/bedrock-eu-check`
 (Tags `1`, `1.0`, `1.0.0`, `latest`) veröffentlicht und wird in der CI gegen ein lokal
-gebautes Release getestet. Es wurde **nicht mit der Devcontainer-CLI erprobt**. Die
+gebautes Release getestet. Zusätzlich ist es mit der Devcontainer-CLI (Version 0.72.0, Workflow
+`feature-cli`) erprobt: Das Feature aus dem Arbeitsstand wie auch das veröffentlichte Feature
+von `ghcr.io` lassen sich in `mcr.microsoft.com/devcontainers/base:ubuntu` installieren, und
+`bedrock-eu-check version` meldet `bedrock-eu-check 1.0.0 (5f1b35cca776)`. Nicht erprobt ist
+`devcontainer up` (es blieb auf dem GitHub-Runner nach dem Start des Containers hängen, die
+Ursache ist nicht ermittelt); erprobt ist `devcontainer build` mit anschließendem `docker run`. Die
 Standard-`baseUrl` zeigt auf das [GitHub-Release v1.0.0](https://github.com/pt9912/bedrock-eu-guard/releases/tag/v1.0.0)
 (siehe [`releasing.md`](releasing.md)).
 
@@ -34,7 +39,7 @@ Ordner `.devcontainer/` des Projekts kopiert:
 }
 ```
 
-Oder direkt aus der Registry, ohne Kopie (nicht mit der Devcontainer-CLI erprobt):
+Oder direkt aus der Registry, ohne Kopie (mit der Devcontainer-CLI erprobt):
 
 ```jsonc
 "features": {

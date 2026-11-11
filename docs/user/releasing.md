@@ -110,7 +110,11 @@ Workflow `release-artifacts` baut nur und veröffentlicht nichts.
      `gh release create v1.0.0 dist/v1.0.0/* --notes-file <datei>`.
    - Docker-Images und Devcontainer-Feature nach `ghcr.io` über den Workflow `publish`
      (nur manuell, `workflow_dispatch`; Eingaben: `version`, `commit`, Schalter `images`
-     und `feature`). Er baut aus dem Tag `v<version>`, prüft Commit und Labels, führt die
+     und `feature`, `dry_run` und `ref`). **Standard ist der Trockenlauf** (`dry_run=true`): Er prüft
+     Eingaben, Tag und Commit, baut und testet die Images bzw. packt das Feature und pusht nichts;
+     erst `dry_run=false` meldet an und veröffentlicht. Für eine neue Feature-Version ohne neuen
+     Werkzeug-Tag setzt `ref=feature-v<version>` den Tag `feature-v<version>` (angelegt über
+     `release-create` mit `target=feature`); `version` ist dann die Feature-Version. Er baut aus dem Tag `v<version>`, prüft Commit und Labels, führt die
      Smoke-Tests vor dem Push aus und nutzt das `GITHUB_TOKEN` des Laufs (keine eigenen
      Zugangsdaten). Zuerst nur `images`, nach der Nachprüfung erst `feature`. Images:
      `ghcr.io/pt9912/bedrock-eu-check:<version>-slim|-full`; Feature:
