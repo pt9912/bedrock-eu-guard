@@ -100,7 +100,8 @@ gesucht, nicht in Unterverzeichnissen. **Rekursiv** gesucht werden Terraform-Dat
 (`*.example`, `*.sample`, `*.template`). Die Verzeichnisse `.git`, `.terraform`, `vendor`, `node_modules` und `.tmp`
 werden übersprungen, Symlinks nicht verfolgt.
 
-**Erfolg:** Exit-Code `0` (kein `FAIL`). `WARN` lässt den Lauf nicht scheitern.
+**Erfolg:** Exit-Code `0` (kein `FAIL`). `WARN` lässt den Lauf nicht scheitern, außer Sie verlangen es
+mit `--fail-on warn` (Aufgabe 9).
 
 ## Aufgabe 3: Einen Befund verstehen und beheben
 
@@ -342,7 +343,9 @@ erkennbar.
   auf stderr (`bedrock-eu-check: 3 PASS, 1 WARN, 0 FAIL (Exit 0)`), damit Pipeline-Logs den
   Ausgang zeigen, auch wenn stdout in eine Datei umgeleitet ist.
 - Die Pipeline scheitert bei Exit `1` (mindestens ein `FAIL`) und bei Exit `2` (Tool-Fehler),
-  nicht bei `WARN`.
+  nicht bei `WARN`. Wer auch Warnungen nicht durchlassen will, ergänzt `--fail-on warn`: Dann
+  gilt Exit `1` ab dem ersten `WARN`. Erwartete Warnungen (zum Beispiel fehlende Benutzer-Settings
+  in CI) machen die Pipeline dann rot; sie lassen sich nur durch Beheben oder `exclude` vermeiden.
 - Für Pull Requests aus Forks eignen sich meist nur `local` und `terraform`.
 
 Ein vollständiger Beispiel-Workflow für GitHub Code Scanning (nicht auf GitHub erprobt) steht

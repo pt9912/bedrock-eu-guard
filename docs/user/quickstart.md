@@ -45,7 +45,7 @@ Summary: 1 PASS, 1 WARN, 1 FAIL
 - Befunde mit Datei zeigen `[Datei:Zeile]`.
 - Es werden nie Secret-Werte ausgegeben, nur „set“ oder „not set“.
 
-**Exit-Codes:** `0` kein `FAIL`, `1` mindestens ein `FAIL`, `2` Tool-Fehler
+**Exit-Codes:** `0` kein `FAIL`, `1` mindestens ein `FAIL` (mit `--fail-on warn` auch bei `WARN`), `2` Tool-Fehler
 (z. B. ungültige Konfiguration). Eine Übersicht steht in der [Referenz](reference.md).
 
 ## 3. AWS-Prüfung (optional)

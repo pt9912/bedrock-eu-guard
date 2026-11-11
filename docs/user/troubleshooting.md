@@ -18,6 +18,7 @@ Typische Meldungen und was dahintersteckt. Die Bedeutung der Reason-Codes steht 
 
 | Befund | Ursache und Abhilfe |
 |---|---|
+| Exit `1`, aber nur `WARN` in der Ausgabe | Der Lauf wurde mit `--fail-on warn` gestartet; dann zählt schon ein `WARN` als Fehlschlag. Warnung beheben oder die Option weglassen. |
 | `AWS_NO_CREDENTIALS` | Keine oder abgelaufene Zugangsdaten (auch abgelaufene SSO-Sitzung). Anmelden und erneut ausführen. |
 | `AWS_ACCESS_DENIED` | Dem aktuellen Principal fehlt ein Recht der Prüfung; benötigte Rechte: [`aws-permissions.md`](aws-permissions.md). Bei der IAM-Prüfung ergibt das nur `WARN` (`IAM_UNKNOWN`). |
 | `AWS_UNREACHABLE` | AWS nicht erreichbar (Netz, Proxy, falsche Region/Endpoint) oder unerwartete Antwort der AWS-CLI. |
