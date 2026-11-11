@@ -207,6 +207,19 @@ Präzisiert [`LH-FA-REP-002`](lastenheft.md#lh-fa-rep-002--json-ausgabe). **Secr
 Fail-closed: Kann ein offline-Check nicht ausgeführt werden, ist das
 Exit `2`, nicht stilles `0`.
 
+**Ausgabeziel `--output FILE`** (Erweiterung, nur auf ausdrückliche
+Anforderung): Das Ergebnis im gewählten Format wird in die Datei statt nach
+stdout geschrieben; stdout bleibt leer, Meldungen und die Zusammenfassung des
+CI-Modus gehen weiterhin nach stderr. Exit-Codes und Befunde ändern sich nicht.
+Die Datei wird vollständig oder gar nicht geschrieben (temporäre Datei im
+Zielverzeichnis, dann Umbenennen) und ersetzt eine vorhandene Datei. Gibt es
+**kein Ergebnis** (Tool-Fehler vor dem Ergebnis, zum Beispiel eine ungültige
+Konfiguration), wird keine Datei angelegt und eine vorhandene bleibt
+unverändert. Liegt bei einem späteren Tool-Fehler (zum Beispiel `all` mit
+fehlendem `aws`-Binary) ein Teilergebnis vor, wird es wie auf stdout
+geschrieben, der Exit-Code bleibt `2`. Kann die Datei nicht geschrieben werden,
+endet der Lauf mit Exit `2` und einer festen Meldung ohne Dateiinhalt.
+
 **Schwelle `--fail-on`** (Erweiterung, nur auf ausdrückliche Anforderung auf
 der Kommandozeile): `--fail-on fail` ist der Standard und gleichbedeutend mit
 der Tabelle oben. Mit `--fail-on warn` gilt für Exit `1` stattdessen: mindestens
