@@ -5,13 +5,16 @@ vorinstalliertes Tool bereitgestellt werden
 ([`LH-TECH-005`](../../spec/lastenheft.md#lh-tech-005--devcontainer-integration)).
 
 **Stand:** Das Feature ist als `ghcr.io/pt9912/bedrock-eu-guard/bedrock-eu-check`
-(Tags `1`, `1.0`, `1.0.0`, `latest`) veröffentlicht und wird in der CI gegen ein lokal
+(Tags `1`, `1.0`, `1.0.1`, `1.0.0`, `latest`; aktuelle Feature-Version 1.0.1) veröffentlicht und wird in der CI gegen ein lokal
 gebautes Release getestet. Zusätzlich ist es mit der Devcontainer-CLI (Version 0.72.0, Workflow
 `feature-cli`) erprobt: Das Feature aus dem Arbeitsstand wie auch das veröffentlichte Feature
 von `ghcr.io` lassen sich in `mcr.microsoft.com/devcontainers/base:ubuntu` installieren, und
 `bedrock-eu-check version` meldet `bedrock-eu-check 1.0.0 (5f1b35cca776)`. Nicht erprobt ist
-`devcontainer up` (es blieb auf dem GitHub-Runner nach dem Start des Containers hängen, die
-Ursache ist nicht ermittelt); erprobt ist `devcontainer build` mit anschließendem `docker run`. Die
+`devcontainer up` mit der CLI 0.72.0: Es blieb auf dem GitHub-Runner (Docker 29.4.2) nach dem Start
+des Containers hängen. Dieselbe Messung mit den CLI-Versionen 0.86.1 und 0.90.0 lief auf demselben Runner durch
+(Läufe 42999455137 und 42999946761); der Fehler hängt also an der Kombination aus CLI 0.72.0 und
+dieser Docker-Version, nicht am Feature. Erprobt ist bisher `devcontainer build` mit anschließendem `docker run`;
+die Umstellung der Erprobung auf eine neuere CLI mit `up` ist als Wartungsslice geplant. Die
 Standard-`baseUrl` zeigt auf das [GitHub-Release v1.0.0](https://github.com/pt9912/bedrock-eu-guard/releases/tag/v1.0.0)
 (siehe [`releasing.md`](releasing.md)).
 
@@ -62,7 +65,7 @@ vorhanden).
 **Sicherheit:** `baseUrl` muss mit `https://` oder `file://` beginnen. `SHA256SUMS`
 stammt vom selben Ursprung wie das Binary: Die Prüfung schützt vor Korruption und
 Teil-Downloads, **nicht** vor einem kompromittierten Ursprung. Signierte Releases
-(z. B. Sigstore) sind ein Folgepunkt. Der Default `1.0.0` zeigt auf das veröffentlichte Release v1.0.0.
+(z. B. Sigstore) sind ein Folgepunkt. Der Default `1.0.0` zeigt auf das veröffentlichte Release v1.0.0; das Werkzeug 1.1.0 wählst du mit `"version": "1.1.0"`.
 
 Zum Testen des Ablaufs ohne Release: `make feature-test` (baut ein lokales
 „Release“, installiert es per `file://` in einen Container ohne Netz und prüft

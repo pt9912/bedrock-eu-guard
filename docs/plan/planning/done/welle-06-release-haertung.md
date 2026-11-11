@@ -1,6 +1,6 @@
 # Welle welle-06-release-haertung: Release-Prozess erproben und härten
 
-**Status:** in-progress (gestartet; slice-023 und slice-025 done, slice-024 offen)
+**Status:** done (abgeschlossen 2026-11-11, siehe [`welle-06-results.md`](welle-06-results.md))
 
 **Zielmeilenstein:** M6 — Release-Prozess erprobt
 
@@ -11,7 +11,7 @@
 ## 1. Welle-Ziel
 
 Die Teile von Release 1.0.0, die bei der Veröffentlichung **nicht erprobt** waren
-([`welle-05-results.md`](done/welle-05-results.md), Abschnitte „Herkunft der Release-Dateien“ und „Bekannter Mangel im veröffentlichten Feature“),
+([`welle-05-results.md`](welle-05-results.md), Abschnitte „Herkunft der Release-Dateien“ und „Bekannter Mangel im veröffentlichten Feature“),
 werden erprobt und korrigiert, und der Veröffentlichungsablauf wird nachvollziehbar und
 wiederholbar (Workflows statt lokaler Handarbeit), ohne dass etwas automatisch veröffentlicht wird.
 

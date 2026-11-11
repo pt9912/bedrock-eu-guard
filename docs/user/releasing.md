@@ -1,7 +1,9 @@
 # Releasing & Betrieb — bedrock-eu-check
 
-**Status:** Version 1.0.0 veröffentlicht am 2026-11-11 auf Commit `5f1b35cca776` (Tag, GitHub-Release, Images, Feature). Zuletzt konkretisiert mit
-Welle 5 ([`LH-RM-005`](../../spec/lastenheft.md#lh-rm-005--version-10)).
+**Status:** Version 1.0.0 veröffentlicht am 2026-11-11 auf Commit `5f1b35cca776` (Tag, GitHub-Release, Images, Feature). Version 1.1.0
+veröffentlicht am 2026-11-11 auf Commit `5274f3dce55f` (Tag `v1.1.0`, GitHub-Release, Images `1.1.0-slim` und `1.1.0-full`); Feature
+1.0.1 am selben Tag auf demselben Commit (Tag `feature-v1.0.1`). Zuletzt konkretisiert mit
+Welle 5 ([`LH-RM-005`](../../spec/lastenheft.md#lh-rm-005--version-10)) und den Wellen 6 und 7.
 
 Dieses Dokument (Rang 6 der Source Precedence) beschreibt, *wie*
 `bedrock-eu-check` versioniert, gebaut, verteilt und in CI betrieben wird.
@@ -102,10 +104,15 @@ Workflow `release-artifacts` baut nur und veröffentlicht nichts.
      Binaries und `SHA256SUMS` an. Schreibrechte hat nur der Job `create`, der an die
      GitHub-Umgebung `release` gebunden ist; dort kann in den Repository-Einstellungen ein
      Pflicht-Prüfer eingetragen werden. **Voraussetzung für den ersten scharfen Lauf:** Die
-     Nutzer legen die Umgebung `release` mit Pflicht-Prüfern in den Repository-Einstellungen an;
+     Nutzer legen die Umgebung `release` mit Pflicht-Prüfern in den Repository-Einstellungen an
+     (angelegt am 2026-11-11: Prüfer `pt9912`, nur Branch `main`);
      sonst wird sie beim ersten Lauf ohne Schutz erzeugt, und jede Person mit Schreibrecht
-     könnte den Lauf starten. Das ersetzt das Ja beider Nutzer nicht. Ein scharfer
-     Lauf ist nicht rückholbar. Manuell geht es weiterhin mit
+     könnte den Lauf starten. Da alle Beteiligten dasselbe GitHub-Konto nutzen, unterscheidet die
+     Umgebung nicht zwischen den Nutzern und erlaubt Selbstfreigabe; sie ersetzt das Ja beider
+     Nutzer nicht, das als Wortlaut-Freigabe festgehalten wird. Die Freigabe erteilt ein Mensch in der
+     Weboberfläche; das Token der Agenten darf Deployments nicht freigeben. Ein scharfer
+     Lauf ist nicht rückholbar und ist für `v1.1.0` (Run 42990440491) und `feature-v1.0.1` (Run 42993689182)
+     erfolgreich durchlaufen. Manuell geht es weiterhin mit
      `git tag -a v1.0.0 <commit> -m "bedrock-eu-check 1.0.0"`, `git push origin v1.0.0` und
      `gh release create v1.0.0 dist/v1.0.0/* --notes-file <datei>`.
    - Docker-Images und Devcontainer-Feature nach `ghcr.io` über den Workflow `publish`
@@ -114,7 +121,8 @@ Workflow `release-artifacts` baut nur und veröffentlicht nichts.
      Eingaben, Tag und Commit, baut und testet die Images bzw. packt das Feature und pusht nichts;
      erst `dry_run=false` meldet an und veröffentlicht. Für eine neue Feature-Version ohne neuen
      Werkzeug-Tag setzt `ref=feature-v<version>` den Tag `feature-v<version>` (angelegt über
-     `release-create` mit `target=feature`); `version` ist dann die Feature-Version. Er baut aus dem Tag `v<version>`, prüft Commit und Labels, führt die
+     `release-create` mit `target=feature`); `version` ist dann die Feature-Version. Der Pfad ist
+     für `feature-v1.0.1` erprobt (Trockenlauf Run 42996795891, scharf Run 42996881739). Der Workflow baut aus dem Tag `v<version>`, prüft Commit und Labels, führt die
      Smoke-Tests vor dem Push aus und nutzt das `GITHUB_TOKEN` des Laufs (keine eigenen
      Zugangsdaten). Zuerst nur `images`, nach der Nachprüfung erst `feature`. Images:
      `ghcr.io/pt9912/bedrock-eu-check:<version>-slim|-full`; Feature:

@@ -2,7 +2,7 @@
 
 **Status:** done. **Verantwortlich:** w2 (Plan-Review: w1). **Freigabe zum Erproben:** Nutzer 2026-11-11 („slice 024 freigegeben“).
 
-**Welle:** [`welle-06-release-haertung`](../welle-06-release-haertung.md).
+**Welle:** [`welle-06-release-haertung`](welle-06-release-haertung.md).
 
 **Bezug:** [`LH-TECH-005`](../../../../spec/lastenheft.md#lh-tech-005--devcontainer-integration), [`welle-05-results.md`](../done/welle-05-results.md) (bekannter Mangel im veröffentlichten Feature).
 
