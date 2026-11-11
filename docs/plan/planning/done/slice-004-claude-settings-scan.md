@@ -42,7 +42,7 @@ Präzisierungen aus dem Review (w1):
 
 Datei vorhanden, aber nicht lesbar oder ungültig: `FAIL` mit
 `FILE_UNREADABLE`/`FILE_INVALID`, Scan läuft weiter
-(siehe [`welle-02-config-scanner.md`](../welle-02-config-scanner.md) §5a).
+(siehe [`welle-02-config-scanner.md`](welle-02-config-scanner.md) §5a).
 
 ## 4. Definition of Done
 
@@ -69,7 +69,7 @@ Datei vorhanden, aber nicht lesbar oder ungültig: `FAIL` mit
 
 ## 6. Trigger
 
-[`welle-02-config-scanner`](../welle-02-config-scanner.md) gestartet (Plan gemerged) und Freigabe der Nutzer; Kernverträge von w1 gepusht, bevor die Adapter integriert werden.
+[`welle-02-config-scanner`](welle-02-config-scanner.md) gestartet (Plan gemerged) und Freigabe der Nutzer; Kernverträge von w1 gepusht, bevor die Adapter integriert werden.
 
 ## 7. Closure-Trigger
 

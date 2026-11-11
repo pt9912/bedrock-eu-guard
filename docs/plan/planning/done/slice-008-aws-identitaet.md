@@ -54,7 +54,7 @@ Findings, nie stille Erfolge und nie Exit `2`.
 
 ## 6. Trigger
 
-[`welle-03-aws-checks`](../welle-03-aws-checks.md) gestartet (Plan gemerged).
+[`welle-03-aws-checks`](welle-03-aws-checks.md) gestartet (Plan gemerged).
 
 ## 7. Closure-Trigger
 
