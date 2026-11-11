@@ -1,6 +1,6 @@
 # Entscheidungsvorlage: Release 1.1.0 und Feature 1.0.1
 
-**Status:** Entwurf zur Entscheidung durch beide Nutzer. **Stand:** 2026-11-11.
+**Status:** abgeschlossen: beide Entscheidungen sind von beiden Nutzern getroffen und umgesetzt (siehe Abschnitt 10). **Stand:** 2026-11-11.
 
 **Zweck:** Eine gemeinsame Vorlage für beide Nutzer. Sie bereitet **zwei getrennte Entscheidungen** vor; es wird
 nichts veröffentlicht, bevor beide Nutzer der jeweiligen Entscheidung ausdrücklich zugestimmt haben.
@@ -130,3 +130,23 @@ Die Freigabe zu A deckt nicht B ab und umgekehrt. Ein scharfer Lauf braucht beid
 | B1 | Feature 1.0.1 veröffentlichen? | |
 | B2 | Standard der Feature-Option `version` | |
 | C | Umgebung `release` mit Pflicht-Prüfern angelegt? | |
+
+## 10. Ergebnis (Stand 2026-11-11)
+
+Beide Nutzer haben beiden Entscheidungen auf Commit `5274f3dce55f4423e2937978d3c4d05c888a13cb` zugestimmt, getrennt je Entscheidung:
+
+- **A:** „Ja zu Release 1.1.0 auf Commit 5274f3dce55f für die Ziele Tag + GitHub-Release, Docker-Images nach ghcr.io“ (Nutzer von w2, wörtlich; Nutzer von w1: „Ja zu Release 1.1.0 auf Commit 5274f3dce55f“, Ziele laut Rückfrage Tag + GitHub-Release und Docker-Images nach ghcr.io).
+- **B:** „Ja zu Feature 1.0.1 auf Commit 5274f3dce55f für das Ziel Devcontainer-Feature nach ghcr.io“ (Nutzer von w2, wörtlich; Nutzer von w1: „Ja zu Feature 1.0.1 auf Commit 5274f3dce55f“, Ziel Devcontainer-Feature).
+- **Voraussetzung:** Die Umgebung `release` mit Pflicht-Prüfer wurde vor dem ersten scharfen Lauf angelegt; die Freigabe der scharfen Läufe erteilte der Nutzer in GitHub.
+
+| Schritt | Beleg |
+|---|---|
+| Trockenlauf `release-create` (tool, 1.1.0) | Run 42989181539 |
+| `release-artifacts` auf dem Commit, Prüfsummen bitgleich zum lokalen Build | Run 42989306278 |
+| `release-create` scharf: Tag `v1.1.0` und GitHub-Release | Run 42990440491 |
+| `publish` Images, Trockenlauf und scharf | Runs 42993109110 und 42993271052; `1.1.0-slim` `sha256:224b9dbe8a616feb3cda03b3827778edf9855c376983fa15ba1c087cfc74a057`, `1.1.0-full` `sha256:0792b9ac0896c36a93e9f4a32281c15de17e7d315b9f4304d1bdb5da98ece578` |
+| `release-create` feature, Trockenlauf und scharf: Tag `feature-v1.0.1` | Runs 42993606450 und 42993689182 |
+| `publish` Feature, Trockenlauf und scharf | Runs 42996795891 und 42996881739; Digest `sha256:34aa4f35d7704d07c21e4955ffc343091f679df267da91e6472139190e47f37a` |
+| Nachprüfung `feature-cli` | Run 42996952937 |
+
+Beide Agenten haben die Ergebnisse unabhängig nachgeprüft (frischer Download, `sha256sum -c`, anonymer Pull und Start der Images, Manifeste und Metadaten des Features). Die Abschnitte 3 bis 9 zeigen den Stand zum Zeitpunkt der Vorlage.

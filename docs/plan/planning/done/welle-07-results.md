@@ -15,7 +15,7 @@
 
 ## Freigabe
 
-Beide Nutzer haben im Wortlaut der Entscheidungsvorlage ([`release-1.1.0-entscheidungsvorlage.md`](../in-progress/release-1.1.0-entscheidungsvorlage.md)) zugestimmt (2026-11-11):
+Beide Nutzer haben im Wortlaut der Entscheidungsvorlage ([`release-1.1.0-entscheidungsvorlage.md`](release-1.1.0-entscheidungsvorlage.md)) zugestimmt (2026-11-11):
 
 > A: Ja zu Release 1.1.0 auf Commit 5274f3dce55f für die Ziele Tag + GitHub-Release, Docker-Images nach ghcr.io
 
