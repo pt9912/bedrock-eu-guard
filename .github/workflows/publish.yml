@@ -24,6 +24,10 @@ on:
         description: "Devcontainer-Feature nach ghcr.io veröffentlichen"
         type: boolean
         default: false
+      ref:
+        description: "Nur für das Feature: Tag feature-v<version> statt des Tool-Tags v<version> (version ist dann die Feature-Version und muss dem Tag-Suffix und der devcontainer-feature.json entsprechen)"
+        required: false
+        default: ""
 
 # Oben alles entziehen; die Jobs lockern nur, was sie brauchen.
 permissions: {}
@@ -31,6 +35,7 @@ permissions: {}
 env:
   VERSION: ${{ inputs.version }}
   COMMIT_INPUT: ${{ inputs.commit }}
+  REF_INPUT: ${{ inputs.ref }}
   IMAGE: ghcr.io/pt9912/bedrock-eu-check
   SOURCE: https://github.com/pt9912/bedrock-eu-guard
 
@@ -100,14 +105,16 @@ jobs:
       - name: Checkout (Tag)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: refs/tags/v${{ inputs.version }}
+          ref: refs/tags/${{ inputs.ref || format('v{0}', inputs.version) }}
 
       - name: Version und Commit gegen den Tag prüfen
         run: |
           echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || { echo "ungültige Version: $VERSION" >&2; exit 1; }
           echo "$COMMIT_INPUT" | grep -Eq '^[0-9a-f]{12,40}$' || { echo "ungültiger Commit: $COMMIT_INPUT" >&2; exit 1; }
+          if [ -n "$REF_INPUT" ] && [ "$REF_INPUT" != "feature-v$VERSION" ]; then echo "ref $REF_INPUT passt nicht zur Feature-Version feature-v$VERSION" >&2; exit 1; fi
+          tag=${REF_INPUT:-v$VERSION}
           head=$(git rev-parse HEAD)
-          case "$head" in "$COMMIT_INPUT"*) ;; *) echo "Tag v$VERSION zeigt auf $head, freigegeben war $COMMIT_INPUT" >&2; exit 1;; esac
+          case "$head" in "$COMMIT_INPUT"*) ;; *) echo "Tag $tag zeigt auf $head, freigegeben war $COMMIT_INPUT" >&2; exit 1;; esac
           fv=$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' devcontainer-feature/src/bedrock-eu-check/devcontainer-feature.json | head -1)
           [ "$fv" = "$VERSION" ] || { echo "Feature-Version $fv passt nicht zu $VERSION" >&2; exit 1; }
 
