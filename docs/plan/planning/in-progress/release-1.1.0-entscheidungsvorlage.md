@@ -18,7 +18,25 @@ Werkzeug nicht (der Standard der Feature-Option `version` bleibt 1.0.0, siehe Ab
 
 ## 2. Änderungen seit 1.0.0
 
-*(Abschnitt von w1, der Funktionsumfang, Kompatibilität der Exit-Codes und Spec-Änderungen beschreibt.)*
+**Werkzeug 1.1.0** enthält drei additive Erweiterungen, die jeweils nur auf ausdrückliche Anforderung wirken. Ohne neue Optionen verhält sich das Werkzeug wie 1.0.0.
+
+| Slice | Änderung | Bedienung |
+|---|---|---|
+| 026 | Exit 1 schon bei `WARN` | `--fail-on fail` (Standard) oder `--fail-on warn`; Exit 2 hat immer Vorrang |
+| 027 | Ergebnis in eine Datei statt nach stdout (vollständig oder gar nicht geschrieben) | `--output FILE`; stdout bleibt leer, Meldungen und die Zusammenfassung des CI-Modus gehen nach stderr |
+| 028 | Sichtbarkeit nicht erlaubter Profile in Zusatzregionen (nur lesend, `WARN`, nie `FAIL`) | Konfiguration `visibilityRegions`; neuer Grund `VISIBILITY_UNKNOWN`, Konfigurationsfehler `REGION_ALSO_ALLOWED` |
+
+**Kompatibilität.**
+
+- Exit-Codes 0, 1 und 2 sowie das Standardverhalten sind unverändert ([`SPEC-030`](../../../../spec/spezifikation.md#spec-030--exit-codes); [`LH-FA-EXIT-001`](../../../../spec/lastenheft.md#lh-fa-exit-001--erfolgreiche-prüfung) und [`LH-FA-EXIT-002`](../../../../spec/lastenheft.md#lh-fa-exit-002--fehlgeschlagene-prüfung) bleiben erfüllt). Ein bestehender Aufruf liefert dieselben Befunde und denselben Exit-Code.
+- `visibilityRegions` ist optional (Standard leer, keine zusätzlichen AWS-Aufrufe). Die einzige Verhaltensänderung für Bestandsnutzer entsteht nur, wenn der Schlüssel gesetzt ist: Steht eine Region sowohl dort als auch in `allowedRegions`, endet der Lauf mit Exit 2.
+- Neue Befund- und Fehlercodes stehen in [`docs/user/rules.md`](../../../user/rules.md) bzw. [`docs/user/reference.md`](../../../user/reference.md); ein Test prüft, dass jeder Code dokumentiert ist.
+
+**Spezifikation und Lastenheft.** Geändert wurden nur [`SPEC-020`](../../../../spec/spezifikation.md#spec-020--konfigurationsschema-bedrock-eu-checkyml) (Schlüssel `visibilityRegions`) und [`SPEC-030`](../../../../spec/spezifikation.md#spec-030--exit-codes) (Schwelle `--fail-on`, Ausgabeziel `--output FILE`) in `spezifikation.md`, jeweils additiv (35 Zeilen hinzugefügt, keine entfernt). Das Lastenheft ist seit `v1.0.0` unverändert (`git diff v1.0.0..HEAD -- spec` zeigt nur `spezifikation.md`).
+
+**Seit 1.0.0 geändert, ohne Wirkung auf das Binary:** der Workflow `release-create` (slice-025; scharfer Lauf noch nicht erprobt), die d-check-Ziele in `make gates` (slice-029), Dokumentation, Review-Reports und Lifecycle-Regeln.
+
+**Nicht enthalten:** das Devcontainer-Feature (siehe Entscheidung B) und welle-08 (Sigstore/SBOM, macOS/Windows, `iam-policy.json`).
 
 ## 3. Stand (Messwerte)
 
