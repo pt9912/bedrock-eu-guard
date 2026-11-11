@@ -12,11 +12,11 @@
 
 ## 1. Ziel
 
-Eigenständige IAM-Policy-Dokumente im JSON-Format (zum Beispiel `iam-policy.json`) werden auf riskante Bedrock-Rechte geprüft, mit derselben Bewertung wie Policies in Terraform und im AWS-Konto: `FAIL`, wenn `bedrock:*` oder `InvokeModel` auf `*` ohne Region-Condition erlaubt ist; `WARN` bei `*` mit Region-Condition; `PASS` bei eng gefassten Rechten. Damit entfällt die letzte bekannte Lücke aus `LH-QA-003`.
+Eigenständige IAM-Policy-Dokumente im JSON-Format (zum Beispiel `iam-policy.json`) werden auf riskante Bedrock-Rechte geprüft, mit derselben Bewertung wie Policies in Terraform und im AWS-Konto: `FAIL`, wenn `bedrock:*` oder `InvokeModel` auf `*` ohne Region-Condition erlaubt ist; `WARN` bei `*` mit Region-Condition; `PASS` bei eng gefassten Rechten. Damit entfällt die letzte bekannte Lücke aus [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten).
 
 ## 2. Ausgangslage
 
-- Das Lastenheft nennt `iam-policy.json` bei den Testdaten, beschreibt aber keinen Scanner dafür; `LH-QA-003` ist präzisiert: Für diese Dateiart gilt die Pflicht erst bei bestehender Anforderung.
+- Das Lastenheft nennt `iam-policy.json` bei den Testdaten, beschreibt aber keinen Scanner dafür; [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) ist präzisiert: Für diese Dateiart gilt die Pflicht erst bei bestehender Anforderung.
 - Die Bewertung von Policy-Statements gibt es im Kern (gemeinsame Funktion für Terraform und den AWS-Modus); das Paket `iampolicy` im Adapter liest Policy-Dokumente (AWS und Terraform).
 - Im Handbuch steht als Grenze, dass eigenständige Policy-Dateien nicht geprüft werden.
 
@@ -24,19 +24,19 @@ Eigenständige IAM-Policy-Dokumente im JSON-Format (zum Beispiel `iam-policy.jso
 
 Dieser Plan startet erst, wenn **beide Nutzer** die Priorisierung und diese Festlegungen bestätigt haben. Vorschlag in Klammern.
 
-1. **Neue Anforderung** (Nummer und Wortlaut legen die Auftraggeber fest). Vorschlag: `LH-FA-IAM-004` (frei), „Prüfung von IAM-Policy-Dokumenten (JSON)“, Akzeptanzkriterium: „Das Tool findet eigenständige IAM-Policy-Dateien und bewertet sie wie `LH-FA-IAM-002` und `LH-FA-TF-003`: `FAIL`, wenn `bedrock:*` oder `InvokeModel` auf `*` ohne Region-Condition erlaubt ist; `WARN`, wenn `*` verwendet wird, aber eine Region-Condition vorhanden ist, oder wenn die Wirkung nicht auswertbar ist; `PASS`, wenn die Policy eng eingeschränkt ist. Eine kaputte oder nicht lesbare Datei ist ein `FAIL` mit Grund `FILE_INVALID` bzw. `FILE_UNREADABLE`; Dateiinhalte erscheinen nie in der Ausgabe.“
+1. **Neue Anforderung** (Nummer und Wortlaut legen die Auftraggeber fest). Vorschlag: `IAM-004` im Bereich der IAM-Anforderungen (die ID ist noch nicht vergeben), „Prüfung von IAM-Policy-Dokumenten (JSON)“, Akzeptanzkriterium: „Das Tool findet eigenständige IAM-Policy-Dateien und bewertet sie wie [`LH-FA-IAM-002`](../../../../spec/lastenheft.md#lh-fa-iam-002--zu-breite-bedrock-policies-erkennen) und [`LH-FA-TF-003`](../../../../spec/lastenheft.md#lh-fa-tf-003--bedrock-iam-policies-prüfen): `FAIL`, wenn `bedrock:*` oder `InvokeModel` auf `*` ohne Region-Condition erlaubt ist; `WARN`, wenn `*` verwendet wird, aber eine Region-Condition vorhanden ist, oder wenn die Wirkung nicht auswertbar ist; `PASS`, wenn die Policy eng eingeschränkt ist. Eine kaputte oder nicht lesbare Datei ist ein `FAIL` mit Grund `FILE_INVALID` bzw. `FILE_UNREADABLE`; Dateiinhalte erscheinen nie in der Ausgabe.“
 2. **Modus.** Vorschlag: `terraform` ([`LH-MOD-003`](../../../../spec/lastenheft.md#lh-mod-003--terraform-modus): IAM-Konfigurationen in Infrastrukturdateien), nicht `local`.
 3. **Dateimuster.** Vorschlag: rekursiv `iam-policy*.json` und `*-policy.json`; Ausschlüsse wie bei Terraform (`.git`, `.terraform`, `vendor`, `node_modules`, `.tmp`, keine Symlinks) und über `exclude`. Policies ohne Bedrock-Aktion ergeben kein Finding (kein Fehlalarm bei fremden Policies wie S3).
 4. **Dokumentformen.** Vorschlag: das nackte Policy-Dokument (`Version`, `Statement`) und die Ausgabe von `aws iam get-policy-version` (`PolicyVersion.Document`) bzw. `get-role-policy` (`PolicyDocument`); nicht unterstützt sind CloudFormation- und andere Vorlagen.
-5. **Testdaten.** `testdata/good` und `testdata/bad` enthalten je eine Policy-Datei; die Matrix zu `LH-QA-003` wird um `iam-policy.json` erweitert (Teil von w1).
+5. **Testdaten.** `testdata/good` und `testdata/bad` enthalten je eine Policy-Datei; die Matrix zu [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) wird um `iam-policy.json` erweitert (Teil von w1).
 
 ## 4. Definition of Done
 
-- [ ] Beide Nutzer haben Priorisierung und die Festlegungen aus Abschnitt 3 bestätigt; der Lastenheft-Eintrag steht mit dem bestätigten Wortlaut, `LH-QA-003` ist angepasst.
+- [ ] Beide Nutzer haben Priorisierung und die Festlegungen aus Abschnitt 3 bestätigt; der Lastenheft-Eintrag steht mit dem bestätigten Wortlaut, [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) ist angepasst.
 - [ ] Kern (w1): Port für die Suche und das Lesen von Policy-Dateien (eigene kleine Schnittstelle nach dem Muster der `.env`-Suche), Regel auf der vorhandenen Bewertung, Einbindung in `app.Scan` (nur Modus `terraform`), `exclude` im Kern, Unit-Tests; Regelkatalog und Referenz ergänzt (Doku-Drift-Test grün).
 - [ ] Adapter (w2): JSON-Reader auf dem Paket `iampolicy`, rekursive Suche (sortiert, relative Pfade), Testdaten `good`/`bad` (nur offensichtlich synthetische Werte), CLI-Verdrahtung, CLI-Tests ohne Dateiinhalt in der Ausgabe.
 - [ ] Doku (w2): Handbuch und Fehlersuche; die Grenze „eigenständige Policy-Dateien werden nicht geprüft“ entfällt.
-- [ ] Matrix-Test zu `LH-QA-003` um `iam-policy.json` erweitert; das Self-Check-Gate (`make self-check`) bleibt grün.
+- [ ] Matrix-Test zu [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) um `iam-policy.json` erweitert; das Self-Check-Gate (`make self-check`) bleibt grün.
 - [ ] `make verify-clean` und CI grün; Review-Report durch den anderen Agenten.
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
@@ -44,7 +44,7 @@ Dieser Plan startet erst, wenn **beide Nutzer** die Priorisierung und diese Fest
 
 | Datei / Komponente | Änderungs-Art | Zuständig |
 |---|---|---|
-| `spec/lastenheft.md` (neue Anforderung, `LH-QA-003`) | update nach Wortlaut der Auftraggeber | w1 |
+| `spec/lastenheft.md` (neue Anforderung, [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten)) | update nach Wortlaut der Auftraggeber | w1 |
 | Kern: Port, Regel, `app.Scan` | neu/update | w1 |
 | `internal/adapter/driven/iampolicy` (Datei-Reader, Suche) | update/neu | w2 |
 | `internal/adapter/driving/cli` (Verdrahtung `terraform`) | update | w2 |
