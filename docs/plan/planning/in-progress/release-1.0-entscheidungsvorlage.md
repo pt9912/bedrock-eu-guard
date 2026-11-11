@@ -22,7 +22,7 @@ GitHub-Repository ist **öffentlich**.
 | B | Registry und Namen für Image und Feature | GitHub Container Registry; Namen siehe Abschnitt 5 | 5 |
 | C | `apiKeyHelper`: `WARN` oder `FAIL` | `WARN` beibehalten | 6 |
 | D | Schwelle `--fail-on warn` | Folgeslice nach 1.0 | 7 |
-| E | Lücke `.env` / `iam-policy.json` | siehe [w1-Vorlage](release-1.0-entscheidung-qa003.md) (Empfehlung dort: mindestens `.env`) | 8 |
+| E | Lücke `.env` / `iam-policy.json` | siehe [w1-Vorlage](release-1.0-entscheidung-qa003.md) (Empfehlung dort: mindestens `.env`); bei Option 1 zusätzlich deren Festlegungen 1 bis 4 und der Wortlaut der Lastenheft-Anforderungen | 8 |
 
 Die Entscheidungen A und E hängen zusammen: Wird E mit „Scanner ergänzen“ beantwortet, verschiebt sich
 der Zeitpunkt von A um die zusätzlichen Slices.
@@ -57,7 +57,7 @@ Jedes Ziel ist ein eigener, getrennt freizugebender Schritt.
 
 | Ziel | Was geschieht | Rückholbar? | Voraussetzung |
 |---|---|---|---|
-| 1. Git-Tag `v1.0.0` | Tag wird auf den Release-Commit gesetzt und gepusht | **praktisch nein**: Das Repository ist öffentlich, der Modulpfad `github.com/pt9912/bedrock-eu-guard` ist über den Go-Modul-Proxy abrufbar, der Versionen dauerhaft zwischenspeichern kann | Entscheidung E geklärt, Gates grün |
+| 1. Git-Tag `v1.0.0` | Tag wird auf den Release-Commit gesetzt und gepusht | **praktisch nein**: Das Repository ist öffentlich, der Modulpfad `github.com/pt9912/bedrock-eu-guard` ist über den Go-Modul-Proxy abrufbar, der Versionen dauerhaft zwischenspeichern kann. Ein Tag macht das Werkzeug damit auch per `go install github.com/pt9912/bedrock-eu-guard/cmd/bedrock-eu-check@v1.0.0` installierbar (erwartet, nicht geprüft); ein so gebautes Binary trägt keine Build-Informationen (`version` zeigt `dev`) | Entscheidung E geklärt, Gates grün |
 | 2. GitHub-Release | Release mit Binaries, `SHA256SUMS` und Release-Notizen | Release lässt sich löschen oder bearbeiten, **bereits geladene Kopien nicht** | Tag (1) |
 | 3. Docker-Images | `slim` und `full` werden in eine Registry gepusht | Tags lassen sich je nach Registry löschen, **bereits gezogene Images nicht** | Registry und Namen (B) |
 | 4. Devcontainer-Feature | Feature wird als OCI-Artefakt veröffentlicht | wie bei Images; versionierte Tags gelten als dauerhaft | Release-Artefakte (2), Registry (B) |
@@ -75,14 +75,16 @@ Alle Schritte sind **manuell**; kein Workflow veröffentlicht etwas. `<SHA>` ist
 
 1. **Stand prüfen** (sauberer Checkout von `<SHA>`):
    `make verify-clean`, `make self-check`, `make deps-verify`, `make image-test`, `make feature-test`
-   und die CI auf `<SHA>` grün.
+   und die CI auf `<SHA>` grün. Außerdem prüfen, dass `LICENSE` und `THIRD_PARTY_NOTICES.md`
+   (MPL-2.0 für HCL, `yaml.v3` u. a.) zum Release-Stand passen: Lizenzhinweise gehören in ein öffentliches Release.
 2. **Release-Notizen** schreiben: Highlights, bekannte Grenzen (nicht geprüfte Dateiarten, Entscheidung E,
    nicht erprobte Workflows), Verweis auf [`docs/user/handbuch.md`](../../../user/handbuch.md).
 3. **Artefakte bauen:** `make dist VERSION=1.0.0 COMMIT=<SHA kurz>` lokal, und den Workflow
    `release-artifacts` mit Version `1.0.0` auf `<SHA>` laufen lassen. Die Prüfsummen aus beiden Läufen
    müssen übereinstimmen (Reproduzierbarkeit); `sha256sum -c SHA256SUMS` meldet „OK“.
 4. **Tag setzen** *(Ziel 1)*: `git tag -a v1.0.0 -m "bedrock-eu-check 1.0.0" <SHA>`, danach
-   `git push origin v1.0.0`.
+   `git push origin v1.0.0`. Der Tag-Push löst **keinen** Workflow aus: `gates` reagiert nur auf Pull Requests und
+   auf Pushes nach `main`, `release-artifacts` nur auf manuellen Start.
 5. **GitHub-Release anlegen** *(Ziel 2)*:
    `gh release create v1.0.0 dist/v1.0.0/* --title "bedrock-eu-check 1.0.0" --notes-file <datei>`.
 6. **Nachprüfen:** Artefakte frisch herunterladen, `sha256sum -c`, `bedrock-eu-check version` meldet `1.0.0`
@@ -95,7 +97,8 @@ Alle Schritte sind **manuell**; kein Workflow veröffentlicht etwas. `<SHA>` ist
    veröffentlichen. *Nicht erprobt; Werkzeug und Namensraum sind noch festzulegen.* Danach in einem
    frischen Devcontainer mit der Standard-`baseUrl` installieren und `bedrock-eu-check version` prüfen.
 9. **Dokumentation und Roadmap:** Stand in README, `releasing.md` und Roadmap von „Release-Kandidat“ auf
-   „veröffentlicht“ ändern, `welle-05` nach `done/` abschließen, Meilenstein M5 eintragen (eigener PR).
+   „veröffentlicht“ ändern, `welle-05` nach `done/` abschließen (reiner `git mv`, danach Verweise per `grep` nachziehen,
+   macht w1), Meilenstein M5 eintragen (eigener PR).
 
 ## 5. Entscheidung B: Registry und Namen
 
@@ -119,6 +122,7 @@ Ist in den Claude-Settings ein `apiKeyHelper` gesetzt, meldet das Werkzeug ein `
 |---|---|---|
 | `WARN` (Ist) | Lauf scheitert nicht, Befund sichtbar | Ein Helper ist ein Skript; ob es einen Anthropic-Key liefert, ist aus der Konfiguration nicht belegbar. Ein `FAIL` wäre bei Bedrock-Nutzung mit legitimem Helper ein Fehlalarm |
 | `FAIL` | Lauf scheitert | strenger, aber unzuverlässig; würde Teams zwingen, den Helper zu entfernen, obwohl er evtl. ein Bedrock-Token liefert |
+| `FAIL` nur, wenn `apiKeyHelper` gesetzt **und** `CLAUDE_CODE_USE_BEDROCK=1` im selben Geltungsbereich fehlt | Lauf scheitert nur ohne aktives Bedrock | genauer, aber Benutzer- und Projekt-Settings müssten zusammen bewertet werden: mehr Kernlogik und eine Änderung an [`SPEC-012`](../../../../spec/spezifikation.md#spec-012--direkte-anthropic-konfiguration-in-claude-settings) |
 
 **Empfehlung:** `WARN` beibehalten; wer streng sein will, wertet `APIKEY_HELPER` in der JSON-Ausgabe aus.
 
@@ -163,4 +167,4 @@ Bitte je Zeile eintragen (beide Nutzer getrennt):
 | B | Registry und Namen (oder „zunächst nicht veröffentlichen“) | | |
 | C | `apiKeyHelper`: `WARN` behalten oder `FAIL` | | |
 | D | `--fail-on warn`: Folgeslice nach 1.0 (ja/nein) | | |
-| E | `.env` / `iam-policy.json`: Option 1a, 1b oder 2 (siehe w1-Vorlage) | | |
+| E | `.env` / `iam-policy.json`: Option 1a, 1b oder 2 (siehe w1-Vorlage); bei Option 1 zusätzlich Festlegungen 1 bis 4 (Dateimuster, Modus, Suchmuster für Policy-Dateien, Suchtiefe für `.env`) und Wortlaut der Lastenheft-Anforderungen | | |
