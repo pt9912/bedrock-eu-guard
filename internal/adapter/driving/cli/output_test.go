@@ -74,13 +74,16 @@ func TestOutputFileReplacesExistingAtomically(t *testing.T) {
 
 // Schreibfehler (Verzeichnis fehlt, Ziel ist ein Verzeichnis) → Exit 2 mit klarer Meldung.
 func TestOutputFileWriteErrorIsToolError(t *testing.T) {
-	for name, target := range map[string]string{
-		"Verzeichnis fehlt":    filepath.Join(t.TempDir(), "gibt-es-nicht", "r.json"),
-		"Ziel ist Verzeichnis": t.TempDir(),
+	for name, c := range map[string]struct{ target, class string }{
+		"Verzeichnis fehlt":    {filepath.Join(t.TempDir(), "gibt-es-nicht", "r.json"), "Zielverzeichnis fehlt"},
+		"Ziel ist Verzeichnis": {t.TempDir(), "Ziel ist ein Verzeichnis"},
 	} {
-		code, out, errs := outRun(t, "local", "--root", t.TempDir(), "--format", "json", "--output", target)
-		if code != 2 || out != "" || !strings.Contains(errs, "--output") {
-			t.Errorf("%s: exit=%d stdout=%q stderr=%q", name, code, out, errs)
+		code, out, errs := outRun(t, "local", "--root", t.TempDir(), "--format", "json", "--output", c.target)
+		if code != 2 || out != "" || !strings.Contains(errs, "--output") || !strings.Contains(errs, c.class) {
+			t.Errorf("%s: exit=%d stdout=%q stderr=%q (Klasse %q erwartet)", name, code, out, errs, c.class)
+		}
+		if strings.Contains(errs, c.target) || strings.Contains(errs, "gibt-es-nicht") {
+			t.Errorf("%s: Pfad darf nicht in der Meldung stehen: %q", name, errs)
 		}
 	}
 }
@@ -146,5 +149,21 @@ func TestOutputFileUsageErrors(t *testing.T) {
 		if code, _, errs := outRun(t, args...); code != 2 || !strings.Contains(errs, "usage:") || !strings.Contains(errs, "[--output FILE]") {
 			t.Errorf("%v: exit=%d stderr=%q", args, code, errs)
 		}
+	}
+}
+
+// Fehlende Berechtigung wird als eigene Klasse gemeldet (nicht als Root ausführbar).
+func TestOutputFilePermissionClass(t *testing.T) {
+	if os.Getuid() == 0 {
+		t.Skip("als root gibt es keine Berechtigungsfehler")
+	}
+	dir := filepath.Join(t.TempDir(), "gesperrt")
+	if err := os.Mkdir(dir, 0o500); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.Chmod(dir, 0o700) })
+	code, _, errs := outRun(t, "local", "--root", t.TempDir(), "--format", "json", "--output", filepath.Join(dir, "r.json"))
+	if code != 2 || !strings.Contains(errs, "keine Berechtigung") {
+		t.Errorf("exit=%d stderr=%q", code, errs)
 	}
 }

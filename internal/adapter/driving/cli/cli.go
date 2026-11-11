@@ -4,8 +4,10 @@ package cli
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
+	iofs "io/fs"
 	"os"
 	"path/filepath"
 	"sort"
@@ -240,7 +242,7 @@ func finish(findings []model.Finding, err error, rep driven.Reporter, sink *byte
 	}
 	if sink != nil && reported {
 		if werr := writeFileAtomic(opts.output, sink.Bytes()); werr != nil {
-			fmt.Fprintln(stderr, "error: Ausgabedatei konnte nicht geschrieben werden (--output)")
+			fmt.Fprintf(stderr, "error: Ausgabedatei konnte nicht geschrieben werden (--output): %s\n", outputErrorClass(opts.output, werr))
 			code = exitToolError
 		}
 	}
@@ -259,6 +261,21 @@ func newReporter(opts options, stdout io.Writer) (driven.Reporter, *bytes.Buffer
 	}
 	buf := &bytes.Buffer{}
 	return reporterFor(opts, buf), buf
+}
+
+// outputErrorClass benennt die Fehlerklasse eines Schreibfehlers, ohne Pfad,
+// Systemmeldung oder Inhalt auszugeben.
+func outputErrorClass(path string, err error) string {
+	switch {
+	case errors.Is(err, iofs.ErrPermission):
+		return "keine Berechtigung"
+	case errors.Is(err, iofs.ErrNotExist):
+		return "Zielverzeichnis fehlt"
+	}
+	if info, serr := os.Stat(path); serr == nil && info.IsDir() {
+		return "Ziel ist ein Verzeichnis"
+	}
+	return "sonstiger Fehler"
 }
 
 // writeFileAtomic ersetzt die Zieldatei vollständig oder gar nicht: erst eine
