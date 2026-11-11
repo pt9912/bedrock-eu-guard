@@ -1,8 +1,14 @@
 # Docker-Image
 
 `bedrock-eu-check` gibt es als Docker-Image in zwei Varianten
-([`LH-TECH-004`](../../spec/lastenheft.md#lh-tech-004--docker-image)). Die Images sind
-**noch nicht veröffentlicht**; bis dahin lassen sie sich lokal bauen:
+([`LH-TECH-004`](../../spec/lastenheft.md#lh-tech-004--docker-image)). Die Images der Version 1.0.0 sind veröffentlicht:
+
+```bash
+docker pull ghcr.io/pt9912/bedrock-eu-check:1.0.0-slim   # local, terraform
+docker pull ghcr.io/pt9912/bedrock-eu-check:1.0.0-full   # alle Modi, mit AWS-CLI
+```
+
+Es gibt bewusst kein `latest`. Lokal lassen sie sich ebenfalls bauen:
 
 ```bash
 make image        # baut bedrock-eu-check:slim und bedrock-eu-check:full

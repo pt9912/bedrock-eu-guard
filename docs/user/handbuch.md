@@ -10,8 +10,8 @@ EU-Region** betrieben wird (Default `eu-central-1`) und nicht über die direkte
 Anthropic-API, ein US-/Global-Inference-Profil oder eine fehlende Region. Es **liest nur**
 und gibt **nie Secret-Werte** aus.
 
-> **Stand:** Release-Kandidat 1.0, noch nicht veröffentlicht. Bis dahin bauen Sie das
-> Werkzeug selbst (Aufgabe 1). In den Beispielen steht `bedrock-eu-check` für das
+> **Stand:** Version 1.0.0 ist veröffentlicht (Binary, Docker-Images, Devcontainer-Feature, siehe
+> [`README.md`](../../README.md)). Alternativ bauen Sie das Werkzeug selbst (Aufgabe 1). In den Beispielen steht `bedrock-eu-check` für das
 > mit `make build` erzeugte Binary bzw. das Binary in Ihrem `PATH`.
 
 ## Inhalt
@@ -398,8 +398,8 @@ Die vollständige Liste typischer Meldungen steht in der [Fehlersuche](troublesh
   abgeleitet. Fehlermeldungen der AWS-CLI werden nicht übernommen.
 - **Näherungen sind markiert.** Nicht auswertbare Ausdrücke (Terraform-Variablen, `NotAction` in
   Policies), die eingeschränkte IAM-Simulation und nicht belegbare Einstellungen ergeben `WARN`.
-- **Veröffentlichung.** Das Release 1.0 ist noch nicht veröffentlicht; Registry, Tags und
-  Artefakte entstehen erst nach ausdrücklicher Freigabe ([`releasing.md`](releasing.md)).
+- **Veröffentlichung.** Die Version 1.0.0 ist veröffentlicht; weitere Veröffentlichungen
+  geschehen nur nach ausdrücklicher Freigabe ([`releasing.md`](releasing.md)).
 
 ## Weiterführend
 
