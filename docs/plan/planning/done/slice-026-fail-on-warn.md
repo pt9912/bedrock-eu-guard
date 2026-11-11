@@ -1,7 +1,6 @@
 # Slice slice-026: Schwelle `--fail-on warn`
 
-**Status:** open → next → in-progress → done (Datei wird durch die
-Verzeichnisse bewegt).
+**Status:** done.
 
 **Welle:** [`welle-07-ci-komfort`](../welle-07-ci-komfort.md).
 
@@ -35,11 +34,11 @@ Bei `all` mit fehlendem `aws`-Binary bleibt es bei Exit `2`; die Schwelle wird n
 
 ## 4. Definition of Done
 
-- [ ] Kern (w1): `ExitCodeAt` mit Tabellentest über alle Kombinationen; Spec fortgeschrieben.
-- [ ] CLI (w2): Option, Validierung (auch `version` mit der Option = Exit `2`), Tests je Modus (Default unverändert, `warn` greift, ungültiger Wert Exit `2`); Referenz (Option und Exit-Tabelle; Doku-Drift-Test beachten), Handbuch (Aufgabe „In CI einbinden“ und Fehlersuche: „`WARN` ändert den Exit-Code nur mit `--fail-on warn`“), `ci.md` (Beispiel „strenge Pipeline“), README-Optionsliste aktualisiert; der `jq`-Workaround verweist auf die Option.
-- [ ] Regressionstest: ohne Option unverändertes Verhalten in allen Modi.
-- [ ] `make verify-clean` und CI grün; Doku-Drift-Test grün.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Kern (w1): `ExitCodeAt` mit Tabellentest über alle Kombinationen; Spec fortgeschrieben.
+- [x] CLI (w2): Option, Validierung (auch `version` mit der Option = Exit `2`), Tests je Modus (Default unverändert, `warn` greift, ungültiger Wert Exit `2`); Referenz (Option und Exit-Tabelle; Doku-Drift-Test beachten), Handbuch (Aufgabe „In CI einbinden“ und Fehlersuche: „`WARN` ändert den Exit-Code nur mit `--fail-on warn`“), `ci.md` (Beispiel „strenge Pipeline“), README-Optionsliste aktualisiert; der `jq`-Workaround verweist auf die Option.
+- [x] Regressionstest: ohne Option unverändertes Verhalten in allen Modi.
+- [x] `make verify-clean` und CI grün; Doku-Drift-Test grün.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 5. Plan (vor Code)
 
@@ -64,7 +63,13 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 9. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-11 (PRs #89 Kern/w1, #91 CLI/Doku/w2).
+
+- **Funktioniert:** `--fail-on fail|warn` für `local`, `terraform`, `aws` und `all`. Der Kern liefert `app.ExitCodeAt(findings, err, failOn)` (Tool-Fehler hat Vorrang vor der Schwelle; nur `WARN` und `FAIL` sind zulässige Schwellen, alles andere gilt als `FAIL`) und `model.ParseFailOn` als einzige Quelle der zulässigen Werte; `app.ExitCode` ist unverändert die Schwelle `FAIL`. Die CLI nimmt die Option an, weist ungültige, leere oder fehlende Werte sowie die Option beim Befehl `version` als Aufruffehler ab (Exit `2`, `usage`) und zeigt in der Zusammenfassung des CI-Modus den tatsächlichen Exit-Code. [`SPEC-030`](../../../../spec/spezifikation.md#spec-030--exit-codes) ist fortgeschrieben (Erweiterung, keine Umgebungsvariable, kein Konfigurationsfeld); Referenz, `ci.md`, Handbuch, Fehlersuche, Schnellstart und README sind aktualisiert. Tests: Tabellentest über alle Kombinationen im Kern; in der CLI Default unverändert, `warn` greift, Ausgabe in Konsole/JSON/SARIF unverändert, Tool-Fehler bleibt Exit `2`, ungültige Aufrufe.
+- **Anders als geplant:** nichts Wesentliches. Die Ergänzung des `jq`-Workarounds in der Doku verweist jetzt auf die Option.
+- **Offen:** Dauerhafte, erwartbare `WARN`-Befunde (zum Beispiel fehlende Benutzer-Settings in Containern) machen `--fail-on warn` nur mit `exclude` oder angepasster Konfiguration brauchbar; das steht in der Doku. Die Schwelle ist bewusst nur auf der Kommandozeile einstellbar.
+- **Steering-Loop:** Die Menge der zulässigen Werte liegt einmal im Kern (`ParseFailOn`) und wird von der CLI nur verwendet; so können Kern und Option nicht auseinanderlaufen. Ein Standardverhalten, das sich nicht ändern darf, braucht einen eigenen Regressionstest, nicht nur Tests der neuen Option.
+- **Folge-Slices:** keine.
 
 ## 10. Sub-Area-Modus-Begründung
 
