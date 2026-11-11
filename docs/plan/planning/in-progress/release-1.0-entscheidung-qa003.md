@@ -44,6 +44,7 @@ vorhandenen Bausteinen.
 
 1. **Dateimuster für `.env`:** nur `.env`, oder auch `.env.local` und `.env.*`? Vorschlag: `.env`, `.env.local` und `.env.*.local`; Beispieldateien (`*.example`, `*.sample`, `*.template`) bleiben ausgenommen (Fehlalarme).
 2. **Moduszuordnung:** `.env` gehört zu `local`. `iam-policy.json` passt zu `terraform` ([`LH-MOD-003`](../../../../spec/lastenheft.md#lh-mod-003--terraform-modus): IAM-Konfigurationen in Infrastrukturdateien), nicht zu `local`. Vorschlag: `terraform`.
+4. **Suchtiefe für `.env`:** Die Datei-Discovery der Env-Quellen (Devcontainer, Compose, Dockerfile) findet heute nur Dateien **im Scan-Root** (nicht rekursiv); Terraform sucht rekursiv. Für `.env` ist festzulegen: nur im Scan-Root (kleiner Aufwand, deckt `apps/api/.env` nicht ab) oder rekursiv wie Terraform (größerer Aufwand: rekursive Suche, Ausschlüsse über `exclude`). Vorschlag: rekursiv, weil `.env`-Dateien in Monorepos typischerweise in Unterverzeichnissen liegen.
 3. **Suchmuster für Policy-Dateien:** `iam-policy.json` allein ist eng; Vorschlag: `**/iam-policy*.json` und `**/*-policy.json` (rekursiv wie Terraform, Ausschlüsse über `exclude`).
 
 **Aufwand** (Schätzung, je ein kleiner Slice nach dem bekannten Muster Plan, Kern, Adapter, Closure):
@@ -54,13 +55,15 @@ vorhandenen Bausteinen.
 | `iam-policy.json` | Regel über die vorhandene Bewertung `assessBedrockStatements`, Unit-Tests | JSON-Reader auf dem vorhandenen Paket `iampolicy`, rekursive Suche, Testdaten `good`/`bad` |
 | Gemeinsam | Plan-Dateien, Regelkatalog (`rules.md`), Doku-Drift-Test (greift automatisch), `reference.md` | Handbuch, Fehlersuche |
 
+Hinweis zum Aufwand der Discovery: Der `.env`-Parser ist klein, die Suche nicht, wenn sie rekursiv sein soll (Festlegung 4). Optional und kein Bestandteil dieser Entscheidung: Compose-`env_file:` zeigt oft auf genau diese Datei; der Compose-Reader könnte referenzierte Dateien als Fund melden (Folgepunkt).
+
 Größenordnung: je Teil ein Arbeitsblock vergleichbar mit slice-006 (`.env`) bzw. einer Erweiterung von slice-010 (`iam-policy.json`); kein neuer Port außer einer weiteren `EnvSourceKind`-Art und einem Policy-Reader.
 
 **Folgen**
 
 - **Lastenheft** (bindend): zwei neue Abschnitte (Variante 1a) bzw. einer (1b), Anpassung von [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) falls nötig, Eintrag der Regel-IDs im Regelkatalog.
 - **Release 1.0:** verschiebt sich um die Slices; Alternative: Release 1.0 ohne die Scanner mit dokumentiertem Gap, Nachlieferung in 1.1 (dann bleibt die Lücke zu [`LH-PRI-MUSS-002`](../../../../spec/lastenheft.md#lh-pri-muss-002) für `.env` bis dahin offen).
-- **Risiken:** Fehlalarme bei Beispieldateien (siehe Festlegung 1); `.env`-Dateien enthalten reale Secrets, deshalb darf kein Wert den Adapter verlassen (Muster und Tests wie bei Compose und Dockerfile vorhanden); `.env` ist kein einheitlich spezifiziertes Format (Dialekte), der Parser deckt die gängige Syntax ab und meldet unlesbare Dateien als `FILE_INVALID`.
+- **Risiken:** Fehlalarme bei Beispieldateien (siehe Festlegung 1); **Testdaten werden von `.gitignore` verschluckt:** das Repository ignoriert `.env` und `.env.*` bewusst (Schutz für [`LH-SEC-001`](../../../../spec/lastenheft.md#lh-sec-001--keine-speicherung-von-aws-credentials) und [`LH-SEC-002`](../../../../spec/lastenheft.md#lh-sec-002--keine-speicherung-von-claude-anthropic-secrets)); Testdaten `good`/`bad` für den Scanner brauchen eine gezielte Negation (z. B. `!internal/**/testdata/**/.env`) oder `git add -f` und dürfen ausschließlich offensichtlich synthetische Werte enthalten (Marker wie `GEHEIM-…`), damit Secret-Scanner und Reviews sie nicht für echte Schlüssel halten (dieselbe Falle wie beim früheren, durch `.git/info/exclude` verschluckten Quellcode: Testdaten nach dem Anlegen mit `git status` prüfen); `.env`-Dateien enthalten reale Secrets, deshalb darf kein Wert den Adapter verlassen (Muster und Tests wie bei Compose und Dockerfile vorhanden); `.env` ist kein einheitlich spezifiziertes Format (Dialekte), der Parser deckt die gängige Syntax ab und meldet unlesbare Dateien als `FILE_INVALID`.
 
 ### Option 2 — Anforderung streichen oder präzisieren
 
@@ -79,7 +82,7 @@ Option 2 ist nur vertretbar, wenn Release 1.0 ausdrücklich ohne `.env`-Prüfung
 ## 4. Benötigte Entscheidungen
 
 1. Option 1a, 1b oder 2?
-2. Bei Option 1: Dateimuster (Festlegung 1 und 3) und Moduszuordnung (Festlegung 2) bestätigen oder ändern; Wortlaut und Nummern der neuen Lastenheft-Anforderungen freigeben.
+2. Bei Option 1: Dateimuster (Festlegung 1 und 3), Moduszuordnung (Festlegung 2) und Suchtiefe (Festlegung 4) bestätigen oder ändern; Wortlaut und Nummern der neuen Lastenheft-Anforderungen freigeben.
 3. Bei Option 1: Release 1.0 nach den Slices (Zeitplan) oder Release 1.0 mit dokumentiertem Gap und Nachlieferung in 1.1?
 
 Nichts davon wird ohne Entscheidung umgesetzt; das Lastenheft bleibt unverändert, bis die Auftraggeber zugestimmt haben.
