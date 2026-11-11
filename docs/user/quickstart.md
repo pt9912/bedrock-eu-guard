@@ -28,7 +28,7 @@ Im Wurzelverzeichnis des zu prüfenden Projekts:
 
 ```bash
 bedrock-eu-check local        # Umgebung, .env, Claude-Settings, Devcontainer, Compose, Dockerfile
-bedrock-eu-check terraform    # Terraform-Dateien (rekursiv)
+bedrock-eu-check terraform    # Terraform-Dateien und IAM-Policy-Dateien (rekursiv)
 ```
 
 Beide Modi arbeiten offline. Die Ausgabe hat eine Zeile je Befund:

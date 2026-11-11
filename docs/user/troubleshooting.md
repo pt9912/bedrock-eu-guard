@@ -33,6 +33,7 @@ Typische Meldungen und was dahintersteckt. Die Bedeutung der Reason-Codes steht 
 | `NO_TERRAFORM_FILES` | Im Scan-Root liegt keine `.tf`-Datei (Verzeichnisse wie `.terraform`, `vendor`, `node_modules` werden übersprungen). `--root` prüfen. |
 | `REGION_DYNAMIC` | Die Region eines Terraform-Providers ist ein Ausdruck (`var.region`, `local.x`), der sich ohne Auswertung nicht belegen lässt. |
 | `REGION_NOT_SET` bei einem Dockerfile | Das Dockerfile setzt keine AWS-Region per `ENV`. Gewollt, wenn die Region zur Laufzeit gesetzt wird. |
+| `FILE_INVALID` als `WARN` bei einer `*-policy.json` | Die Datei trifft nur das breite Muster `*-policy.json` und ist kein gültiges JSON, oft ein fremdes Format. Umbenennen oder mit `exclude` ausnehmen; eine Datei `iam-policy*.json` mit dem Fehler wäre ein `FAIL`. |
 | `ACCOUNT_UNCHECKED` | Das Konto wurde nicht geprüft, weil die Identität nicht ermittelbar war. |
 
 ## Ausgabeformate

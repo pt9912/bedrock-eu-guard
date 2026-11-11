@@ -561,7 +561,8 @@ func TestFormatSARIFTerraformBad(t *testing.T) {
 			errors++
 		}
 		loc := m["locations"].([]any)[0].(map[string]any)["physicalLocation"].(map[string]any)
-		if loc["artifactLocation"].(map[string]any)["uri"] != "main.tf" {
+		// Terraform-Regeln verweisen auf main.tf; die Regel für eigenständige Policy-Dateien (IAM-004) auf deren Pfad.
+		if rid, _ := m["ruleId"].(string); strings.HasPrefix(rid, "LH-FA-TF-") && loc["artifactLocation"].(map[string]any)["uri"] != "main.tf" {
 			t.Errorf("Terraform-Findings verweisen auf main.tf: %v", loc)
 		}
 	}
