@@ -4,6 +4,9 @@ name: diag-up
 # Nur lesende Rechte, veröffentlicht nichts.
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/diag-up.yml
 
 permissions: {}
 
