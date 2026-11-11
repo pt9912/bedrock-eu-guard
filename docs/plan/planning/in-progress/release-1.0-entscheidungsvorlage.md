@@ -1,6 +1,6 @@
 # Entscheidungsvorlage: Release 1.0
 
-**Status:** Entscheidung der Auftraggeber ausstehend. **Datum:** 2026-11-11.
+**Status:** teilweise entschieden (Nutzer 1, 2026-11-11); **Freigabe zur Veröffentlichung noch nicht erteilt** (Commit steht noch nicht fest, Antwort von Nutzer 2 fehlt). **Datum:** 2026-11-11.
 **Verfasser:** w2. **Gemeinsame Vorlage** mit w1: Die Entscheidung zur Lücke bei den Testdaten
 (`.env`, `iam-policy.json`) steht in [`release-1.0-entscheidung-qa003.md`](release-1.0-entscheidung-qa003.md).
 
@@ -29,7 +29,7 @@ der Zeitpunkt von A um die zusätzlichen Slices.
 
 ## 2. Stand (Messwerte)
 
-Gemessen auf `main`, Commit `7e78decdd8c8`, am 2026-11-11.
+Gemessen auf `main`, Commit `7e78decdd8c8`, am 2026-11-11 (**vor** dem `.env`-Scanner; der Release-Commit ist ein späterer, siehe Abschnitt 3).
 
 | Gegenstand | Stand |
 |---|---|
@@ -48,7 +48,7 @@ b0494016e33b7d3f5456a3e1468bb9ee0822925370e7ced451b5d6821556c3cb  bedrock-eu-che
 e83aba16a734ccb28227ce98c51ce98bd33a2c13074f2a7c27c60fc1259dc352  bedrock-eu-check_1.0.0_linux_arm64
 ```
 
-Die Prüfsummen hängen von Version **und Commit** ab (beides steckt im Binary). **Maßgeblich** sind die
+Die Vorschau gilt für den älteren Commit und ändert sich mit dem Release-Commit. Die Prüfsummen hängen von Version **und Commit** ab (beides steckt im Binary). **Maßgeblich** sind die
 Werte des Release-Commits; die Vorschau zeigt nur, dass der Build reproduzierbar ist.
 
 ## 3. Entscheidung A: Freigabe zur Veröffentlichung
@@ -143,6 +143,10 @@ Empfehlung stehen in [`release-1.0-entscheidung-qa003.md`](release-1.0-entscheid
 - **Option 2 (Anforderung präzisieren):** Release 1.0 kann zeitnah erfolgen; die Grenze („`.env` und Policy-JSON werden
   nicht geprüft“) steht bereits im [Handbuch](../../../user/handbuch.md) und im README und gehört in die Release-Notizen.
 
+**Umsetzungsstand (2026-11-11):** Option 1b ist umgesetzt: Der `.env`-Scanner ist in `main`
+([`slice-022`](../done/slice-022-dotenv-scanner.md), PRs #76–#79, Matrix-Test #78). Offen bleibt nur die
+eigenständige Policy-Datei `iam-policy.json` (Soll nach 1.0, gehört in die Release-Notizen).
+
 ## 9. Nicht erprobt und Risiken
 
 Nicht auf der Zielplattform ausgeführt oder gegen externe Systeme getestet:
@@ -163,8 +167,15 @@ Bitte je Zeile eintragen (beide Nutzer getrennt):
 
 | # | Frage | Antwort Nutzer 1 | Antwort Nutzer 2 |
 |---|---|---|---|
-| A | Freigabe für Version 1.0.0 auf Commit `<SHA>`: welche Ziele (1 Tag, 2 Release, 3 Images, 4 Feature)? | | |
-| B | Registry und Namen (oder „zunächst nicht veröffentlichen“) | | |
-| C | `apiKeyHelper`: `WARN` behalten oder `FAIL` | | |
-| D | `--fail-on warn`: Folgeslice nach 1.0 (ja/nein) | | |
-| E | `.env` / `iam-policy.json`: Option 1a, 1b oder 2 (siehe w1-Vorlage); bei Option 1 zusätzlich Festlegungen 1 bis 4 (Dateimuster, Modus, Suchmuster für Policy-Dateien, Suchtiefe für `.env`) und Wortlaut der Lastenheft-Anforderungen | | |
+| A | Freigabe für Version 1.0.0 auf Commit `<SHA>`: welche Ziele (1 Tag, 2 Release, 3 Images, 4 Feature)? | Grundsätzlich **ja**; Ziele: **1 Tag + 2 GitHub-Release, 3 Docker-Images, 4 Devcontainer-Feature**. Commit noch nicht festgelegt, daher **erneute Bestätigung** mit dem endgültigen `<SHA>` nach dem `.env`-Scanner | |
+| B | Registry und Namen (oder „zunächst nicht veröffentlichen“) | **GitHub** (`ghcr.io`); endgültige Namen noch zu bestätigen | |
+| C | `apiKeyHelper`: `WARN` behalten oder `FAIL` | nach Belieben der Agenten → **`WARN` bleibt** | |
+| D | `--fail-on warn`: Folgeslice nach 1.0 (ja/nein) | **ja** | |
+| E | `.env` / `iam-policy.json`: Option 1a, 1b oder 2 (siehe w1-Vorlage); bei Option 1 zusätzlich Festlegungen 1 bis 4 (Dateimuster, Modus, Suchmuster für Policy-Dateien, Suchtiefe für `.env`) und Wortlaut der Lastenheft-Anforderungen | **Option 1b**: erst `.env`-Scanner, dann Release; Lastenheft wird um die `.env`-Anforderung ergänzt. Festlegungen 1 bis 4 und Wortlaut nach Belieben der Agenten, orientiert an der w1-Vorlage | |
+
+## 11. Beschlossenes Vorgehen (Stand 2026-11-11)
+
+1. `.env`-Scanner als eigener Slice (Plan, Kern, Adapter, Tests, Lastenheft-Eintrag) vor dem Release.
+2. Danach erneute Abfrage beider Nutzer mit dem endgültigen Commit im Wortlaut aus Abschnitt 3.
+3. Erst nach dem Ja **beider** Nutzer: Checkliste aus Abschnitt 4, stufenweise (Tag und Release, Images, Feature).
+4. Folgeslice nach 1.0: `--fail-on warn`.
