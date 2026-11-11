@@ -130,7 +130,8 @@ Nur real existierende Targets (keine halluzinierten Gates, Modul 13):
 | `make lint`      | `gofmt -l .` + `go vet ./...` (containerisiert, netzlos)           |
 | `make test`      | Unit-Tests (`go test ./...`, containerisiert, netzlos)             |
 | `make build`     | Binary `bin/bedrock-eu-check` bauen                                |
-| `make gates`     | alle lauffähigen Gates: `doc-check`, `lint`, `test`                |
+| `make doc-targets` | Doku ↔ Makefile: jedes Target aus `Makefile` steht in diesen Tabellen und umgekehrt (d-check, Modul `targets`, netzlos) |
+| `make gates`     | alle lauffähigen Gates: `doc-check`, `doc-targets`, `lint`, `test` |
 | `make verify-clean` | `make gates` im frischen `git worktree` des committeten HEAD     |
 | `make deps`      | `go mod tidy` + `vendor/` neu erzeugen (mit Netz, nicht Teil der Gates, [`ADR-0004`](docs/plan/adr/0004-abhaengigkeiten-und-offline-gates.md)) |
 | `make deps-verify` | `go mod verify` + `vendor/` entspricht Upstream (mit Netz; CI-Job nur bei Änderungen an `vendor/`, `go.mod`, `go.sum`) |

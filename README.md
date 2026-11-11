@@ -130,7 +130,7 @@ Gates laufen netzlos in gepinnten Containern.
 
 ```bash
 make help          # alle Targets
-make gates         # doc-check, lint, test (netzlos)
+make gates         # doc-check, doc-targets, lint, test (netzlos)
 make self-check    # bedrock-eu-check gegen das eigene Repository
 make verify-clean  # make gates im frischen Worktree des committeten Stands
 ```

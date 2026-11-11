@@ -95,4 +95,4 @@ verify-clean: ## gates in frischem git worktree des committeten HEAD (kein Arbei
 	$(MAKE) -C "$$d/wt" gates; rc=$$?; \
 	git worktree remove --force "$$d/wt"; rm -rf "$$d"; exit $$rc
 
-gates: doc-check lint test ## alle lauffähigen Gates (doc-check, lint, test)
+gates: doc-check doc-targets lint test ## alle lauffähigen Gates (doc-check, doc-targets, lint, test)

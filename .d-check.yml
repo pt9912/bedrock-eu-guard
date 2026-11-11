@@ -60,3 +60,11 @@ matrix:
 
 codepaths:
   exempt-paths: [CHANGELOG.md, "docs/reviews/**"]
+
+# Deklarations-Konsistenz Doku <-> Makefile-Targets (Modul targets, opt-in; Aufruf: make doc-targets).
+# Die von d-check --print-mk erzeugten doc-*-Regeln und help sind Utility-Targets ohne Doku-Pflicht.
+targets:
+  makefiles: [Makefile, d-check.mk]
+  doc-tables: [AGENTS.md, harness/README.md]
+  authority: AGENTS.md
+  exempt-targets: [help, doc-trace, doc-complete, doc-doctor, doc-repair, doc-immutable, doc-commits, doc-planning, doc-tracked, doc-targets, doc-structure, doc-usage, doc-manual, doc-help]
