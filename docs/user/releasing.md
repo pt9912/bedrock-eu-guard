@@ -94,9 +94,15 @@ Workflow `release-artifacts` baut nur und veröffentlicht nichts.
      `git push origin v1.0.0`.
    - GitHub-Release mit den Artefakten und Release-Notizen anlegen
      (`gh release create v1.0.0 dist/v1.0.0/* --notes-file <datei>`).
-   - Docker-Images taggen und in die vereinbarte Registry pushen (Registry und Namen sind
-     noch nicht festgelegt).
-   - Devcontainer-Feature veröffentlichen (Registry noch nicht festgelegt).
+   - Docker-Images und Devcontainer-Feature nach `ghcr.io` über den Workflow `publish`
+     (nur manuell, `workflow_dispatch`; Eingaben: `version`, `commit`, Schalter `images`
+     und `feature`). Er baut aus dem Tag `v<version>`, prüft Commit und Labels, führt die
+     Smoke-Tests vor dem Push aus und nutzt das `GITHUB_TOKEN` des Laufs (keine eigenen
+     Zugangsdaten). Zuerst nur `images`, nach der Nachprüfung erst `feature`. Images:
+     `ghcr.io/pt9912/bedrock-eu-check:<version>-slim|-full`; Feature:
+     `ghcr.io/pt9912/bedrock-eu-guard/bedrock-eu-check`. Neue Pakete sind zunächst
+     privat; die Sichtbarkeit wird danach in den Paketeinstellungen auf GitHub bewusst
+     geändert.
 5. **Nachprüfen:** Artefakt frisch herunterladen und `sha256sum -c` ausführen; das Feature mit
    der Standard-`baseUrl` in einem frischen Devcontainer installieren.
 

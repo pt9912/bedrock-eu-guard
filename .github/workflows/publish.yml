@@ -1,0 +1,120 @@
+name: publish
+
+# VERÖFFENTLICHT nach ghcr.io (Container-Images und Devcontainer-Feature) aus dem
+# bereits gesetzten Tag v<version>. Läuft NUR manuell (workflow_dispatch) und nur nach
+# ausdrücklicher Freigabe beider Nutzer zu genau Version, Commit und Zielen
+# (docs/user/releasing.md). Der Push nutzt das GITHUB_TOKEN dieses Laufs; es gibt
+# keine eigenen Zugangsdaten. Images und Feature sind getrennte Schalter, damit das
+# Feature erst nach Nachprüfung der Images veröffentlicht wird.
+# Vorbild: d-check release.yml (SHA-gepinnte Actions, Rechte oben entzogen).
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release-Version x.y.z (ohne führendes v); der Tag v<version> muss existieren"
+        required: true
+      commit:
+        description: "Freigegebener Commit (mindestens 12 Hex-Zeichen); muss dem Tag entsprechen"
+        required: true
+      images:
+        description: "Container-Images (slim, full) nach ghcr.io pushen"
+        type: boolean
+        default: false
+      feature:
+        description: "Devcontainer-Feature nach ghcr.io veröffentlichen"
+        type: boolean
+        default: false
+
+# Oben alles entziehen; die Jobs lockern nur, was sie brauchen.
+permissions: {}
+
+env:
+  VERSION: ${{ inputs.version }}
+  COMMIT_INPUT: ${{ inputs.commit }}
+  IMAGE: ghcr.io/pt9912/bedrock-eu-check
+  SOURCE: https://github.com/pt9912/bedrock-eu-guard
+
+jobs:
+  images:
+    if: ${{ inputs.images }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout (Tag)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/v${{ inputs.version }}
+
+      - name: Version und Commit gegen den Tag prüfen
+        run: |
+          echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || { echo "ungültige Version: $VERSION" >&2; exit 1; }
+          echo "$COMMIT_INPUT" | grep -Eq '^[0-9a-f]{12,40}$' || { echo "ungültiger Commit: $COMMIT_INPUT" >&2; exit 1; }
+          head=$(git rev-parse HEAD)
+          case "$head" in "$COMMIT_INPUT"*) ;; *) echo "Tag v$VERSION zeigt auf $head, freigegeben war $COMMIT_INPUT" >&2; exit 1;; esac
+
+      - name: Images bauen
+        run: |
+          commit=$(git rev-parse --short=12 HEAD)
+          for t in slim full; do
+            docker build --target "$t" \
+              --build-arg VERSION="$VERSION" --build-arg COMMIT="$commit" \
+              --label org.opencontainers.image.source="$SOURCE" \
+              --label org.opencontainers.image.version="$VERSION" \
+              --label org.opencontainers.image.revision="$(git rev-parse HEAD)" \
+              -t "$IMAGE:$VERSION-$t" .
+          done
+
+      - name: Smoke-Tests (vor dem Push)
+        run: |
+          tools/image-smoke.sh "$IMAGE:$VERSION-slim" slim
+          tools/image-smoke.sh "$IMAGE:$VERSION-full" full
+
+      - name: Bei ghcr.io anmelden
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: OCI-Labels prüfen und nach ghcr.io pushen
+        run: |
+          set -euo pipefail
+          for t in slim full; do
+            v=$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.version" }}' "$IMAGE:$VERSION-$t")
+            [ "$v" = "$VERSION" ] || { echo "Label version=[$v] passt nicht zu $VERSION" >&2; exit 1; }
+            docker push "$IMAGE:$VERSION-$t"
+            docker inspect --format '{{index .RepoDigests 0}}' "$IMAGE:$VERSION-$t" | sed "s/^/$t: /"
+          done
+
+  feature:
+    if: ${{ inputs.feature }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout (Tag)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/v${{ inputs.version }}
+
+      - name: Version und Commit gegen den Tag prüfen
+        run: |
+          echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || { echo "ungültige Version: $VERSION" >&2; exit 1; }
+          echo "$COMMIT_INPUT" | grep -Eq '^[0-9a-f]{12,40}$' || { echo "ungültiger Commit: $COMMIT_INPUT" >&2; exit 1; }
+          head=$(git rev-parse HEAD)
+          case "$head" in "$COMMIT_INPUT"*) ;; *) echo "Tag v$VERSION zeigt auf $head, freigegeben war $COMMIT_INPUT" >&2; exit 1;; esac
+          fv=$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' devcontainer-feature/src/bedrock-eu-check/devcontainer-feature.json | head -1)
+          [ "$fv" = "$VERSION" ] || { echo "Feature-Version $fv passt nicht zu $VERSION" >&2; exit 1; }
+
+      - name: Feature veröffentlichen
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm install --global @devcontainers/cli@0.72.0
+          devcontainer features publish --registry ghcr.io \
+            --namespace pt9912/bedrock-eu-guard ./devcontainer-feature/src
