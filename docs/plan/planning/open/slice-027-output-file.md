@@ -18,7 +18,7 @@ Die CLI schreibt das Ergebnis mit `--output FILE` in eine Datei statt nach stdou
 
 - [ ] Flag `--output FILE` in allen Modi; Pfad relativ zum aktuellen Verzeichnis; die Datei wird atomar geschrieben (temporär, dann umbenannt).
 - [ ] Bei `--output` bleibt stdout leer; die `--ci`-Zusammenfassung geht weiter nach stderr; Exit-Codes unverändert.
-- [ ] Fehler beim Schreiben (Verzeichnis fehlt, keine Rechte) ergeben Exit 2 mit klarer Meldung, ohne Dateiinhalt.
+- [ ] Fehler beim Schreiben (Verzeichnis fehlt, keine Rechte) ergeben Exit 2 mit klarer Meldung, ohne Dateiinhalt. Endet der Lauf vor dem Ergebnis mit einem Tool-Fehler (Exit 2), wird die Ausgabedatei gar nicht angelegt (keine halbe Datei); eine bestehende Datei wird nur bei vorhandenem Ergebnis atomar ersetzt.
 - [ ] Tests für alle drei Formate, Fehlerfall und unveränderte Ausgabe ohne Flag; `reference.md`, `ci.md` und README aktualisiert (Beispiel ohne Shell-Umleitung).
 - [ ] `make verify-clean` und CI grün.
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.

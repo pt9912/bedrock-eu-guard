@@ -17,10 +17,11 @@ Ein neuer Workflow `release-create` legt Tag und GitHub-Release aus CI an, statt
 ## 2. Definition of Done
 
 - [ ] Eingaben: `version` (x.y.z), `commit` (mindestens 12 Hex-Zeichen), `dry_run` (Standard: wahr).
-- [ ] Prüft Version und Commit; der Commit muss auf `main` liegen und dem ausgecheckten HEAD entsprechen; der Tag `v<version>` darf noch nicht existieren.
+- [ ] Prüft Version und Commit: Checkout mit `ref=<commit>`; der Commit muss ein Vorfahre von `main` sein (auch ein älterer freigegebener Commit ist zulässig, nicht nur der Kopf von `main`); der Tag darf noch nicht existieren. Neben `v<version>` (Werkzeug) unterstützt der Workflow den Feature-Tag `feature-v<x.y.z>` (siehe slice-024).
 - [ ] Trockenlauf: baut mit `make dist`, prüft `SHA256SUMS`, gibt Namen und Prüfsummen aus; schreibt nichts.
 - [ ] Scharfer Lauf (`dry_run=false`): legt den annotierten Tag auf dem Commit an und das Release mit Binaries und `SHA256SUMS`; `contents: write` nur im Job, oben `permissions: {}`.
 - [ ] Im Trockenlauf erprobt (Run-ID in der Closure-Notiz); der scharfe Lauf geschieht erst bei der nächsten freigegebenen Veröffentlichung.
+- [ ] Optionale technische Sicherung geprüft: GitHub-Umgebung (`environment`) mit Required Reviewers für den scharfen Lauf. Sie erzwingt eine zweite Bestätigung in GitHub, kann aber das „Ja beider Nutzer“ nicht prüfen (Reviewer sind GitHub-Konten, die Einstellung nimmt der Nutzer im Repository vor). Entscheidung und Begründung in der Closure-Notiz.
 - [ ] `releasing.md` beschreibt den Ablauf mit dem Workflow; das Ja beider Nutzer zur Version, zum Commit und zu den Zielen bleibt Voraussetzung.
 - [ ] `make verify-clean` und CI grün.
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.

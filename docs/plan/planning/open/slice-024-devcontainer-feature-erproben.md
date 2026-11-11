@@ -20,6 +20,7 @@ Das Devcontainer-Feature wird mit der echten `devcontainer`-CLI installiert und 
 - [ ] Mängel aus der Erprobung behoben; die Option-Beschreibung „zeigt auf ein Release, das noch nicht existiert“ ist korrigiert.
 - [ ] `feature-test` (lokal, `file://`) bleibt grün; `devcontainer.md` nennt den erprobten Weg und entfernt „nicht erprobt“.
 - [ ] Neue Feature-Version in `devcontainer-feature.json`; Veröffentlichung über den Workflow `publish` (Schalter `feature`) **nur nach dem Ja beider Nutzer** zu Feature-Version, Commit und Ziel.
+- [ ] Veröffentlichungsweg festgelegt (Variante b): eigener Tag `feature-v<x.y.z>` auf dem Fix-Commit; der Workflow `publish` nimmt dafür eine Eingabe `ref` (Standard `v<version>`) und prüft Commit gegen diesen Tag. Grund: Der Tool-Tag `v1.0.0` zeigt auf einen Stand mit der alten `devcontainer-feature.json`; ein `publish` mit `feature=true` am Tool-Tag würde die alte Datei erneut veröffentlichen. Variante a (Tool-Patch 1.0.1 mit neuem Tool-Tag, neuen Binaries und Images) nur, falls sich auch Tool-Code ändert.
 - [ ] `make verify-clean` und CI grün.
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
@@ -29,6 +30,7 @@ Das Devcontainer-Feature wird mit der echten `devcontainer`-CLI installiert und 
 |---|---|---|
 | `.github/workflows/feature-cli.yml` | neu | Erprobung mit der echten CLI, eigener Job mit Netz |
 | `devcontainer-feature/src/bedrock-eu-check/devcontainer-feature.json` | update | Option-Beschreibung, Feature-Version |
+| `.github/workflows/publish.yml` | update | Eingabe `ref` für `feature-v<x.y.z>` (nur Feature), gleiche Commit-gegen-Tag-Prüfung |
 | `docs/user/devcontainer.md`, `README.md` | update | erprobter Weg |
 
 ## 4. Trigger
