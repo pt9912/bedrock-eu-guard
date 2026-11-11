@@ -9,7 +9,7 @@
 
 **Eingangs-Kontext** (die Verträge, gegen die geprüft wurde):
 
-- der Plan [`slice-031-coverage-gate.md`](../plan/planning/in-progress/slice-031-coverage-gate.md) (Definition of Done, Entscheidungen)
+- der Plan [`slice-031-coverage-gate.md`](../plan/planning/done/slice-031-coverage-gate.md) (Definition of Done, Entscheidungen)
 - [`ADR-0005`](../plan/adr/0005-coverage-gate.md) (Proposed) und [`ADR-0004`](../plan/adr/0004-abhaengigkeiten-und-offline-gates.md)
 - [`AGENTS.md`](../../AGENTS.md) §3.5, §3.6 und §4
 - [`LH-QA-001`](../../spec/lastenheft.md#lh-qa-001--unit-tests)

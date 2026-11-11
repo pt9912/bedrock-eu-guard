@@ -1,6 +1,6 @@
 # Slice slice-031: `coverage-gate` mit begründeter Schwelle und ADR
 
-**Status:** next. **Verantwortlich:** w1 (Plan-Review: w2). **Freigabe:** Nutzer 2026-11-11 („031 coverage-gate + ADR“; beide Nutzer wählten 031).
+**Status:** done. **Verantwortlich:** w1 (Plan-Review: w2). **Freigabe:** Nutzer 2026-11-11 („031 coverage-gate + ADR“; beide Nutzer wählten 031).
 
 **Welle:** [`welle-08-erweiterungen`](../welle-08-erweiterungen.md).
 
@@ -27,13 +27,13 @@ Pakete bei der einfachen Messung: `rules` 97,2 %, `app` 97,5 %, `report` 97,0 %,
 
 ## 3. Definition of Done
 
-- [ ] **Neue ADR** `docs/plan/adr/0005-coverage-gate.md` legt fest: Messweise, Ausschlüsse mit Begründung, den Mindestwert mit Begründung und die Regel für spätere Änderungen. Sie wird als `Proposed` eingereicht und erst nach dem Sign-off der Auftraggeber (beide Nutzer, wie bei [`ADR-0004`](../../adr/0004-abhaengigkeiten-und-offline-gates.md)) `Accepted`; der Sign-off liegt vor dem Merge des Implementierungs-PR. Der ADR-Index ist aktualisiert.
-- [ ] `make coverage-gate` läuft offline im gepinnten Image, schreibt das Profil nach `.tmp/` (nicht ins Repository), gibt die Gesamt- und die Paketwerte aus und endet mit einem Fehler unterhalb der Schwelle.
-- [ ] Negativprobe: eine absichtlich zu hohe Schwelle lässt das Target scheitern (Beleg in der Closure-Notiz); danach der echte Wert grün.
-- [ ] `coverage-gate` ist in `make gates` aufgenommen; `AGENTS.md` §4 trägt das Target in die Tabelle ein und streicht den Satz „entsteht in einem späteren Slice“.
-- [ ] Der CI-Job `gates` ruft es über `make gates` auf; die Laufzeit steigt nicht merklich (Messung in der Closure-Notiz).
-- [ ] `make verify-clean` und CI grün; `docs/user` bleibt unberührt (kein Vertrag nach außen).
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] **Neue ADR** `docs/plan/adr/0005-coverage-gate.md` legt fest: Messweise, Ausschlüsse mit Begründung, den Mindestwert mit Begründung und die Regel für spätere Änderungen. Sie wird als `Proposed` eingereicht und erst nach dem Sign-off der Auftraggeber (beide Nutzer, wie bei [`ADR-0004`](../../adr/0004-abhaengigkeiten-und-offline-gates.md)) `Accepted`; der Sign-off liegt vor dem Merge des Implementierungs-PR. Der ADR-Index ist aktualisiert.
+- [x] `make coverage-gate` läuft offline im gepinnten Image, schreibt das Profil nach `.tmp/` (nicht ins Repository), gibt die Gesamt- und die Paketwerte aus und endet mit einem Fehler unterhalb der Schwelle.
+- [x] Negativprobe: eine absichtlich zu hohe Schwelle lässt das Target scheitern (Beleg in der Closure-Notiz); danach der echte Wert grün.
+- [x] `coverage-gate` ist in `make gates` aufgenommen; `AGENTS.md` §4 trägt das Target in die Tabelle ein und streicht den Satz „entsteht in einem späteren Slice“.
+- [x] Der CI-Job `gates` ruft es über `make gates` auf; die Laufzeit steigt nicht merklich (Messung in der Closure-Notiz).
+- [x] `make verify-clean` und CI grün; `docs/user` bleibt unberührt (kein Vertrag nach außen).
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 4. Plan (vor Code)
 
@@ -70,7 +70,14 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 8. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-11 (PRs #122 Plan und #123 Umsetzung, w1; Plan-Review von w2: [`2026-11-11-pr122-slice-031-plan.md`](../../../reviews/2026-11-11-pr122-slice-031-plan.md), Code-Review und Nachlauf von w2: [`2026-11-11-pr123-slice-031-coverage-gate.md`](../../../reviews/2026-11-11-pr123-slice-031-coverage-gate.md) und [`…-nachlauf.md`](../../../reviews/2026-11-11-pr123-slice-031-coverage-gate-nachlauf.md), alle vor dem Merge).
+
+- **Funktioniert:** `make coverage-gate` misst im gepinnten Image ohne Netz paketübergreifend (`-coverpkg` über die Produktionspakete ohne `coretest/*` und `cmd/`), gibt den Wert je Paket aus und scheitert unter `COVERAGE_MIN` (Anfangswert 90; Ist-Stand 95,4 %). Es ist Teil von `make gates` und läuft damit in der CI. Die Negativproben liegen vor: `COVERAGE_MIN=99` scheitert (Exit 1), ungültige Werte (`0`, `.`, `9.9.9`, `-1`, `abc`, `101`) und Werte unter 90 enden mit Exit 2, ein absichtlich fehlschlagender Test zeigt seine Ausgabe. Die ADR [`ADR-0005`](../../adr/0005-coverage-gate.md) ist `Accepted` (Sign-off beider Nutzer zur überarbeiteten Fassung). `AGENTS.md` §4, `harness/README.md` und `README.md` nennen das Target; `make doc-targets` prüft die Übereinstimmung.
+- **Anders als geplant:** Der Plan-Review (F-1) ließ den Änderungsweg der Schwelle neu fassen: Der Mindestwert steht in der ADR, der wirksame Wert im `Makefile`. Der Code-Review (F-1, MEDIUM) fand, dass das Skript nur die Zeichenklasse prüfte und ein Senken im `Makefile` das Gate bestanden hätte; daraufhin erzwingt das Skript die Untergrenze 90 als Konstante, prüft Werte strikt, und `COVERAGE_MIN` ist nicht mehr aus der Umgebung überschreibbar (`=` statt `?=`). Dadurch wurde die ADR vor dem Sign-off in Punkt 4 geändert (Werte ab 90 sind freiwilliger Abstand, Senken darunter braucht eine neue ADR); beide Nutzer haben der überarbeiteten Fassung zugestimmt. Der zweite Befund (LOW): Das Gate war bei einem Testfehler stumm; jetzt erscheint die Testausgabe.
+- **Laufzeit:** `go test ./...` rund 3 s, mit `-coverpkg` und Profil rund 6 s im gepinnten Image (Messung im Plan-Review); das Gate allein rund 4 s (Messung im Code-Review). `make gates` bleibt offline und ohne Zusatzabhängigkeit.
+- **Offen:** Der Gesamtwert kann Lücken in einem einzelnen Paket verdecken (`claudesettings` 88,3 %, `fs` 90,0 %); die Re-Evaluierungs-Trigger der ADR benennen das. Die Untergrenze steht an zwei Stellen (ADR und Konstante im Skript) und ändert sich nur gemeinsam.
+- **Steering-Loop:** Eine Schwelle, die nur im Menschenauge geschützt ist, ist keine; die Untergrenze gehört in das Gate selbst, und ein Gate braucht Negativproben für jeden Parameter (ungültige Werte, Umgebung, Testfehler), nicht nur für den Normalfall. Und eine ADR, die sich im Review ändert, geht vor dem Sign-off erneut an die Auftraggeber, nicht danach.
+- **Folge-Slices:** keine; weitere Slices von welle-08 bleiben bei ihren Triggern.
 
 ## 9. Sub-Area-Modus-Begründung
 
