@@ -1,0 +1,51 @@
+name: diag-up
+
+# Wegwerf-Diagnose (nicht für main): warum bleibt `devcontainer up` auf dem Runner hängen?
+# Nur lesende Rechte, veröffentlicht nichts.
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  up:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: plain,        probe: "",     extra: "",                                  stdin: "" }
+          - { name: probe-none,   probe: "none", extra: "",                                  stdin: "" }
+          - { name: stdin-null,   probe: "",     extra: "",                                  stdin: "/dev/null" }
+          - { name: skip-hooks,   probe: "",     extra: "--skip-post-create --skip-post-attach", stdin: "" }
+    name: ${{ matrix.name }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: npm install --global "@devcontainers/cli@0.72.0"
+      - name: devcontainer up (Trace, 150 s)
+        env:
+          PROBE: ${{ matrix.probe }}
+          EXTRA: ${{ matrix.extra }}
+          STDIN: ${{ matrix.stdin }}
+        run: |
+          ws="$RUNNER_TEMP/diag"
+          mkdir -p "$ws/.devcontainer"
+          cp -r devcontainer-feature/src/bedrock-eu-check "$ws/.devcontainer/bedrock-eu-check"
+          probe=""
+          [ -z "$PROBE" ] || probe=', "userEnvProbe": "'"$PROBE"'"'
+          printf '{ "image": "mcr.microsoft.com/devcontainers/base:ubuntu", "features": { "./bedrock-eu-check": { "version": "1.0.0" } }%s }\n' "$probe" > "$ws/.devcontainer/devcontainer.json"
+          cat "$ws/.devcontainer/devcontainer.json"
+          in=/dev/stdin; [ -z "$STDIN" ] || in="$STDIN"
+          set +e
+          timeout 150 devcontainer up --log-level trace --workspace-folder "$ws" $EXTRA < "$in" > "$RUNNER_TEMP/up.log" 2>&1
+          code=$?
+          echo "=== exit=$code (124 = Timeout) ==="
+          echo "--- letzte 40 Zeilen:"
+          tail -n 40 "$RUNNER_TEMP/up.log" | cut -c1-300
+          echo "--- Container/Prozesse:"
+          docker ps --format '{{.ID}} {{.Image}} {{.Status}}' | head
+          for c in $(docker ps -q); do docker top "$c" -eo pid,ppid,stat,cmd 2>/dev/null | head -8; done
+          exit 0
