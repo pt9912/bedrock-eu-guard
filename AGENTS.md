@@ -131,18 +131,17 @@ Nur real existierende Targets (keine halluzinierten Gates, Modul 13):
 | `make test`      | Unit-Tests (`go test ./...`, containerisiert, netzlos)             |
 | `make build`     | Binary `bin/bedrock-eu-check` bauen                                |
 | `make doc-targets` | Doku ↔ Makefile: jedes Target aus `Makefile` steht in diesen Tabellen und umgekehrt (d-check, Modul `targets`, netzlos) |
-| `make gates`     | alle lauffähigen Gates: `doc-check`, `doc-targets`, `lint`, `test` |
+| `make gates`     | alle lauffähigen Gates: `doc-check`, `doc-targets`, `lint`, `test`, `coverage-gate` |
 | `make verify-clean` | `make gates` im frischen `git worktree` des committeten HEAD     |
 | `make deps`      | `go mod tidy` + `vendor/` neu erzeugen (mit Netz, nicht Teil der Gates, [`ADR-0004`](docs/plan/adr/0004-abhaengigkeiten-und-offline-gates.md)) |
 | `make deps-verify` | `go mod verify` + `vendor/` entspricht Upstream (mit Netz; CI-Job nur bei Änderungen an `vendor/`, `go.mod`, `go.sum`) |
+| `make coverage-gate` | Testabdeckung paketübergreifend gegen `COVERAGE_MIN` prüfen (offline, Teil von `make gates`; [`ADR-0005`](docs/plan/adr/0005-coverage-gate.md)) |
 | `make self-check` | `bedrock-eu-check local` und `terraform` gegen das eigene Repo (kontrollierte Umgebung, `bedrock-eu-check.yml` im Root); Exit 0 Pflicht |
 | `make image`     | Docker-Images `slim` und `full` bauen (mit Netz, nicht Teil der Gates)                 |
 | `make image-test` | Images bauen und Smoke-Tests (`tools/image-smoke.sh`, Laufzeit ohne Netz; CI-Job `image`) |
 | `make feature-test` | Devcontainer-Feature gegen ein lokal gebautes Release testen (Docker, Laufzeit ohne Netz; CI-Job `image`) |
 | `make dist`      | Release-Artefakte (Linux amd64/arm64) und `SHA256SUMS` nach `dist/v<version>/` bauen und verifizieren (`VERSION=x.y.z`); veröffentlicht nichts |
 
-`make coverage-gate` entsteht in einem späteren Slice; es wird erst hier
-eingetragen, wenn es läuft.
 
 ## 5. Dokumentations-Regeln
 

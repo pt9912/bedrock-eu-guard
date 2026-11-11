@@ -1,6 +1,6 @@
 # Welle welle-08-erweiterungen: Erweiterungen und Härtung (nach Entscheidung der Auftraggeber)
 
-**Status:** open (nur Plan mit Triggern, nicht freigegeben)
+**Status:** in-progress (teilweise: slice-031 freigegeben und in Arbeit; die übrigen Slices warten auf ihre Trigger)
 
 **Zielmeilenstein:** M8 — Erweiterungen (Werkzeug-Version 1.2.0 oder später, je Slice)
 

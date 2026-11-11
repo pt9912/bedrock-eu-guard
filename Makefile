@@ -20,7 +20,7 @@ GO_NET = docker run --rm -u $(shell id -u):$(shell id -g) \
 	-e HOME=/tmp -e GOCACHE=/src/.tmp/gocache -e GOMODCACHE=/src/.tmp/gomod \
 	-e GOFLAGS=-mod=mod -v "$(CURDIR):/src" -w /src $(GO_IMAGE)
 
-.PHONY: help gates lint test build verify-clean deps deps-verify self-check image image-test feature-test dist
+.PHONY: help gates lint test coverage-gate build verify-clean deps deps-verify self-check image image-test feature-test dist
 help: ## Targets anzeigen
 	@grep -hE '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  %-16s %s\n", $$1, $$2}'
@@ -34,6 +34,15 @@ lint: ## gofmt-Check (ohne vendor/) + go vet
 test: ## Unit-Tests (go test)
 	@mkdir -p .tmp/gocache
 	$(GO_RUN) go test ./...
+
+# Mindestabdeckung in Prozent (ADR-0005): paketübergreifend über die Produktionspakete.
+# Anheben ist ein gewöhnlicher PR; unter 90 lässt das Skript nicht zu (neue ADR nötig).
+# Kein ?=: die Umgebung soll den Wert nicht überschreiben; nur ein ausdrücklicher Aufruf (make COVERAGE_MIN=...).
+COVERAGE_MIN = 90
+
+coverage-gate: ## Testabdeckung gegen COVERAGE_MIN prüfen (offline, ADR-0005)
+	@mkdir -p .tmp/gocache
+	$(GO_RUN) sh tools/coverage-gate.sh $(COVERAGE_MIN)
 
 # Build-Informationen und reproduzierbare Flags (LH-QA-004): statisch gelinkt,
 # ohne Pfade/Zeitstempel/VCS-Stempel im Binary.
@@ -95,4 +104,4 @@ verify-clean: ## gates in frischem git worktree des committeten HEAD (kein Arbei
 	$(MAKE) -C "$$d/wt" gates; rc=$$?; \
 	git worktree remove --force "$$d/wt"; rm -rf "$$d"; exit $$rc
 
-gates: doc-check doc-targets lint test ## alle lauffähigen Gates (doc-check, doc-targets, lint, test)
+gates: doc-check doc-targets lint test coverage-gate ## alle lauffähigen Gates (doc-check, doc-targets, lint, test, coverage-gate)
