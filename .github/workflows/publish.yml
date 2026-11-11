@@ -42,6 +42,8 @@ env:
   VERSION: ${{ inputs.version }}
   COMMIT_INPUT: ${{ inputs.commit }}
   REF_INPUT: ${{ inputs.ref }}
+  # Aktuelle devcontainer-CLI (slice-034); die 0.72.0 hing auf dem Runner bei `devcontainer up`.
+  CLI_VERSION: 0.90.0
   IMAGE: ghcr.io/pt9912/bedrock-eu-check
   SOURCE: https://github.com/pt9912/bedrock-eu-guard
 
@@ -139,7 +141,7 @@ jobs:
           [ "$fv" = "$VERSION" ] || { echo "Feature-Version $fv passt nicht zu $VERSION" >&2; exit 1; }
 
       - name: devcontainer-CLI installieren
-        run: npm install --global @devcontainers/cli@0.72.0
+        run: npm install --global "@devcontainers/cli@$CLI_VERSION"
 
       - name: Trockenlauf — Feature packen, nichts veröffentlichen
         if: ${{ inputs.dry_run }}

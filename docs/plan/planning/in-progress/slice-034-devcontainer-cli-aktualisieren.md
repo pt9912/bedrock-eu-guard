@@ -1,6 +1,6 @@
 # Slice slice-034: devcontainer-CLI aktualisieren und `devcontainer up` erproben
 
-**Status:** next. **Verantwortlich:** w2. **Freigabe:** Nutzer 2026-11-11 („ja“).
+**Status:** in-progress. **Verantwortlich:** w2. **Freigabe:** Nutzer 2026-11-11 („ja“).
 
 **Welle:** ohne Welle (Wartung, Folge von slice-024).
 

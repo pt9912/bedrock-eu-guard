@@ -15,7 +15,9 @@ on:
 permissions: {}
 
 env:
-  CLI_VERSION: 0.72.0
+  # Gepinnt auf die aktuelle CLI. Die 0.72.0 (2024-11) hing mit Docker 29.4.2 auf dem Runner bei
+  # `devcontainer up`; 0.86.1 und 0.90.0 laufen durch (slice-024/slice-034, Läufe 42999455137, 42999946761).
+  CLI_VERSION: 0.90.0
   # Erwartete Ausgabe des Release v1.0.0 (Tool-Version, unabhängig von der Feature-Version).
   EXPECTED: "bedrock-eu-check 1.0.0 (5f1b35cca776)"
 
@@ -46,10 +48,9 @@ jobs:
             "features": { "./bedrock-eu-check": { "version": "1.0.0" } }
           }
           JSON
-          # build installiert das Feature mit der echten CLI; devcontainer up blieb auf dem
-          # Runner nach "Container started" hängen (Ursache nicht ermittelt, siehe slice-024).
-          devcontainer build --workspace-folder "$ws" --image-name "feature-case-a"
-          out=$(docker run --rm "feature-case-a" bedrock-eu-check version)
+          # der Weg, den Nutzer nehmen: Container starten, Befehl im Container ausführen
+          devcontainer up --workspace-folder "$ws"
+          out=$(devcontainer exec --workspace-folder "$ws" bedrock-eu-check version)
           echo "Ausgabe: $out"
           [ "$out" = "$EXPECTED" ] || { echo "unerwartete Ausgabe (erwartet: $EXPECTED)" >&2; exit 1; }
 
@@ -76,9 +77,8 @@ jobs:
             "features": { "ghcr.io/pt9912/bedrock-eu-guard/bedrock-eu-check:1": { "version": "1.0.0" } }
           }
           JSON
-          # build installiert das Feature mit der echten CLI; devcontainer up blieb auf dem
-          # Runner nach "Container started" hängen (Ursache nicht ermittelt, siehe slice-024).
-          devcontainer build --workspace-folder "$ws" --image-name "feature-case-b"
-          out=$(docker run --rm "feature-case-b" bedrock-eu-check version)
+          # der Weg, den Nutzer nehmen: Container starten, Befehl im Container ausführen
+          devcontainer up --workspace-folder "$ws"
+          out=$(devcontainer exec --workspace-folder "$ws" bedrock-eu-check version)
           echo "Ausgabe: $out"
           [ "$out" = "$EXPECTED" ] || { echo "unerwartete Ausgabe (erwartet: $EXPECTED)" >&2; exit 1; }
