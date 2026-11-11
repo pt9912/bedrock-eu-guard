@@ -29,8 +29,8 @@ Version 1.0.0 (Commit `5f1b35cca776`) bleibt unverändert abrufbar. Alle Prüfmo
 Nicht auf externen Plattformen erprobt ist der Beispiel-Workflow
 für GitHub Code Scanning; die Beispiel-IAM-Policy wurde nicht gegen ein echtes AWS-Konto getestet.
 Der Release-Ablauf (`release-create`, `publish`) ist scharf durchlaufen. Das Devcontainer-Feature
-ist mit der Devcontainer-CLI erprobt (`devcontainer build`; `devcontainer up` nicht, die Ursache
-des Hängens ist ungeklärt).
+ist mit der Devcontainer-CLI erprobt (`devcontainer build`). `devcontainer up` hängt mit der CLI 0.72.0
+auf GitHub-Runnern mit Docker 29.4.2; die CLI-Versionen 0.86.1 und 0.90.0 laufen dort durch.
 Den Fahrplan zeigt die [Roadmap](docs/plan/planning/in-progress/roadmap.md).
 
 ## Schnellstart

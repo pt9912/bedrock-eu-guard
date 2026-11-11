@@ -10,7 +10,7 @@
 | Alle Slices done (023, 024, 025) | erfüllt |
 | `make verify-clean` und CI grün | erfüllt (Stand `5274f3dce55f`) |
 | `release-artifacts` auf GitHub gelaufen, Prüfsummen == Release | erfüllt (slice-023, Run 42970275950, bitgleich zum Release 1.0.0) |
-| Feature mit der echten `devcontainer`-CLI installiert, Mängel behoben | erfüllt für `devcontainer build` mit `docker run` (slice-024); **`devcontainer up` nicht erprobt**, siehe „Offen“ |
+| Feature mit der echten `devcontainer`-CLI installiert, Mängel behoben | erfüllt für `devcontainer build` mit `docker run` (slice-024); `devcontainer up` mit 0.72.0 hängt (Ursache belegt, siehe „Offen“) |
 | `release-create` im Trockenlauf erprobt, Tag und Release nur auf Eingabe | erfüllt (slice-025) und seit 2026-11-11 auch **scharf** durchlaufen (siehe unten) |
 | Jede Veröffentlichung nur nach dem Ja beider Nutzer mit Version, Commit und Zielen | erfüllt (Wortlaut siehe Welle 7, Entscheidung B) |
 
@@ -37,14 +37,14 @@ w1 hat die Tags, die Digests, die OCI-Metadaten (Feature-Version 1.0.1, korrigie
 
 ## Offen
 
-1. **`devcontainer up` hängt** auf dem GitHub-Runner nach „Container started“ (Run 42983578810, Job-Timeout nach 20 Minuten); die Ursache ist **nicht ermittelt**. Erprobt ist `devcontainer build` mit `docker run`. w2 untersucht es in einem Diagnose-Lauf; ein Ergebnis steht aus.
+1. **`devcontainer up` hängt mit der CLI 0.72.0** auf dem GitHub-Runner nach „Container started“ (Run 42983578810, Job-Timeout nach 20 Minuten). Die Diagnose von w2 (Läufe 42999455137 und 42999946761, Docker 29.4.2 auf dem Runner) belegt: Mit 0.72.0 läuft `up` in den Timeout, mit 0.86.1 und 0.90.0 läuft es durch; das Feature ist nicht die Ursache. Die Welle hat deshalb bei `devcontainer build` mit `docker run` erprobt. Die Umstellung auf CLI 0.90.0 mit `up` und `exec` ist als Wartungsslice (slice-034, ohne Welle) geplant.
 2. **Umgebung `release`:** Sie ist mit dem Prüfer `pt9912` (nur Branch `main`) angelegt. Weil alle Beteiligten dasselbe GitHub-Konto nutzen, erzwingt sie das „Ja beider Nutzer“ nicht und erlaubt Selbstfreigabe; das Ja bleibt eine Wortlaut-Freigabe im Dialog. Das Token der Agenten darf Deployments nicht freigeben (HTTP 403); die Freigabe erteilte ein Mensch in der Weboberfläche.
 3. Der Beispiel-Workflow für GitHub Code Scanning und die Beispiel-IAM-Policy sind weiter nicht auf externen Plattformen erprobt (nicht Teil dieser Welle).
 
 ## Fehlläufe und Abweichungen (ehrlich)
 
 - `release-create`: Der erste Trockenlauf (Run 42972041118) scheiterte, weil `actions/checkout` keine verkürzte SHA als `ref` akzeptiert; behoben in PR #93.
-- `devcontainer up` hing (siehe „Offen“); der Workflow weicht auf `devcontainer build` aus, statt das Hängen zu verschweigen.
+- `devcontainer up` hing mit der CLI 0.72.0 (siehe „Offen“); der Workflow wich auf `devcontainer build` aus, statt das Hängen zu verschweigen. Die Ursache wurde nach der Veröffentlichung mit einer Diagnose-Matrix (PR #111, geschlossen) eingegrenzt.
 - Der Trockenlauf von `publish` für die Feature-Version konnte erst laufen, nachdem der Tag existierte; der Beleg ist deshalb erst bei der Veröffentlichung entstanden (Review-Finding F-2 zu PR #107).
 - Der Reviewer-Skill `.harness/skills/reviewer.md` existiert im Repository nicht; die Review-Reports tragen „Skill: keiner“. Die Anlage ist als eigener Doku-Slice abgestimmt, aber noch nicht umgesetzt.
 

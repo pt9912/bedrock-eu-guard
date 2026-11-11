@@ -10,8 +10,11 @@ gebautes Release getestet. Zusätzlich ist es mit der Devcontainer-CLI (Version 
 `feature-cli`) erprobt: Das Feature aus dem Arbeitsstand wie auch das veröffentlichte Feature
 von `ghcr.io` lassen sich in `mcr.microsoft.com/devcontainers/base:ubuntu` installieren, und
 `bedrock-eu-check version` meldet `bedrock-eu-check 1.0.0 (5f1b35cca776)`. Nicht erprobt ist
-`devcontainer up` (es blieb auf dem GitHub-Runner nach dem Start des Containers hängen, die
-Ursache ist nicht ermittelt); erprobt ist `devcontainer build` mit anschließendem `docker run`. Die
+`devcontainer up` mit der CLI 0.72.0: Es blieb auf dem GitHub-Runner (Docker 29.4.2) nach dem Start
+des Containers hängen. Dieselbe Messung mit den CLI-Versionen 0.86.1 und 0.90.0 lief auf demselben Runner durch
+(Läufe 42999455137 und 42999946761); der Fehler hängt also an der Kombination aus CLI 0.72.0 und
+dieser Docker-Version, nicht am Feature. Erprobt ist bisher `devcontainer build` mit anschließendem `docker run`;
+die Umstellung der Erprobung auf eine neuere CLI mit `up` ist als Wartungsslice geplant. Die
 Standard-`baseUrl` zeigt auf das [GitHub-Release v1.0.0](https://github.com/pt9912/bedrock-eu-guard/releases/tag/v1.0.0)
 (siehe [`releasing.md`](releasing.md)).
 
