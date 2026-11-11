@@ -8,6 +8,7 @@ import (
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/core/app"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/core/model"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/coretest/fakeenvsource"
+	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/coretest/fakeiampolicy"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/coretest/fakesettings"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/coretest/faketerraform"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/coretest/memfs"
@@ -336,6 +337,61 @@ func TestScanDotenvDiscoveryExcludeAndErrors(t *testing.T) {
 			if f.RuleID == "LH-FA-LENV-007" {
 				t.Errorf("%s: unerwartetes Finding %+v", name, f)
 			}
+		}
+	}
+}
+
+func TestScanIAMPolicyFiles(t *testing.T) {
+	r := fakeiampolicy.Reader{
+		Files: map[string]*model.IAMPolicyFile{
+			"iam-policy.json":      {Statements: []model.IAMStatement{{Effect: "Allow", Actions: []string{"bedrock:*"}, Resources: []string{"*"}}}},
+			"ok/app-policy.json":   {Statements: []model.IAMStatement{{Effect: "Allow", Actions: []string{"s3:*"}, Resources: []string{"*"}}}},
+			"skip/iam-policy.json": {Statements: []model.IAMStatement{{Effect: "Allow", Actions: []string{"bedrock:*"}, Resources: []string{"*"}}}},
+		},
+		Errs: map[string]error{
+			"bad/iam-policy.json": &model.FileError{Path: "bad/iam-policy.json", Reason: model.ReasonFileInvalid},
+			"bad/x-policy.json":   &model.FileError{Path: "bad/x-policy.json", Reason: model.ReasonFileInvalid},
+		},
+	}
+	cfg := model.DefaultConfig()
+	cfg.Exclude = []string{"skip/**"}
+	fs, err := app.Scan{Settings: fakesettings.Reader{}, IAMPolicyFiles: r}.Run(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]string{}
+	for _, f := range fs {
+		if f.RuleID == "LH-FA-IAM-004" {
+			got[f.File] = f.Severity.String()
+		}
+	}
+	want := map[string]string{"iam-policy.json": "FAIL", "bad/iam-policy.json": "FAIL", "bad/x-policy.json": "WARN"}
+	if len(got) != len(want) {
+		t.Fatalf("got %v want %v", got, want)
+	}
+	for k, v := range want {
+		if got[k] != v {
+			t.Errorf("%s: got %q want %q", k, got[k], v)
+		}
+	}
+}
+
+func TestScanIAMPolicyFilesFindErrorAndOff(t *testing.T) {
+	fs, _ := app.Scan{Settings: fakesettings.Reader{}, IAMPolicyFiles: fakeiampolicy.Reader{FindErr: errors.New("boom")}}.Run(model.DefaultConfig())
+	var fail bool
+	for _, f := range fs {
+		if f.RuleID == "LH-FA-IAM-004" && f.Severity == model.FAIL && f.Reason == model.ReasonFileUnreadable {
+			fail = strings.Contains(f.Message, "nicht lesbar")
+		}
+	}
+	if !fail {
+		t.Fatalf("Suchfehler ohne FAIL: %+v", fs)
+	}
+	// Ohne Reader läuft die Regel nicht.
+	a, _ := app.Scan{Settings: fakesettings.Reader{}}.Run(model.DefaultConfig())
+	for _, f := range a {
+		if f.RuleID == "LH-FA-IAM-004" {
+			t.Fatalf("Regel ohne Reader: %+v", f)
 		}
 	}
 }

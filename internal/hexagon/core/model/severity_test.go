@@ -43,3 +43,18 @@ func TestParseFailOn(t *testing.T) {
 		}
 	}
 }
+
+func TestStrictIAMPolicyName(t *testing.T) {
+	yes := []string{"iam-policy.json", "sub/iam-policy.json", "iam-policy-prod.json", "a/b/iam-policy.v2.json"}
+	no := []string{"app-policy.json", "sub/deploy-policy.json", "iam-policy", "iam-policy.yaml", "my-iam-policy.json", "iam-policy.json.bak"}
+	for _, n := range yes {
+		if !model.StrictIAMPolicyName(n) {
+			t.Errorf("%q sollte eindeutig sein", n)
+		}
+	}
+	for _, n := range no {
+		if model.StrictIAMPolicyName(n) {
+			t.Errorf("%q sollte nicht eindeutig sein", n)
+		}
+	}
+}

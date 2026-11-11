@@ -24,6 +24,9 @@ type Scan struct {
 	EnvFinder driven.EnvFileFinder
 	// Terraform ist optional (nil = keine Terraform-Prüfung).
 	Terraform driven.TerraformReader
+	// IAMPolicyFiles ist optional (nil = keine Prüfung eigenständiger IAM-Policy-
+	// Dateien, LH-FA-IAM-004).
+	IAMPolicyFiles driven.IAMPolicyFileReader
 }
 
 // Run lädt die Settings einmal und wertet alle Scan-Regeln aus; Findings
@@ -54,6 +57,9 @@ func (u Scan) Run(cfg model.Config) ([]model.Finding, error) {
 	}
 	if u.Terraform != nil {
 		sc.Terraform = u.loadTerraform(cfg)
+	}
+	if u.IAMPolicyFiles != nil {
+		sc.IAMPolicies = u.loadIAMPolicies(cfg)
 	}
 	var out []model.Finding
 	for _, r := range rules.ScanRules() {
@@ -172,4 +178,37 @@ func (u Scan) loadDotenv(cfg model.Config) []rules.EnvSourceFile {
 		out = append(out, sf)
 	}
 	return out
+}
+
+// loadIAMPolicies sucht IAM-Policy-Dateien über den Reader, filtert
+// ausgeschlossene Pfade und liest die übrigen. Ein Fehler der Suche selbst wird
+// als nicht lesbare Quelle gemeldet.
+func (u Scan) loadIAMPolicies(cfg model.Config) rules.IAMPolicyScan {
+	p := rules.IAMPolicyScan{Searched: true}
+	rels, err := u.IAMPolicyFiles.Find()
+	if err != nil {
+		var fe *model.FileError
+		if !errors.As(err, &fe) {
+			fe = &model.FileError{Path: ".", Reason: model.ReasonFileUnreadable}
+		}
+		p.FindErr = fe
+		return p
+	}
+	sort.Strings(rels)
+	for _, rel := range rels {
+		if cfg.Excluded(rel) {
+			continue
+		}
+		f, err := u.IAMPolicyFiles.Read(rel)
+		st := rules.IAMPolicyFileState{Path: rel, F: f}
+		if err != nil {
+			var fe *model.FileError
+			if !errors.As(err, &fe) {
+				fe = &model.FileError{Path: rel, Reason: model.ReasonFileUnreadable}
+			}
+			st.F, st.Err = nil, fe
+		}
+		p.Files = append(p.Files, st)
+	}
+	return p
 }
