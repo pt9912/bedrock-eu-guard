@@ -22,7 +22,8 @@ und `:1.0.0-full` und als Devcontainer-Feature. Alle Prüfmodi, die Ausgabeforma
 (Konsole, JSON, SARIF) und der CI-Modus sind implementiert und getestet. Der Ablauf steht in
 [`docs/user/releasing.md`](docs/user/releasing.md).
 
-Nicht auf externen Plattformen erprobt sind der Beispiel-Workflow
+Nicht auf externen Plattformen erprobt sind der Workflow `release-artifacts` (die Binaries
+des Releases wurden lokal mit `make dist` gebaut), der Beispiel-Workflow
 für GitHub Code Scanning und das Devcontainer-Feature mit der Devcontainer-CLI; die
 Beispiel-IAM-Policy wurde nicht gegen ein echtes AWS-Konto getestet.
 Den Fahrplan zeigt die [Roadmap](docs/plan/planning/in-progress/roadmap.md).
