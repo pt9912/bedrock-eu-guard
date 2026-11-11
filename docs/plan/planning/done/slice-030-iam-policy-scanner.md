@@ -1,6 +1,6 @@
 # Slice slice-030: Scanner für eigenständige IAM-Policy-Dateien (`iam-policy.json`)
 
-**Status:** in-progress. **Verantwortlich:** Kern w1, Adapter/CLI/Doku w2. **Priorisierung:** Beide Nutzer haben diesen Slice am 2026-11-11 priorisiert und die Festlegungen in Abschnitt 3 bestätigt.
+**Status:** done. **Verantwortlich:** Kern w1, Adapter/CLI/Doku w2. **Priorisierung:** Beide Nutzer haben diesen Slice am 2026-11-11 priorisiert und die Festlegungen in Abschnitt 3 bestätigt.
 
 **Welle:** [`welle-08-erweiterungen`](../welle-08-erweiterungen.md).
 
@@ -35,13 +35,13 @@ Beide Nutzer haben die Priorisierung und diese Festlegungen bestätigt (siehe un
 ## 4. Definition of Done
 
 - [x] Beide Nutzer haben Priorisierung und die Festlegungen aus Abschnitt 3 bestätigt (2026-11-11).
-- [ ] Der Lastenheft-Eintrag steht mit dem bestätigten Wortlaut, [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) ist angepasst (w1, eigener PR).
-- [ ] Kern (w1): Port für die Suche und das Lesen von Policy-Dateien (eigene kleine Schnittstelle nach dem Muster der `.env`-Suche), Regel auf der vorhandenen Bewertung, Einbindung in `app.Scan` (nur Modus `terraform`), `exclude` im Kern, Unit-Tests; Regelkatalog und Referenz ergänzt (Doku-Drift-Test grün).
-- [ ] Adapter (w2): JSON-Reader auf dem Paket `iampolicy`, rekursive Suche (sortiert, relative Pfade), Testdaten `good`/`bad` (nur offensichtlich synthetische Werte), CLI-Verdrahtung, CLI-Tests ohne Dateiinhalt in der Ausgabe.
-- [ ] Doku (w2): Handbuch und Fehlersuche; die Grenze „eigenständige Policy-Dateien werden nicht geprüft“ entfällt.
-- [ ] Matrix-Test zu [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) um `iam-policy.json` erweitert; das Self-Check-Gate (`make self-check`) bleibt grün.
-- [ ] `make verify-clean` und CI grün; Review-Report durch den anderen Agenten.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Der Lastenheft-Eintrag steht mit dem bestätigten Wortlaut, [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) ist angepasst (w1, eigener PR).
+- [x] Kern (w1): Port für die Suche und das Lesen von Policy-Dateien (eigene kleine Schnittstelle nach dem Muster der `.env`-Suche), Regel auf der vorhandenen Bewertung, Einbindung in `app.Scan` (nur Modus `terraform`), `exclude` im Kern, Unit-Tests; Regelkatalog und Referenz ergänzt (Doku-Drift-Test grün).
+- [x] Adapter (w2): JSON-Reader auf dem Paket `iampolicy`, rekursive Suche (sortiert, relative Pfade), Testdaten `good`/`bad` (nur offensichtlich synthetische Werte), CLI-Verdrahtung, CLI-Tests ohne Dateiinhalt in der Ausgabe.
+- [x] Doku (w2): Handbuch und Fehlersuche; die Grenze „eigenständige Policy-Dateien werden nicht geprüft“ entfällt.
+- [x] Matrix-Test zu [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) um `iam-policy.json` erweitert; das Self-Check-Gate (`make self-check`) bleibt grün.
+- [x] `make verify-clean` und CI grün; Review-Report durch den anderen Agenten.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 5. Plan (vor Code)
 
@@ -72,7 +72,13 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 9. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+**Abgeschlossen:** 2026-11-11 (PRs #121 Plan, #125 Lastenheft, #127 Kern, #128 Adapter; Kern w1, Adapter, CLI und Doku w2). Reviews, jeweils vor dem Merge: Plan [`2026-11-11-pr121-slice-030-plan.md`](../../../reviews/2026-11-11-pr121-slice-030-plan.md) (w1), Kern [`2026-11-11-pr127-slice-030-kern.md`](../../../reviews/2026-11-11-pr127-slice-030-kern.md) und [Nachlauf](../../../reviews/2026-11-11-pr127-slice-030-kern-nachlauf.md) (w2), Adapter [`2026-11-11-pr128-slice-030-adapter.md`](../../../reviews/2026-11-11-pr128-slice-030-adapter.md) (w1).
+
+- **Funktioniert:** Die neue Anforderung [`LH-FA-IAM-004`](../../../../spec/lastenheft.md#lh-fa-iam-004--iam-policy-dokumente-json-prüfen) steht mit dem von beiden Nutzern bestätigten Wortlaut im Lastenheft, [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) verweist darauf. Der Modus `terraform` (und `all`) findet rekursiv `iam-policy*.json` und `*-policy.json` und bewertet sie wie die Policies in Terraform und im AWS-Konto. Der Kern liefert Port (`IAMPolicyFileReader`), Regel (`CheckIAMPolicyFiles`) und die Fehlerregel je Muster (eindeutiger Name `FAIL`, breites Muster `WARN`; ohne Bedrock-Aktion oder bei Fremdformat kein Finding); der Adapter (Paket `policyfile`) entpackt das Policy-Dokument sowie die Hüllen von `get-policy-version` und `get-role-policy`. Testdaten `good`/`bad` samt Fremdformat und kaputter Datei, der Matrix-Test zu [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) und ein Test gegen echt wirkende Konto- und Schlüssel-IDs in den IAM-Testdaten sind vorhanden. Binary-Proben beider Reviews: Dateiinhalt erscheint nie in der Ausgabe, Symlinks und `node_modules` werden nicht gefunden, `local` und `aws` prüfen die Dateien nicht.
+- **Anders als geplant:** Der Plan-Review ([`2026-11-11-pr121-slice-030-plan.md`](../../../reviews/2026-11-11-pr121-slice-030-plan.md)) fand einen Widerspruch zwischen „kaputte Datei ist `FAIL`“ und dem Fehlalarm-Schutz beim breiten Muster; die Fehlerregel wurde vor der Bestätigung durch die Nutzer je Muster getrennt. Der Code-Review des Kerns fand, dass ein `Allow` nur mit `NotAction` kein Finding ergab, obwohl das Handbuch dafür `WARN` zusagte; die gemeinsame Bewertung meldet es jetzt als `WARN` mit `IAM_DYNAMIC`, **auch für [`LH-FA-TF-003`](../../../../spec/lastenheft.md#lh-fa-tf-003--bedrock-iam-policies-prüfen) und [`LH-FA-IAM-002`](../../../../spec/lastenheft.md#lh-fa-iam-002--zu-breite-bedrock-policies-erkennen)** (Angleichung an das Handbuch, der Standard-Exit-Code ändert sich nicht). Am PR des Kerns fiel außerdem ein instabiler Test auf: Die Negativprobe der Prüfsumme in `tools/feature-test.sh` ersetzte das erste Zeichen durch `0` und war bei Binarys, deren Hash mit `0` beginnt (rund 1 von 16), wirkungslos; sie nutzt jetzt `x` (PR #129).
+- **Offen:** (1) Kein Größenlimit beim Lesen der Policy-Dateien (wie bei den anderen Readern). (2) Die Hüllformate `get-policy-version` und `get-role-policy` sind nachgebaut und wurden nicht gegen die Ausgabe einer echten AWS-CLI geprüft; URL-kodierte Dokumente älterer CLI-Versionen gelten als Fremdformat. (3) Der Modus `local` prüft die Dateien nicht (Festlegung der Nutzer, im Handbuch genannt). (4) Das Verhalten ist neu im Binary und noch nicht veröffentlicht; eine Veröffentlichung (zum Beispiel als 1.2.0) braucht das Ja beider Nutzer.
+- **Steering-Loop:** Eine Fehlerregel, die für ein breites Dateimuster gilt, muss je Muster formuliert sein, bevor die Auftraggeber den Wortlaut bestätigen; Plan-Reviews am Wortlaut sind billiger als Korrekturen am Lastenheft. Eine Zusage in der Doku (hier `NotAction` → `WARN`) braucht einen Test, der sie am Binary belegt; sonst steht sie nur dort. Und ein Test mit einem Zufallsanteil im Eingang (Hash des Test-Binarys) braucht Eingaben, die den Test nicht unwirksam machen können.
+- **Folge-Slices:** keine; weitere Slices von welle-08 (032, 033) bleiben bei ihren Triggern.
 
 ## 10. Sub-Area-Modus-Begründung
 

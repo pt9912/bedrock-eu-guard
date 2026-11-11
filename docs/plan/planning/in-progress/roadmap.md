@@ -10,7 +10,7 @@ Reihenfolge von Terminen. Die Wellen bilden die Versions-Stufen
 
 ## Aktuelle Welle
 
-welle-08 (Erweiterungen) ist teilweise aktiv: [`slice-030`](slice-030-iam-policy-scanner.md) (Scanner für eigenständige IAM-Policy-Dateien) liegt in `in-progress/`; [`slice-031`](../done/slice-031-coverage-gate.md) (`coverage-gate`, [ADR-0005](../../adr/0005-coverage-gate.md)) ist done; die übrigen Slices warten auf ihre Trigger. Zuletzt abgeschlossen davor: Wartung ohne Welle, [`slice-034`](../done/slice-034-devcontainer-cli-aktualisieren.md) und [`slice-035`](../done/slice-035-reviewer-skill.md).
+Keine aktive Welle (kein Slice in `in-progress/`; Ruhezustand im Sinne des Slice-Lifecycles). welle-08 (Erweiterungen) ist teilweise umgesetzt: [`slice-030`](../done/slice-030-iam-policy-scanner.md) (IAM-Policy-Dateien) und [`slice-031`](../done/slice-031-coverage-gate.md) (`coverage-gate`) sind done; slice-032 und slice-033 warten auf ihre Trigger.
 
 welle-01 bis welle-07 sind abgeschlossen. Release 1.0.0 ist am 2026-11-11 veröffentlicht
 (Tag `v1.0.0` auf Commit `5f1b35cca776`, GitHub-Release, Images auf `ghcr.io`, Devcontainer-Feature),
@@ -49,7 +49,7 @@ Pläne: [`../done/welle-06-release-haertung.md`](../done/welle-06-release-haertu
 | M5 — Release 1.0 | welle-05 | Docker-Image + Doku + Tests grün | erreicht (2026-11-11, veröffentlicht) |
 | M6 — Release-Prozess erprobt | welle-06 | `release-artifacts` und Feature erprobt, `release-create` vorhanden | erreicht (2026-11-11; Feature 1.0.1 veröffentlicht) |
 | M7 — CI-Komfort (1.1.0) | welle-07 | `--fail-on warn`, `--output FILE`, Zusatzregionen, Gate-Bewertung | erreicht (2026-11-11; 1.1.0 veröffentlicht) |
-| M8 — Erweiterungen | welle-08 | je Slice: Entscheidung der Auftraggeber bzw. ADR | teilweise (slice-031 done; übrige Slices warten auf Trigger) |
+| M8 — Erweiterungen | welle-08 | je Slice: Entscheidung der Auftraggeber bzw. ADR | teilweise (slice-030 und slice-031 done; 032 und 033 warten auf Trigger) |
 
 ## Abhängigkeitsgraph
 
