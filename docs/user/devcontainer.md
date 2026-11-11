@@ -64,7 +64,7 @@ vorhanden).
 **Sicherheit:** `baseUrl` muss mit `https://` oder `file://` beginnen. `SHA256SUMS`
 stammt vom selben Ursprung wie das Binary: Die Prüfung schützt vor Korruption und
 Teil-Downloads, **nicht** vor einem kompromittierten Ursprung. Signierte Releases
-(z. B. Sigstore) sind ein Folgepunkt. Der Default `1.0.0` zeigt auf das veröffentlichte Release v1.0.0; das Werkzeug 1.1.0 wählst du mit `"version": "1.1.0"`.
+(z. B. Sigstore) sind ein Folgepunkt. Der Default `1.0.0` zeigt auf das veröffentlichte Release v1.0.0; das Werkzeug 1.2.0 wählst du mit `"version": "1.2.0"`.
 
 Zum Testen des Ablaufs ohne Release: `make feature-test` (baut ein lokales
 „Release“, installiert es per `file://` in einen Container ohne Netz und prüft
