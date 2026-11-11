@@ -24,3 +24,22 @@ func TestSeverityLevels(t *testing.T) {
 		}
 	}
 }
+
+func TestParseFailOn(t *testing.T) {
+	for in, want := range map[string]struct {
+		s  model.Severity
+		ok bool
+	}{
+		"fail": {model.FAIL, true},
+		"warn": {model.WARN, true},
+		"":     {model.PASS, false},
+		"pass": {model.PASS, false},
+		"WARN": {model.PASS, false},
+		"info": {model.PASS, false},
+	} {
+		s, ok := model.ParseFailOn(in)
+		if s != want.s || ok != want.ok {
+			t.Errorf("ParseFailOn(%q) = %v,%v want %v,%v", in, s, ok, want.s, want.ok)
+		}
+	}
+}

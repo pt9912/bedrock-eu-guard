@@ -23,12 +23,23 @@ func (CheckLocal) Run(env driven.Environment, cfg model.Config) ([]model.Finding
 }
 
 // ExitCode bildet Findings/Fehler auf SPEC-030 ab: Fehler → 2,
-// mindestens ein FAIL → 1, sonst 0.
+// mindestens ein FAIL → 1, sonst 0 (Schwelle FAIL, Standardverhalten).
 func ExitCode(findings []model.Finding, err error) int {
+	return ExitCodeAt(findings, err, model.FAIL)
+}
+
+// ExitCodeAt wie ExitCode, aber mit wählbarer Schwelle (--fail-on): Fehler → 2
+// (hat Vorrang vor der Schwelle), höchster Schweregrad >= failOn → 1, sonst 0.
+// Zulässig sind model.WARN und model.FAIL; jeder andere Wert gilt als
+// model.FAIL (keine versehentlich zu strenge oder zu lasche Schwelle).
+func ExitCodeAt(findings []model.Finding, err error, failOn model.Severity) int {
 	if err != nil {
 		return 2
 	}
-	if model.MaxSeverity(findings) == model.FAIL {
+	if failOn != model.WARN {
+		failOn = model.FAIL
+	}
+	if model.MaxSeverity(findings) >= failOn {
 		return 1
 	}
 	return 0
