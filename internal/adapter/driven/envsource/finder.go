@@ -37,7 +37,7 @@ func isDotenvName(name string) bool {
 // anderen Arten ist die Dateisuche Sache des Kerns (Glob), Find liefert dort nichts.
 // Symlinks werden nicht verfolgt.
 func (r Reader) Find(kind model.EnvSourceKind) ([]string, error) {
-	if kind != dotenvKind {
+	if kind != model.EnvDotenv {
 		return nil, nil
 	}
 	var out []string

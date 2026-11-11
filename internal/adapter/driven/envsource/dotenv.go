@@ -8,10 +8,6 @@ import (
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/core/model"
 )
 
-// dotenvKind ist die Art von .env-Dateien. Sie wird durch model.EnvDotenv ersetzt,
-// sobald der Kern-Vertrag von slice-022 auf main liegt.
-const dotenvKind = model.EnvSourceKind("dotenv")
-
 var dotenvKey = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_.-]*$`)
 
 // parseDotenv liest eine .env-Datei in der gängigen Syntax: Kommentarzeilen,
@@ -21,7 +17,7 @@ var dotenvKey = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_.-]*$`)
 // Eintrag. Eine Zeile, die sich nicht lesen lässt, ergibt FILE_INVALID mit der Zeile,
 // nie mit Dateiinhalt. Secret-Werte werden geschwärzt (secretkey).
 func parseDotenv(path string, data []byte) (*model.EnvFile, *model.FileError) {
-	f := &model.EnvFile{Path: path, Kind: dotenvKind}
+	f := &model.EnvFile{Path: path, Kind: model.EnvDotenv}
 	text := strings.TrimPrefix(string(data), "\ufeff")
 	lines := strings.Split(text, "\n")
 	invalid := func(line int) (*model.EnvFile, *model.FileError) {

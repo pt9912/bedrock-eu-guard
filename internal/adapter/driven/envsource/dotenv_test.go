@@ -9,7 +9,10 @@ import (
 	"testing"
 
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/core/model"
+	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/port/driven"
 )
+
+var _ driven.EnvFileFinder = Reader{}
 
 func TestDotenvSyntax(t *testing.T) {
 	in := "\ufeff# Kommentar\r\n" +
@@ -53,7 +56,7 @@ func TestDotenvSyntax(t *testing.T) {
 			t.Errorf("%s: got %+v, want %+v", k, got[k], w)
 		}
 	}
-	if f.Kind != dotenvKind {
+	if f.Kind != model.EnvDotenv {
 		t.Errorf("kind = %v", f.Kind)
 	}
 	noSecretLeak(t, f)
@@ -140,7 +143,7 @@ func TestFindDotenv(t *testing.T) {
 	}
 
 	r := New(root)
-	got, err := r.Find(dotenvKind)
+	got, err := r.Find(model.EnvDotenv)
 	want := []string{".env", "apps/api/.env", "apps/api/.env.production"}
 	if err != nil || !reflect.DeepEqual(got, want) {
 		t.Fatalf("Find: got %v, %v; want %v", got, err, want)
@@ -156,18 +159,18 @@ func TestReaderReadsDotenvAndMissing(t *testing.T) {
 		t.Fatal(err)
 	}
 	r := New(root)
-	f, err := r.ReadEnvSource(dotenvKind, ".env")
+	f, err := r.ReadEnvSource(model.EnvDotenv, ".env")
 	if err != nil || f == nil || len(f.Env) != 2 {
 		t.Fatalf("%+v, %v", f, err)
 	}
 	noSecretLeak(t, f)
-	if f, err := r.ReadEnvSource(dotenvKind, "nicht/da/.env"); f != nil || err != nil {
+	if f, err := r.ReadEnvSource(model.EnvDotenv, "nicht/da/.env"); f != nil || err != nil {
 		t.Errorf("fehlend: %+v, %v", f, err)
 	}
 	if err := os.WriteFile(filepath.Join(root, ".env.bad"), []byte("kaputt ohne gleich\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	_, err = r.ReadEnvSource(dotenvKind, ".env.bad")
+	_, err = r.ReadEnvSource(model.EnvDotenv, ".env.bad")
 	var fe *model.FileError
 	if !errors.As(err, &fe) || fe.Reason != model.ReasonFileInvalid || fe.Line != 1 {
 		t.Errorf("kaputt: %v", err)
