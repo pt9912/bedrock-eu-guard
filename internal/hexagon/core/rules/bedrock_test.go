@@ -197,3 +197,54 @@ func TestBedrockUsedFromSettings(t *testing.T) {
 		t.Errorf("Dedup/Zusatz: %+v", fs)
 	}
 }
+
+func TestVisibilityRegions(t *testing.T) {
+	cfg := model.Config{AllowedRegions: []string{"eu-central-1"}, VisibilityRegions: []string{"us-east-1", "us-east-1", "", "eu-central-1", "us-west-2"}}
+	got := rules.VisibilityRegions(cfg)
+	if len(got) != 2 || got[0] != "us-east-1" || got[1] != "us-west-2" {
+		t.Errorf("got %v", got)
+	}
+	if rules.VisibilityRegions(model.DefaultConfig()) != nil {
+		t.Error("Default: keine Zusatzregionen")
+	}
+}
+
+func TestBedrockVisibilityRegions(t *testing.T) {
+	cfg := model.DefaultConfig()
+	allowed := rules.RegionData{Region: "eu-central-1", Profiles: prof("eu.anthropic.claude-sonnet-4-6")}
+	vis := func(profiles []model.InferenceProfile, err *model.AWSError) rules.RegionData {
+		return rules.RegionData{Region: "us-east-1", VisibilityOnly: true, Profiles: profiles, ProfilesErr: err}
+	}
+	// BEDROCK-001 betrifft Zusatzregionen nicht
+	s := bedrock(fakeenv.Env{}, allowed, vis(prof("us.anthropic.claude-opus-4"), nil))
+	if fs := rules.CheckBedrockProfiles(s, cfg); len(fs) != 1 || fs[0].Subject != "eu-central-1" {
+		t.Errorf("001 darf Zusatzregionen nicht melden: %+v", fs)
+	}
+	// BEDROCK-002: sichtbares blockiertes Profil → WARN mit Region, nie FAIL
+	fs := rules.CheckBedrockBlocked(s, cfg)
+	if len(fs) != 1 || fs[0].Severity != model.WARN || fs[0].Reason != model.ReasonProfilesVisible || !strings.Contains(fs[0].Message, "us-east-1") {
+		t.Errorf("002 sichtbar: %+v", fs)
+	}
+	// nur erlaubte Profile in der Zusatzregion → PASS
+	fs = rules.CheckBedrockBlocked(bedrock(fakeenv.Env{}, allowed, vis(prof("eu.x"), nil)), cfg)
+	if len(fs) != 1 || fs[0].Severity != model.PASS {
+		t.Errorf("002 nur erlaubte: %+v", fs)
+	}
+	// nicht lesbare Zusatzregion → WARN VISIBILITY_UNKNOWN (kein FAIL), mit Region
+	fs = rules.CheckBedrockBlocked(bedrock(fakeenv.Env{}, allowed, vis(nil, &model.AWSError{Op: "bedrock:ListInferenceProfiles", Reason: model.AWSAccessDenied})), cfg)
+	if len(fs) != 1 || fs[0].Severity != model.WARN || fs[0].Reason != model.ReasonVisibilityUnknown || fs[0].Subject != "us-east-1" {
+		t.Errorf("002 unbekannt: %+v", fs)
+	}
+	// verwendet (FAIL) + sichtbar in Zusatzregion (WARN): beides
+	env := fakeenv.Env{"ANTHROPIC_MODEL": "us.anthropic.claude-opus-4"}
+	fs = rules.CheckBedrockBlocked(bedrock(env, allowed, vis(prof("global.anthropic.claude-sonnet-4-6"), nil)), cfg)
+	if len(fs) != 2 || fs[0].Severity != model.FAIL || fs[1].Severity != model.WARN {
+		t.Errorf("002 verwendet+sichtbar: %+v", fs)
+	}
+	// Verfügbarkeit (004) nutzt weiter die Primärregion, nicht die Zusatzregion
+	allowedWithModel := rules.RegionData{Region: "eu-central-1", Models: mods("anthropic.claude-sonnet-4-6")}
+	s2 := bedrock(fakeenv.Env{"ANTHROPIC_MODEL": "anthropic.claude-sonnet-4-6"}, vis(prof("x"), nil), allowedWithModel)
+	if fs := rules.CheckBedrockAvailability(s2, cfg); len(fs) != 1 || fs[0].Severity != model.PASS {
+		t.Errorf("004: %+v", fs)
+	}
+}

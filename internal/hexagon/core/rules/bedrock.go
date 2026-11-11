@@ -25,6 +25,9 @@ type RegionData struct {
 	ProfilesErr *model.AWSError
 	Models      []model.FoundationModel
 	ModelsErr   *model.AWSError
+	// VisibilityOnly kennzeichnet eine Zusatzregion (visibilityRegions): dort
+	// werden nur Profile gelesen und nur die Sichtbarkeit bewertet.
+	VisibilityOnly bool
 }
 
 // BedrockScan bündelt die Bedrock-Daten je abgefragter Region (in
@@ -42,6 +45,20 @@ func QueryRegions(cfg model.Config) []string {
 	seen := map[string]bool{}
 	for _, r := range cfg.AllowedRegions {
 		if r != "" && !seen[r] {
+			seen[r] = true
+			out = append(out, r)
+		}
+	}
+	return out
+}
+
+// VisibilityRegions liefert die Zusatzregionen (stabil, ohne Duplikate und
+// ohne erlaubte Regionen), in denen nur die Sichtbarkeit geprüft wird.
+func VisibilityRegions(cfg model.Config) []string {
+	var out []string
+	seen := map[string]bool{}
+	for _, r := range cfg.VisibilityRegions {
+		if r != "" && !seen[r] && !cfg.RegionAllowed(r) {
 			seen[r] = true
 			out = append(out, r)
 		}
@@ -113,6 +130,9 @@ func CheckBedrockProfiles(s AWSScan, _ model.Config) []model.Finding {
 	}
 	var out []model.Finding
 	for _, r := range s.Bedrock.Regions {
+		if r.VisibilityOnly {
+			continue
+		}
 		f := model.Finding{RuleID: IDBedrockProfiles, Subject: r.Region}
 		switch {
 		case r.ProfilesErr != nil:
@@ -147,11 +167,18 @@ func CheckBedrockBlocked(s AWSScan, cfg model.Config) []model.Finding {
 				Recommendation: "EU-Profil-ID (eu.*) verwenden"})
 		}
 	}
-	visible := map[string]bool{}
+	visible := map[string]string{} // Profil-ID → erste Region, in der es sichtbar ist
+	var unknown []string
 	for _, r := range s.Bedrock.Regions {
+		if r.VisibilityOnly && r.ProfilesErr != nil {
+			unknown = append(unknown, r.Region)
+			continue
+		}
 		for _, p := range r.Profiles {
 			if Classify(p.ID, cfg) == model.ModelBlocked && !usedBlocked[p.ID] {
-				visible[p.ID] = true
+				if _, ok := visible[p.ID]; !ok {
+					visible[p.ID] = r.Region
+				}
 			}
 		}
 	}
@@ -163,8 +190,14 @@ func CheckBedrockBlocked(s AWSScan, cfg model.Config) []model.Finding {
 		sort.Strings(ids)
 		out = append(out, model.Finding{RuleID: IDBedrockBlocked, Severity: model.WARN, Reason: model.ReasonProfilesVisible,
 			Subject:        "inference-profiles",
-			Message:        fmt.Sprintf("%d nicht erlaubte Profile sichtbar, aber nicht verwendet, z. B. %s", len(ids), ids[0]),
+			Message:        fmt.Sprintf("%d nicht erlaubte Profile sichtbar, aber nicht verwendet, z. B. %s (in %s)", len(ids), ids[0], visible[ids[0]]),
 			Recommendation: "Per IAM/SCP einschränken, damit sie nicht aktiv genutzt werden können"})
+	}
+	sort.Strings(unknown)
+	for _, region := range unknown {
+		out = append(out, model.Finding{RuleID: IDBedrockBlocked, Severity: model.WARN, Reason: model.ReasonVisibilityUnknown,
+			Subject: region, Message: "Sichtbarkeit nicht erlaubter Profile in " + region + " nicht ermittelbar",
+			Recommendation: "bedrock:ListInferenceProfiles in dieser Region erlauben oder die Region aus visibilityRegions entfernen"})
 	}
 	if len(out) == 0 {
 		out = append(out, model.Finding{RuleID: IDBedrockBlocked, Severity: model.PASS, Reason: model.ReasonOK,
