@@ -1,0 +1,59 @@
+# Welle welle-01-lokaler-env-check: Lokaler Env- und Region-Check
+
+**Status:** done
+
+**Zielmeilenstein:** M1 — erstes lauffähiges Tool
+
+**Verantwortlich:** Projektteam bedrock-eu-guard. **Datum:** 2026-06-24.
+
+---
+
+## 1. Welle-Ziel
+
+Eine erste lauffähige Version: `bedrock-eu-check local` prüft die lokalen
+Umgebungsvariablen und Modell-IDs, liefert `PASS`/`WARN`/`FAIL` auf der
+Konsole und setzt die Exit-Codes `0`/`1`/`2`. Damit ist das Hexagon-Gerüst
+(Kern, Ports, CLI-Composition-Root, ein driven-Adapter je Quelle) etabliert
+und die `MUSS`-Anforderungen [`LH-PRI-MUSS-001`](../../../../spec/lastenheft.md#lh-pri-muss-001) bis [`LH-PRI-MUSS-005`](../../../../spec/lastenheft.md#lh-pri-muss-005) sind im Kern
+erfüllt (`RM-001` / v0.1).
+
+## 2. Trigger (Welle startet)
+
+- [`ADR-0002`](../../adr/0002-implementierungssprache.md) (Implementierungssprache) **accepted** — Sprachwahl bestätigt.
+- [`ADR-0003`](../../adr/0003-hexagonale-architektur.md) (Hexagonale Architektur) accepted ✅.
+
+## 3. Closure-Trigger (Welle schließt)
+
+- Alle Slices der Welle done.
+- `make gates` grün — inkl. der neu entstehenden `make lint`/`make test`.
+- `bedrock-eu-check local` erfüllt die Abnahmekriterien [`LH-ABN-001`](../../../../spec/lastenheft.md#lh-abn-001--kritische-lokale-fehlkonfiguration)
+  (kritische Fehlkonfiguration → ≥ 2 FAIL, Exit 1, kein Secret-Wert) und
+  [`LH-ABN-002`](../../../../spec/lastenheft.md#lh-abn-002--eu-konforme-minimalumgebung) (EU-Minimalumgebung → PASS, Exit 0).
+- Closure-Notiz in `done/welle-01-results.md` mit Steering-Loop-Eintrag.
+
+## 4. Slices in dieser Welle
+
+| Slice | Titel | Status | Bezug |
+|---|---|---|---|
+| slice-001 | Hexagon-Gerüst + Env-/Region-Check + Exit-Codes + Konsolen-Reporter | done | [`LH-FA-LENV-001`](../../../../spec/lastenheft.md#lh-fa-lenv-001--prüfung-von-aws_region)/[`LH-FA-LENV-002`](../../../../spec/lastenheft.md#lh-fa-lenv-002--prüfung-von-aws_default_region), `EXIT-*`, `REP-001` |
+| slice-002 | Modell-ID-Klassifikation (allow/block) + LENV-006 | done | [`LH-FA-LENV-006`](../../../../spec/lastenheft.md#lh-fa-lenv-006--prüfung-von-claude-default-modellvariablen), [`SPEC-010`](../../../../spec/spezifikation.md#spec-010--klassifikation-von-modell-profil-ids) |
+| slice-003 | Mantle-Prüfung (LENV-005); LENV-003/-004 bereits in slice-001 | done | [`LH-FA-LENV-005`](../../../../spec/lastenheft.md#lh-fa-lenv-005--prüfung-von-claude_code_use_mantle) |
+
+> slice-001 bis slice-003 sind als Dateien in `open/` angelegt (Plan-vor-Code,
+> Modul 5). slice-003 wurde am 2026-11-10 umdefiniert: LENV-003/-004 lieferte
+> bereits slice-001, übrig bleibt LENV-005 (Mantle).
+
+## 5. Abhängigkeiten
+
+- Blockiert: welle-02 (Config-Scanner bauen auf Kern + Reporter auf).
+- Wird blockiert von: nichts ([ADR-0002](../../adr/0002-implementierungssprache.md) accepted 2026-11-10).
+
+## 6. Out-of-Scope für diese Welle
+
+- Jeder AWS-Live-Call (Welle 3) — `local` bleibt strikt offline.
+- JSON-/SARIF-Ausgabe (Welle 4).
+- Terraform-/Container-Scanner (Welle 2).
+
+## 7. Closure-Notiz
+
+Abgeschlossen am 2026-11-10, siehe [`done/welle-01-results.md`](welle-01-results.md).

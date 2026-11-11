@@ -43,7 +43,7 @@ Port `driven.Reporter` bleibt unverändert.
 
 ## 5. Trigger
 
-[`welle-04-output-ci`](../welle-04-output-ci.md) gestartet (Plan gemerged); `Severity.Level()` gemerged oder im selben Stapel.
+[`welle-04-output-ci`](welle-04-output-ci.md) gestartet (Plan gemerged); `Severity.Level()` gemerged oder im selben Stapel.
 
 ## 6. Closure-Trigger
 

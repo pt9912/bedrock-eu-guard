@@ -17,7 +17,7 @@
 Bisher ist der Code Stdlib-only; die Gates (`make lint/test/build`,
 `verify-clean`, CI) laufen in einem Go-Container mit `--network none`
 und einem per Digest gepinnten Image. Ab der Konfigurationsdatei und dem Terraform-Scanner in
-[welle-02](../planning/welle-02-config-scanner.md) braucht das Tool
+[welle-02](../planning/done/welle-02-config-scanner.md) braucht das Tool
 Parser, die nicht in der Stdlib liegen ([ADR-0002](0002-implementierungssprache.md) nennt
 `gopkg.in/yaml.v3` und `hashicorp/hcl`):
 
@@ -83,5 +83,5 @@ mit Netz (`make deps`) und einen PR, in dem das Diff von `vendor/` und
 
 | Datum | Ereignis | Verweis |
 |---|---|---|
-| 2026-11-10 | Proposed | [`welle-02-config-scanner`](../planning/welle-02-config-scanner.md) §7 Risiken |
+| 2026-11-10 | Proposed | [`welle-02-config-scanner`](../planning/done/welle-02-config-scanner.md) §7 Risiken |
 | 2026-11-10 | Accepted | Sign-off durch den Auftraggeber (Option A, Vendoring); Review w1 eingearbeitet |
