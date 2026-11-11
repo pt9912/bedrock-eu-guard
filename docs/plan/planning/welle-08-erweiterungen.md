@@ -24,7 +24,7 @@ Pro Slice: Definition of Done des Slice-Plans erfüllt, `make verify-clean` und 
 abgeschlossen, wenn alle Slices entweder done oder ausdrücklich gestrichen sind. Eine Veröffentlichung geschieht nur mit dem
 Ja beider Nutzer zu Version, Commit und Zielen.
 
-## 4. Slices in dieser Welle (Entwurf; keine Slice-Dateien vor dem Start)
+## 4. Slices in dieser Welle (030 und 031 sind done; 032 und 033 liegen als Pläne in `open/`, nicht priorisiert)
 
 | Slice | Titel | Zuständig | Trigger |
 |---|---|---|---|
