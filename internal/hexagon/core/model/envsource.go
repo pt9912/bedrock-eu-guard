@@ -8,6 +8,7 @@ const (
 	EnvDevcontainer EnvSourceKind = "devcontainer"
 	EnvCompose      EnvSourceKind = "compose"
 	EnvDockerfile   EnvSourceKind = "dockerfile"
+	EnvDotenv       EnvSourceKind = "dotenv"
 )
 
 // Reason-Codes der Env-Quellen-Regeln.

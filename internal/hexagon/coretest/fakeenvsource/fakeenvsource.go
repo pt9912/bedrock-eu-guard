@@ -16,3 +16,17 @@ func (r Reader) ReadEnvSource(_ model.EnvSourceKind, rel string) (*model.EnvFile
 	}
 	return r.Files[rel], nil
 }
+
+// Finder implementiert driven.EnvFileFinder mit vorbereiteten Pfaden je Art.
+type Finder struct {
+	Paths map[model.EnvSourceKind][]string
+	Err   error
+}
+
+// Find implementiert driven.EnvFileFinder.
+func (f Finder) Find(kind model.EnvSourceKind) ([]string, error) {
+	if f.Err != nil {
+		return nil, f.Err
+	}
+	return append([]string(nil), f.Paths[kind]...), nil
+}
