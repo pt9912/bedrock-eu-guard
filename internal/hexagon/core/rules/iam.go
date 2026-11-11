@@ -34,6 +34,13 @@ func touchesBedrock(s model.IAMStatement) bool {
 	return false
 }
 
+// notActionOnly erkennt ein Allow-Statement ohne Aktionsliste, das nur über
+// NotAction formuliert ist (Dynamic): Es erlaubt alles außer den genannten
+// Aktionen, also auch Bedrock, und ist nicht auswertbar (WARN).
+func notActionOnly(s model.IAMStatement) bool {
+	return s.Dynamic && len(s.Actions) == 0
+}
+
 func hasStarResource(s model.IAMStatement) bool {
 	for _, r := range s.Resources {
 		if r == "*" {
@@ -52,7 +59,7 @@ func assessBedrockStatements(stmts []model.IAMStatement) []model.Finding {
 	var out []model.Finding
 	bedrock, risky, dynamic, dynLine := 0, 0, 0, 0
 	for _, s := range stmts {
-		if !strings.EqualFold(s.Effect, "Allow") || !touchesBedrock(s) {
+		if !strings.EqualFold(s.Effect, "Allow") || !(touchesBedrock(s) || notActionOnly(s)) {
 			continue
 		}
 		bedrock++

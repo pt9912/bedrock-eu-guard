@@ -39,6 +39,7 @@ type ScanContext struct {
 	Dockerfiles   []EnvSourceFile
 	Dotenvs       []EnvSourceFile
 	Terraform     TerraformScan
+	IAMPolicies   IAMPolicyScan
 	// SkipClaude überspringt die vier Claude-Settings-Regeln (kein Reader
 	// konfiguriert); der Nullwert behält das bisherige Verhalten.
 	SkipClaude bool
@@ -52,7 +53,7 @@ type ScanRule func(sc ScanContext, cfg model.Config) []model.Finding
 func ScanRules() []ScanRule {
 	return []ScanRule{CheckClaudeUser, CheckClaudeProject, CheckClaudeEndpoints, CheckClaudeWizard,
 		CheckDevcontainer, CheckCompose, CheckDockerfile, CheckDotenv,
-		CheckTerraformFiles, CheckTerraformRegion, CheckTerraformIAM, CheckTerraformModels}
+		CheckTerraformFiles, CheckTerraformRegion, CheckTerraformIAM, CheckTerraformModels, CheckIAMPolicyFiles}
 }
 
 func fileErrorFinding(id string, f SettingsFile) model.Finding {

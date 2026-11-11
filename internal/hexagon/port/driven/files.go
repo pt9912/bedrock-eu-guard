@@ -91,3 +91,23 @@ type IAMReader interface {
 type EnvFileFinder interface {
 	Find(kind model.EnvSourceKind) ([]string, error)
 }
+
+// IAMPolicyFileReader findet und liest eigenständige IAM-Policy-Dateien
+// (LH-FA-IAM-004).
+//
+// Find sucht rekursiv unter dem Scan-Root alle Dateien, deren Basisname dem
+// Muster iam-policy*.json oder *-policy.json entspricht (ohne .git,
+// .terraform, vendor, node_modules, .tmp, ohne Symlinks), und liefert
+// sortierte relative Pfade; ein Fehler der Suche selbst ist ein Fehler.
+// Die Konfiguration (exclude) wendet der Kern an, nicht der Adapter.
+//
+// Read: Datei fehlt → (nil, nil); nicht lesbar → (nil, *model.FileError mit
+// FILE_UNREADABLE); kein gültiges JSON → (nil, *model.FileError mit
+// FILE_INVALID); sonst die flachen Statements. Der Adapter entpackt die
+// Hüllen (Statement, PolicyVersion.Document, PolicyDocument). Gültiges JSON
+// ohne erkennbares Policy-Dokument ergibt eine leere Liste. Fehler tragen
+// nie Dateiinhalt.
+type IAMPolicyFileReader interface {
+	Find() ([]string, error)
+	Read(rel string) (*model.IAMPolicyFile, error)
+}

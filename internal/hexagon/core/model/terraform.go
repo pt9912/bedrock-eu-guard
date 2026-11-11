@@ -1,5 +1,7 @@
 package model
 
+import "strings"
+
 // Reason-Codes der Terraform-Regeln.
 const (
 	ReasonNoTerraform     = "NO_TERRAFORM_FILES"
@@ -52,4 +54,22 @@ type TerraformFile struct {
 	Providers  []AWSProvider
 	Statements []IAMStatement
 	ModelRefs  []ModelRef
+}
+
+// IAMPolicyFile sind die Fakten einer eigenständigen IAM-Policy-Datei
+// (LH-FA-IAM-004): die flach gelegten Statements. Gültiges JSON ohne
+// erkennbares Policy-Dokument (Fremdformat) ergibt eine leere Liste.
+type IAMPolicyFile struct {
+	Statements []IAMStatement
+}
+
+// StrictIAMPolicyName meldet, ob der Dateiname dem eindeutigen Muster
+// iam-policy*.json entspricht (LH-FA-IAM-004): Dort ist eine kaputte Datei
+// ein FAIL, beim breiten Muster *-policy.json nur ein WARN.
+func StrictIAMPolicyName(rel string) bool {
+	base := rel
+	if i := strings.LastIndexByte(rel, '/'); i >= 0 {
+		base = rel[i+1:]
+	}
+	return strings.HasPrefix(base, "iam-policy") && strings.HasSuffix(base, ".json")
 }

@@ -40,6 +40,7 @@ der Ausgabe, nur „gesetzt“/„nicht gesetzt“.
 | [`LH-FA-TF-002`](../../spec/lastenheft.md#lh-fa-tf-002--aws-provider-region-prüfen) | AWS-Provider-Region je Datei | FAIL: nicht erlaubte Region. WARN: Region dynamisch oder fehlend. PASS: nur erlaubte. | `REGION_NOT_ALLOWED`, `REGION_DYNAMIC`, `REGION_MISSING`, `OK` |
 | [`LH-FA-TF-003`](../../spec/lastenheft.md#lh-fa-tf-003--bedrock-iam-policies-prüfen) | Bedrock-IAM-Statements | FAIL: `bedrock:*`/`InvokeModel*`/`*` auf `*` ohne Region-Condition. WARN: mit Region-Condition oder nicht auflösbar. PASS: eng eingeschränkt. | `IAM_WILDCARD`, `IAM_WILDCARD_REGION_CONDITION`, `IAM_DYNAMIC`, `OK` |
 | [`LH-FA-TF-004`](../../spec/lastenheft.md#lh-fa-tf-004--nicht-erlaubte-modell-ids-finden) | Modell-/Profil-IDs in Literalen | FAIL: blockiert (`us.`, `global.`, fremde Region). WARN: nicht klassifizierbar. PASS: nur erlaubte. | `MODEL_BLOCKED`, `MODEL_UNCLASSIFIED`, `OK` |
+| [`LH-FA-IAM-004`](../../spec/lastenheft.md#lh-fa-iam-004--iam-policy-dokumente-json-prüfen) | eigenständige IAM-Policy-Dateien (`iam-policy*.json`, `*-policy.json`; Modus `terraform`) | Wie [`LH-FA-TF-003`](../../spec/lastenheft.md#lh-fa-tf-003--bedrock-iam-policies-prüfen) auf den Statements der Datei. Datei nicht lesbar oder ungültig: FAIL bei `iam-policy*.json`, WARN bei `*-policy.json`. Gültiges JSON ohne Policy-Statement oder ohne Bedrock-Aktion: kein Finding. | `IAM_WILDCARD`, `IAM_WILDCARD_REGION_CONDITION`, `IAM_DYNAMIC`, `OK`, `FILE_INVALID`, `FILE_UNREADABLE` |
 
 ## Modus `aws` (lesend gegen AWS)
 
