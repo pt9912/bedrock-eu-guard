@@ -45,6 +45,7 @@ type document struct {
 	BlockedModelPatterns *[]string `yaml:"blockedModelPatterns"`
 	AllowedProfiles      *[]string `yaml:"allowedProfiles"`
 	Exclude              *[]string `yaml:"exclude"`
+	VisibilityRegions    *[]string `yaml:"visibilityRegions"`
 	Mantle               *string   `yaml:"mantle"`
 }
 
@@ -76,6 +77,7 @@ func (d document) partial() *model.PartialConfig {
 		BlockedModelPatterns: deref(d.BlockedModelPatterns),
 		AllowedProfiles:      deref(d.AllowedProfiles),
 		Exclude:              deref(d.Exclude),
+		VisibilityRegions:    deref(d.VisibilityRegions),
 	}
 	if d.Mantle != nil {
 		p.Mantle = *d.Mantle
