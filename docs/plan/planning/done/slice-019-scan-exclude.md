@@ -47,7 +47,7 @@ Datei-Discovery ausnehmen. Das ist Voraussetzung für den Self-Check
 
 ## 6. Trigger
 
-[`welle-05-release`](../welle-05-release.md) gestartet (Plan gemerged).
+[`welle-05-release`](welle-05-release.md) gestartet (Plan gemerged).
 
 ## 7. Closure-Trigger
 

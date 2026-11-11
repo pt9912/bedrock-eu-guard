@@ -42,7 +42,7 @@ reproduzierbar zu sein.
 
 ## 5. Trigger
 
-[`welle-05-release`](../welle-05-release.md) gestartet (Plan gemerged); `--ci` und SARIF gemergt (gleiche Datei).
+[`welle-05-release`](welle-05-release.md) gestartet (Plan gemerged); `--ci` und SARIF gemergt (gleiche Datei).
 
 ## 6. Closure-Trigger
 
