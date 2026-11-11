@@ -6,15 +6,14 @@ vorinstalliertes Tool bereitgestellt werden
 
 **Stand:** Das Feature ist als `ghcr.io/pt9912/bedrock-eu-guard/bedrock-eu-check`
 (Tags `1`, `1.0`, `1.0.1`, `1.0.0`, `latest`; aktuelle Feature-Version 1.0.1) veröffentlicht und wird in der CI gegen ein lokal
-gebautes Release getestet. Zusätzlich ist es mit der Devcontainer-CLI (Version 0.72.0, Workflow
+gebautes Release getestet. Zusätzlich ist es mit der Devcontainer-CLI (Version 0.90.0, Workflow
 `feature-cli`) erprobt: Das Feature aus dem Arbeitsstand wie auch das veröffentlichte Feature
-von `ghcr.io` lassen sich in `mcr.microsoft.com/devcontainers/base:ubuntu` installieren, und
-`bedrock-eu-check version` meldet `bedrock-eu-check 1.0.0 (5f1b35cca776)`. Nicht erprobt ist
-`devcontainer up` mit der CLI 0.72.0: Es blieb auf dem GitHub-Runner (Docker 29.4.2) nach dem Start
-des Containers hängen. Dieselbe Messung mit den CLI-Versionen 0.86.1 und 0.90.0 lief auf demselben Runner durch
-(Läufe 42999455137 und 42999946761); der Fehler hängt also an der Kombination aus CLI 0.72.0 und
-dieser Docker-Version, nicht am Feature. Erprobt ist bisher `devcontainer build` mit anschließendem `docker run`;
-die Umstellung der Erprobung auf eine neuere CLI mit `up` ist als Wartungsslice geplant. Die
+von `ghcr.io` lassen sich in `mcr.microsoft.com/devcontainers/base:ubuntu` installieren
+(`devcontainer up`, dann `devcontainer exec`), und `bedrock-eu-check version` meldet
+`bedrock-eu-check 1.0.0 (5f1b35cca776)`. Hinweis zur CLI-Version: Die CLI 0.72.0 (2024) blieb
+mit `devcontainer up` auf GitHub-Runnern mit Docker 29.4.2 nach dem Start des Containers hängen; die Versionen
+0.86.1 und 0.90.0 laufen dort durch (Läufe 42999455137 und 42999946761). Wer die Devcontainer-CLI selbst
+einsetzt, nimmt eine aktuelle Version. Die
 Standard-`baseUrl` zeigt auf das [GitHub-Release v1.0.0](https://github.com/pt9912/bedrock-eu-guard/releases/tag/v1.0.0)
 (siehe [`releasing.md`](releasing.md)).
 
