@@ -133,6 +133,8 @@ Beide Nutzer haben beiden Entscheidungen auf Commit `e04f5da47a077073779bfef5371
 
 **Freigabe des scharfen Laufs.** Die Freigabe in der Umgebung `release` erteilte nicht der Nutzer von w2, sondern w1 per `gh api` mit einem Kommentar, der beide Ja nannte, auf ausdrückliche Rückfrage seines Nutzers; beide Ja im Wortlaut lagen zu diesem Zeitpunkt vor. Die Umgebung erzwingt das Ja beider Nutzer nicht (Selbstfreigabe ist erlaubt); es bleibt Prozessregel.
 
+**Nutzerentscheidung zur Freigabe-Praxis (2026-11-11).** Beide Nutzer haben danach entschieden, dass ein Agent den scharfen Lauf in der Umgebung `release` per `gh api` freigeben darf, aber nur nach beiden Ja im Wortlaut und auf ausdrückliche Anweisung eines Nutzers im Dialog; der Kommentar der Freigabe steht im Protokoll des Laufs. Wortlaut der Antworten: Nutzer von w2: „Agent darf nach beiden Ja“; Nutzer von w1: „Ja, Agent darf auf Anweisung freigeben“. [`releasing.md`](../../../user/releasing.md) beschreibt dies.
+
 | Schritt | Beleg |
 |---|---|
 | Trockenlauf `release-create` (tool, 1.2.0) | Run 43025479835 |
