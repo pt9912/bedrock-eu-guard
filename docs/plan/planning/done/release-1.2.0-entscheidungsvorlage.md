@@ -1,6 +1,6 @@
 # Entscheidungsvorlage: Release 1.2.0
 
-**Status:** Entwurf zur Entscheidung durch beide Nutzer. **Stand:** 2026-11-11.
+**Status:** abgeschlossen: beide Entscheidungen sind von beiden Nutzern getroffen und umgesetzt (siehe Abschnitt 10). **Stand:** 2026-11-11.
 
 **Zweck:** Eine gemeinsame Vorlage für beide Nutzer. Sie bereitet **eine Veröffentlichung** und **eine Grundsatzfrage** vor; es wird
 nichts veröffentlicht, bevor beide Nutzer der Veröffentlichung ausdrücklich zugestimmt haben. Versionsnummern nach 1.0 sind
@@ -123,3 +123,23 @@ A setzt eine Antwort zu C voraus; eine Antwort zu C ist noch keine Freigabe zur 
 |---|---|---|
 | C | Neue Prüfung ohne Opt-in als 1.2.0 (C1), mit Schalter (C2) oder als 2.0.0 (C3)? | |
 | A | Werkzeug 1.2.0 veröffentlichen (Ziele Tag + Release, Images)? | |
+
+## 10. Ergebnis (Stand 2026-11-11)
+
+Beide Nutzer haben beiden Entscheidungen auf Commit `e04f5da47a077073779bfef5371231d5aca540c1` zugestimmt, getrennt je Entscheidung:
+
+- **C:** „C1 ohne Opt-in“ (Nutzer von w2, wörtlich: „C1 ohne Opt-in (Recommended)“; Nutzer von w1: „C1, 1.2.0 ohne Opt-in“).
+- **A:** „Ja zu Release 1.2.0 auf Commit e04f5da47a07 für die Ziele Tag + GitHub-Release, Docker-Images nach ghcr.io“ (Nutzer von w2, wörtlich, danach im Chat wiederholt; Nutzer von w1: „Ja zu Release 1.2.0 auf Commit e04f5da47a07“, Ziele laut Rückfrage Tag + GitHub-Release und Docker-Images nach ghcr.io).
+
+**Freigabe des scharfen Laufs.** Die Freigabe in der Umgebung `release` erteilte nicht der Nutzer von w2, sondern w1 per `gh api` mit einem Kommentar, der beide Ja nannte, auf ausdrückliche Rückfrage seines Nutzers; beide Ja im Wortlaut lagen zu diesem Zeitpunkt vor. Die Umgebung erzwingt das Ja beider Nutzer nicht (Selbstfreigabe ist erlaubt); es bleibt Prozessregel.
+
+| Schritt | Beleg |
+|---|---|
+| Trockenlauf `release-create` (tool, 1.2.0) | Run 43025479835 |
+| `release-artifacts` auf dem Commit, Prüfsummen bitgleich zum lokalen Build | Run 43025485021; amd64 `7aac4961e8dfa9f7c33218e78bb6b151798f722c8e6367cb63b95c0308be8fd0`, arm64 `4f4c2e079b61f21efecf8ece9be3a63c284e9c801f6dd00f22432f449b0eb517` |
+| `release-create` scharf: Tag `v1.2.0` und GitHub-Release | Run 43026896914 |
+| `publish` Images, Trockenlauf (erst nach dem Tag möglich) und scharf | Runs 43032813891 und 43033312511; `1.2.0-slim` `sha256:6fbf3046d3fd6dba50851ec892335210de130a19008fbfa4bcedfccadc4be20a`, `1.2.0-full` `sha256:4e6040f7de20e46e5cd47cd8f65edfe5060a03cf2490b5c1062f806ed1fa5ca7` |
+
+**Richtige Reihenfolge der Läufe.** Der Trockenlauf von `publish` baut aus dem Tag und kann deshalb erst nach dem scharfen Lauf von `release-create` laufen; ein Versuch davor scheiterte erwartungsgemäß (Run 43025490396, „couldn't find remote ref refs/tags/v1.2.0“). Abschnitt 6 dieser Vorlage nennt die Läufe in anderer Reihenfolge; die Reihenfolge war: Trockenlauf `release-create`, `release-artifacts`, Freigabe, `release-create` scharf, Nachprüfen, `publish` trocken, `publish` scharf, Nachprüfen. Die Vorlage wurde nicht geändert, weil jede Änderung an `main` den freigegebenen Commit verschoben hätte.
+
+Beide Agenten haben die Ergebnisse unabhängig nachgeprüft (frischer Download, `sha256sum -c`, `version`, Funktionsprobe der neuen Policy-Datei-Prüfung im veröffentlichten Binary und im Image, anonymer Pull und Start der Images; die Images 1.1.0 und 1.0.0 sind unverändert). Die Abschnitte 3 bis 9 zeigen den Stand zum Zeitpunkt der Vorlage.
