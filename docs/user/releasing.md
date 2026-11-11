@@ -1,6 +1,6 @@
 # Releasing & Betrieb — bedrock-eu-check
 
-**Status:** Stand Release-Kandidat 1.0 (2026-11-10). Zuletzt konkretisiert mit
+**Status:** Version 1.0.0 veröffentlicht am 2026-11-11 auf Commit `5f1b35cca776` (Tag, GitHub-Release, Images, Feature). Zuletzt konkretisiert mit
 Welle 5 ([`LH-RM-005`](../../spec/lastenheft.md#lh-rm-005--version-10)).
 
 Dieses Dokument (Rang 6 der Source Precedence) beschreibt, *wie*

@@ -4,11 +4,11 @@
 vorinstalliertes Tool bereitgestellt werden
 ([`LH-TECH-005`](../../spec/lastenheft.md#lh-tech-005--devcontainer-integration)).
 
-**Stand:** Das Feature ist im Repository enthalten und wird in der CI gegen ein lokal
-gebautes Release getestet. Es ist **noch nicht veröffentlicht** (kein OCI-Feature, kein
-Release), und es wurde **nicht mit der Devcontainer-CLI erprobt**. Mit der
-Standard-`baseUrl` lässt es sich erst installieren, wenn ein Release mit den
-erwarteten Artefakten existiert (siehe [`releasing.md`](releasing.md)).
+**Stand:** Das Feature ist als `ghcr.io/pt9912/bedrock-eu-guard/bedrock-eu-check`
+(Tags `1`, `1.0`, `1.0.0`, `latest`) veröffentlicht und wird in der CI gegen ein lokal
+gebautes Release getestet. Es wurde **nicht mit der Devcontainer-CLI erprobt**. Die
+Standard-`baseUrl` zeigt auf das [GitHub-Release v1.0.0](https://github.com/pt9912/bedrock-eu-guard/releases/tag/v1.0.0)
+(siehe [`releasing.md`](releasing.md)).
 
 ## Variante A: Feature
 
@@ -34,6 +34,14 @@ Ordner `.devcontainer/` des Projekts kopiert:
 }
 ```
 
+Oder direkt aus der Registry, ohne Kopie (nicht mit der Devcontainer-CLI erprobt):
+
+```jsonc
+"features": {
+  "ghcr.io/pt9912/bedrock-eu-guard/bedrock-eu-check:1": { "version": "1.0.0" }
+}
+```
+
 | Option | Default | Bedeutung |
 |---|---|---|
 | `version` | `1.0.0` | Version des Release-Binarys (ohne führendes `v`) |
@@ -49,9 +57,7 @@ vorhanden).
 **Sicherheit:** `baseUrl` muss mit `https://` oder `file://` beginnen. `SHA256SUMS`
 stammt vom selben Ursprung wie das Binary: Die Prüfung schützt vor Korruption und
 Teil-Downloads, **nicht** vor einem kompromittierten Ursprung. Signierte Releases
-(z. B. Sigstore) sind ein Folgepunkt. Der Default `1.0.0` zeigt auf ein Release, das bis
-zur Veröffentlichung nicht existiert; die Installation schlägt dann mit
-„Download … fehlgeschlagen“ fehl.
+(z. B. Sigstore) sind ein Folgepunkt. Der Default `1.0.0` zeigt auf das veröffentlichte Release v1.0.0.
 
 Zum Testen des Ablaufs ohne Release: `make feature-test` (baut ein lokales
 „Release“, installiert es per `file://` in einen Container ohne Netz und prüft

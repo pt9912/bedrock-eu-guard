@@ -15,14 +15,14 @@ schon" — die in der Praxis oft nicht stimmt.
 
 ## Stand
 
-`bedrock-eu-check` ist **funktionsfähig** und liegt als **Release-Kandidat für 1.0**
-vor: Alle Prüfmodi, die Ausgabeformate (Konsole, JSON, SARIF), der CI-Modus, die
-Docker-Images und das Devcontainer-Feature sind implementiert und getestet. Das
-Release ist **noch nicht veröffentlicht**: Es gibt keinen Tag, keine Release-Artefakte
-und keine veröffentlichten Images; das geschieht erst nach ausdrücklicher Freigabe
-([`docs/user/releasing.md`](docs/user/releasing.md)). Bis dahin wird aus dem Quellcode gebaut.
+`bedrock-eu-check` ist **funktionsfähig**; **Version 1.0.0** ist veröffentlicht
+(Commit `5f1b35cca776`): als [GitHub-Release](https://github.com/pt9912/bedrock-eu-guard/releases/tag/v1.0.0)
+mit Linux-Binaries und `SHA256SUMS`, als Docker-Images `ghcr.io/pt9912/bedrock-eu-check:1.0.0-slim`
+und `:1.0.0-full` und als Devcontainer-Feature. Alle Prüfmodi, die Ausgabeformate
+(Konsole, JSON, SARIF) und der CI-Modus sind implementiert und getestet. Der Ablauf steht in
+[`docs/user/releasing.md`](docs/user/releasing.md).
 
-Nicht auf externen Plattformen erprobt sind der Release-Workflow, der Beispiel-Workflow
+Nicht auf externen Plattformen erprobt sind der Beispiel-Workflow
 für GitHub Code Scanning und das Devcontainer-Feature mit der Devcontainer-CLI; die
 Beispiel-IAM-Policy wurde nicht gegen ein echtes AWS-Konto getestet.
 Den Fahrplan zeigt die [Roadmap](docs/plan/planning/in-progress/roadmap.md).
@@ -89,9 +89,9 @@ Alle Felder und Defaults: [Referenz](docs/user/reference.md#konfigurationsdatei-
 
 | Weg | Stand | Dokumentation |
 |---|---|---|
-| Binary (Linux `amd64`/`arm64`, `make dist VERSION=x.y.z`) | lokal baubar, nicht veröffentlicht | [`releasing.md`](docs/user/releasing.md) |
-| Docker-Image `slim` (`local`, `terraform`) und `full` (mit AWS-CLI, alle Modi) | lokal baubar (`make image`), nicht veröffentlicht | [`docker.md`](docs/user/docker.md) |
-| Devcontainer-Feature | im Repository, nicht veröffentlicht | [`devcontainer.md`](docs/user/devcontainer.md) |
+| Binary (Linux `amd64`/`arm64`, `make dist VERSION=x.y.z`) | [GitHub-Release v1.0.0](https://github.com/pt9912/bedrock-eu-guard/releases/tag/v1.0.0) | [`releasing.md`](docs/user/releasing.md) |
+| Docker-Image `slim` (`local`, `terraform`) und `full` (mit AWS-CLI, alle Modi) | `ghcr.io/pt9912/bedrock-eu-check:1.0.0-slim` / `:1.0.0-full` (lokal: `make image`) | [`docker.md`](docs/user/docker.md) |
+| Devcontainer-Feature | `ghcr.io/pt9912/bedrock-eu-guard/bedrock-eu-check:1` | [`devcontainer.md`](docs/user/devcontainer.md) |
 | CI-Einbindung | Beispiel-Workflow | [`ci.md`](docs/user/ci.md) |
 
 ## Dokumentation
