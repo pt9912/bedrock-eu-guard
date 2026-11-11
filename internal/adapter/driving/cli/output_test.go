@@ -75,7 +75,7 @@ func TestOutputFileReplacesExistingAtomically(t *testing.T) {
 // Schreibfehler (Verzeichnis fehlt, Ziel ist ein Verzeichnis) → Exit 2 mit klarer Meldung.
 func TestOutputFileWriteErrorIsToolError(t *testing.T) {
 	for name, target := range map[string]string{
-		"Verzeichnis fehlt": filepath.Join(t.TempDir(), "gibt-es-nicht", "r.json"),
+		"Verzeichnis fehlt":    filepath.Join(t.TempDir(), "gibt-es-nicht", "r.json"),
 		"Ziel ist Verzeichnis": t.TempDir(),
 	} {
 		code, out, errs := outRun(t, "local", "--root", t.TempDir(), "--format", "json", "--output", target)
