@@ -23,8 +23,10 @@ Rule „git mv + Inhaltsänderung = zwei Commits" in
 - **Slices** tragen ihren Status über das **Verzeichnis** (open → … → done).
 - Eine **Welle** wird **in der Roadmap** geführt
   ([`in-progress/roadmap.md`](in-progress/roadmap.md)); ihr Status lebt im
-  `Status:`-Feld des Welle-Plans, der **flach** in `planning/`
-  (`<welle-id>.md`) liegt. Welle-Closure: Lerneintrag in
+  `Status:`-Feld des Welle-Plans. Eine offene oder laufende Welle liegt
+  **flach** in `planning/` (`<welle-id>.md`); ist sie abgeschlossen
+  (`Status: done`), wird der Plan nach `done/` verschoben (reiner
+  `git mv`, danach Verweise nachziehen). Welle-Closure: Lerneintrag in
   `done/<welle-id>-results.md`.
 
 ## Vorlagen
