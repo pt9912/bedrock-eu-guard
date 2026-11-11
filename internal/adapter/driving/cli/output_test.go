@@ -85,6 +85,22 @@ func TestOutputFileWriteErrorIsToolError(t *testing.T) {
 	}
 }
 
+// Schlägt das Umbenennen fehl (Ziel ist ein Verzeichnis), bleibt keine Temp-Datei zurück.
+func TestOutputFileNoTempLeftoverOnRenameError(t *testing.T) {
+	parent := t.TempDir()
+	target := filepath.Join(parent, "ziel")
+	if err := os.Mkdir(target, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if code, _, _ := outRun(t, "local", "--root", t.TempDir(), "--format", "json", "--output", target); code != 2 {
+		t.Fatalf("exit=%d", code)
+	}
+	entries, _ := os.ReadDir(parent)
+	if len(entries) != 1 || entries[0].Name() != "ziel" {
+		t.Errorf("Temp-Rest im Zielverzeichnis: %v", entries)
+	}
+}
+
 // Tool-Fehler vor dem Ergebnis: keine Datei anlegen, bestehende unangetastet lassen.
 func TestOutputFileNotWrittenOnEarlyToolError(t *testing.T) {
 	dir := t.TempDir()
