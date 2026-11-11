@@ -26,6 +26,19 @@ func (s Severity) String() string {
 	}
 }
 
+// ParseFailOn wertet den Wert der Option --fail-on aus: "fail" (Standard)
+// oder "warn". Alles andere ist ungültig (false).
+func ParseFailOn(s string) (Severity, bool) {
+	switch s {
+	case "fail":
+		return FAIL, true
+	case "warn":
+		return WARN, true
+	default:
+		return PASS, false
+	}
+}
+
 // Level liefert den JSON-Schweregrad (SPEC-021): info | warning | error.
 func (s Severity) Level() string {
 	switch s {

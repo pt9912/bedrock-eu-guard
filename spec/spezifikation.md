@@ -199,6 +199,18 @@ Präzisiert [`LH-FA-REP-002`](lastenheft.md#lh-fa-rep-002--json-ausgabe). **Secr
 Fail-closed: Kann ein offline-Check nicht ausgeführt werden, ist das
 Exit `2`, nicht stilles `0`.
 
+**Schwelle `--fail-on`** (Erweiterung, nur auf ausdrückliche Anforderung auf
+der Kommandozeile): `--fail-on fail` ist der Standard und gleichbedeutend mit
+der Tabelle oben. Mit `--fail-on warn` gilt für Exit `1` stattdessen: mindestens
+ein `WARN`- **oder** `FAIL`-Finding. Ein Tool-Fehler (Exit `2`) hat immer
+Vorrang vor der Schwelle, auch bei `all` mit fehlendem `aws`-Binary. Die
+Schwelle ändert weder Befunde noch Ausgabeformate, nur den Exit-Code; sie gilt
+für die Prüfbefehle `local`, `terraform`, `aws` und `all`. Ein ungültiger Wert
+oder die Option beim Befehl `version` ist ein Aufruffehler (Exit `2`). Es gibt
+bewusst keine Umgebungsvariable und kein Konfigurationsfeld dafür. Die
+Standardfälle bleiben nach [`LH-FA-EXIT-001`](lastenheft.md#lh-fa-exit-001--erfolgreiche-prüfung) und
+[`LH-FA-EXIT-002`](lastenheft.md#lh-fa-exit-002--fehlgeschlagene-prüfung) erfüllt.
+
 ## 5. Metriken und Tracing-Felder
 
 Für ein CLI-Werkzeug ohne Service-Laufzeit nicht anwendbar in v1.
