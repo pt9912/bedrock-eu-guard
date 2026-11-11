@@ -39,7 +39,7 @@ Vorschlag in Klammern; die Empfehlung ist die des Autors und offen.
 
 - [ ] Ein Workflow auf GitHub-Runnern `macos-latest` und `windows-latest` (nur Leserechte) baut das Werkzeug und führt `version` sowie die Prüfung der Testdaten `good`/`bad` aus (Exit-Codes `0` und `1`) und versucht die Testsuite.
 - [ ] Ergebnisbericht in der Closure-Notiz: was läuft, was scheitert und warum (Pfade, Shell-Skripte, Symlinks, Rechte), mit geschätztem Aufwand für Anpassungen und Wartung (CI-Runner).
-- [ ] Empfehlung an die Auftraggeber, ob Teil 2 sinnvoll ist.
+- [ ] Empfehlung an die Auftraggeber, ob Teil 2 sinnvoll ist, nach diesen Kriterien: (1) `version` und die Prüfung der Testdaten `good`/`bad` liefern auf beiden Plattformen dieselben Exit-Codes und Findings (außer Pfadtrennern in der Anzeige); (2) die Testsuite läuft nach überschaubaren Anpassungen grün oder die verbleibenden Ausfälle sind einzeln benannt und begründbar; (3) der Wartungsaufwand der CI-Läufe ist für die Auftraggeber akzeptabel.
 
 **Teil 2: Bereitstellung** (nur nach Entscheidung und neuer Anforderung)
 

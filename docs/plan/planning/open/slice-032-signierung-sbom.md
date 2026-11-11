@@ -26,23 +26,29 @@ Jedes Release trägt eine nachprüfbare Herkunft: Nutzer können feststellen, da
 Der Slice startet erst, wenn **beide Nutzer** Priorisierung und Festlegungen bestätigt haben. Vorschlag in Klammern; die Empfehlung ist die des Autors und offen.
 
 1. **Verfahren** (Vertrauensmodell).
-   - **a) GitHub Artifact Attestations:** eine Aktion, Prüfung mit `gh attestation verify`; Rechte `id-token: write` und `attestations: write`; Nachweise liegen bei GitHub. Prüfende brauchen die `gh`-CLI.
+   - **a) GitHub Artifact Attestations:** eine Aktion, Prüfung mit `gh attestation verify`; Rechte `id-token: write` und `attestations: write`; Nachweise liegen bei GitHub. Prüfende brauchen die `gh`-CLI. **Zu klären im Slice:** ob die Attestierung bei einem öffentlichen Repository ebenfalls in ein öffentliches, nicht löschbares Log schreibt (nicht belegt).
    - **b) Sigstore mit `cosign` (keyless, GitHub-OIDC):** Signatur der Prüfsummen-Datei und der Binaries (`sign-blob`) sowie der Image-Digests (`sign`); Prüfung mit `cosign verify-blob` gegen die Identität des Workflows. Die Einträge landen im **öffentlichen Transparenzlog** und sind **nicht löschbar**. (Empfehlung: b, weil `releasing.md` Sigstore als Folgepunkt nennt und die Prüfung nicht an ein GitHub-Konto gebunden ist.)
    - **c) GPG mit eigenem Schlüssel:** Schlüsselverwaltung bei den Nutzern, ein Geheimnis im Repository; nicht empfohlen.
 2. **Umfang.** (Binaries und `SHA256SUMS` sowie die beiden Images; das Feature in einem späteren Schritt.)
-3. **SBOM.** Format (CycloneDX JSON oder SPDX JSON) und Erzeuger aus den Modul- und `vendor/`-Daten; Veröffentlichung als Release-Asset. (CycloneDX JSON für das Binary; SBOM der Images optional später.)
+3. **SBOM.** Format (CycloneDX JSON oder SPDX JSON) und Erzeuger aus den Modul- und `vendor/`-Daten; Veröffentlichung als Release-Asset. Der Erzeuger ist ein Werkzeug in der Lieferkette: Es soll offline im gepinnten Image laufen können ([`ADR-0004`](../../adr/0004-abhaengigkeiten-und-offline-gates.md)) oder als gepinnte Aktion mit Begründung. (CycloneDX JSON für das Binary; Erzeuger offline im gepinnten Image; SBOM der Images optional später.)
 4. **Rechte.** `id-token: write` nur im Job, der signiert; keine weitere Veröffentlichungsfähigkeit. Die Erweiterung der Workflows um diese Fähigkeit braucht das Ja beider Nutzer, wie bei `release-create`.
 5. **Nachweis der Entscheidung.** Eine neue ADR (Proposed, Accepted nach Sign-off beider Nutzer) hält Verfahren, Identität, Umfang und die Unwiderruflichkeit der Transparenzlog-Einträge fest.
 
 ## 4. Definition of Done
 
+**Teil 1: SBOM, ADR und Vorbereitung** (ohne Signatur, ohne Veröffentlichung)
+
 - [ ] Beide Nutzer haben Priorisierung und die Festlegungen aus Abschnitt 3 bestätigt; die ADR ist `Accepted`.
-- [ ] Die Workflows erzeugen die SBOM und signieren die vereinbarten Artefakte; Aktionen und Werkzeuge sind per SHA gepinnt und aktuell (Alter gegen das aktuelle Release geprüft).
-- [ ] **Trockenlauf:** `release-create` und `publish` erzeugen im Trockenlauf die SBOM und prüfen die Voraussetzungen, signieren aber nicht (jede Signatur ist ein dauerhafter öffentlicher Eintrag); die erste Signatur geschieht im scharfen Lauf eines freigegebenen Releases.
-- [ ] Dokumentation: `releasing.md` (Ablauf, Rechte), eine Nutzeranleitung zur Prüfung (Befehle mit der erwarteten Identität), `devcontainer.md` und README (Grenze „Prüfsumme vom selben Ursprung“ aktualisiert).
-- [ ] Die Prüfanleitung ist an einem veröffentlichten Artefakt erprobt (frischer Download, Prüfung gelingt; eine manipulierte Datei fällt durch).
-- [ ] `make verify-clean` und CI grün; Review-Report durch w1.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [ ] Die SBOM wird erzeugt (lokal oder in CI erprobbar), ist als Release-Asset vorgesehen und im Trockenlauf von `release-create` sichtbar; der Erzeuger ist gepinnt und aktuell (Alter gegen das aktuelle Release geprüft).
+- [ ] Die Workflows sind für die Signatur vorbereitet (Rechte `id-token: write` nur im signierenden Job, Schritte vorhanden), signieren im **Trockenlauf aber nicht** (jede Signatur ist ein dauerhafter öffentlicher Eintrag).
+- [ ] Entwurf der Prüfanleitung (Befehle mit der erwarteten Identität) in `releasing.md`, als „noch nicht an einem veröffentlichten Artefakt erprobt“ gekennzeichnet.
+- [ ] `make verify-clean` und CI grün; Review-Report durch w1; Closure-Notiz.
+
+**Teil 2: erste Signatur und Prüfanleitung** (nur mit einem freigegebenen Release; eigener Schritt mit dem Ja beider Nutzer zu Version, Commit und Zielen)
+
+- [ ] Der scharfe Lauf eines freigegebenen Releases signiert die vereinbarten Artefakte.
+- [ ] Die Prüfanleitung ist an dem veröffentlichten Artefakt erprobt (frischer Download, Prüfung gelingt; eine manipulierte Datei fällt durch) und die Kennzeichnung „nicht erprobt“ entfällt; README und `devcontainer.md` nennen die Grenze „Prüfsumme vom selben Ursprung“ entsprechend.
+- [ ] Closure-Notiz für Teil 2 (Ergänzung der Closure-Notiz) mit Steering-Loop-Lerneintrag.
 
 ## 5. Plan (vor Code)
 
@@ -59,7 +65,7 @@ Entscheidung beider Nutzer (Abschnitt 3). Voraussetzung ist erfüllt: `release-c
 
 ## 7. Closure-Trigger
 
-DoD vollständig + PR gemerged + Closure-Notiz geschrieben. Das erste signierte Release ist ein eigener, freigegebener Schritt (Ja beider Nutzer zu Version, Commit und Zielen).
+Teil 1: DoD des Teils 1 + PR gemerged + Closure-Notiz; der Slice kann damit abgeschlossen werden, Teil 2 folgt mit dem nächsten freigegebenen Release (eigener Schritt, Ja beider Nutzer zu Version, Commit und Zielen) und ergänzt die Closure-Notiz.
 
 ## 8. Risiken und offene Punkte
 
