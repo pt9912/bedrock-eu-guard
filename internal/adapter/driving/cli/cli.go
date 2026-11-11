@@ -24,7 +24,7 @@ import (
 
 const exitToolError = 2
 
-const usage = "usage: bedrock-eu-check version | (local|terraform|aws|all) [--root DIR] [--config FILE] [--allowed-account ID]... [--format console|json|sarif] [--ci]\n"
+const usage = "usage: bedrock-eu-check version | (local|terraform|aws|all) [--root DIR] [--config FILE] [--allowed-account ID]... [--format console|json|sarif] [--ci] [--fail-on fail|warn]\n"
 
 // Build-Informationen, zur Buildzeit per -ldflags gesetzt (siehe Makefile):
 //
@@ -76,7 +76,7 @@ func run(args []string, env driven.Environment, home string, stdout, stderr io.W
 	// Eigene Konfiguration ungültig → Tool-Fehler, Exit 2 (SPEC-030).
 	cfg, err := app.LoadConfig(accountOverlay{configyaml.New(opts.configPath()), opts.accounts})
 	if err != nil {
-		return finish(nil, err, reporterFor(opts, stdout), opts.ci, stdout, stderr)
+		return finish(nil, err, reporterFor(opts, stdout), opts, stdout, stderr)
 	}
 	var findings []model.Finding
 	if mode == "local" || mode == "all" {
@@ -95,7 +95,7 @@ func run(args []string, env driven.Environment, home string, stdout, stderr io.W
 		findings = append(findings, aws...)
 	}
 	sort.SliceStable(findings, func(i, j int) bool { return findings[i].RuleID < findings[j].RuleID })
-	return finish(findings, err, reporterFor(opts, stdout), opts.ci, stdout, stderr)
+	return finish(findings, err, reporterFor(opts, stdout), opts, stdout, stderr)
 }
 
 // runLocal ist der Modus local (LH-MOD-001): Env, Claude-Settings,
@@ -121,6 +121,7 @@ type options struct {
 	format       string // "" = console
 	ci           bool   // CI-Modus: Zusammenfassung auf stderr (LH-MOD-005)
 	accounts     []string
+	failOn       model.Severity // Exit-Schwelle (--fail-on); Default FAIL
 }
 
 // reporterFor wählt den Reporter für das Ausgabeformat (stdout trägt nur das
@@ -172,10 +173,11 @@ func (o options) configPath() string {
 	return filepath.Join(o.root, "bedrock-eu-check.yml")
 }
 
-// parseOptions wertet "[--root DIR] [--config FILE]" aus; Default-Root ist
+// parseOptions wertet die Optionen aus (--root, --config, --format, --ci,
+// --allowed-account, --fail-on); Default-Root ist
 // das aktuelle Verzeichnis.
 func parseOptions(args []string) (options, bool) {
-	opts := options{root: "."}
+	opts := options{root: ".", failOn: model.FAIL}
 	for len(args) > 0 {
 		if args[0] == "--ci" { // Schalter ohne Wert
 			opts.ci = true
@@ -197,6 +199,12 @@ func parseOptions(args []string) (options, bool) {
 			opts.format = args[1]
 		case "--allowed-account":
 			opts.accounts = append(opts.accounts, args[1])
+		case "--fail-on":
+			sev, ok := model.ParseFailOn(args[1])
+			if !ok {
+				return options{}, false
+			}
+			opts.failOn = sev
 		default:
 			return options{}, false
 		}
@@ -209,7 +217,7 @@ func parseOptions(args []string) (options, bool) {
 // (SPEC-030). Im CI-Modus steht zusätzlich eine Zusammenfassung auf stderr,
 // damit die Pipeline-Logs auch bei umgeleitetem stdout (z. B. SARIF-Datei)
 // den Ausgang zeigen; stdout trägt weiterhin nur das Ergebnis.
-func finish(findings []model.Finding, err error, rep driven.Reporter, ci bool, stdout, stderr io.Writer) int {
+func finish(findings []model.Finding, err error, rep driven.Reporter, opts options, stdout, stderr io.Writer) int {
 	code := exitToolError
 	if err != nil {
 		if len(findings) > 0 { // bereits ermittelte Befunde trotzdem zeigen
@@ -220,9 +228,9 @@ func finish(findings []model.Finding, err error, rep driven.Reporter, ci bool, s
 	} else if rerr := rep.Report(findings); rerr != nil {
 		fmt.Fprintf(stderr, "error: %v\n", rerr)
 	} else {
-		code = app.ExitCode(findings, nil)
+		code = app.ExitCodeAt(findings, nil, opts.failOn)
 	}
-	if ci {
+	if opts.ci {
 		fmt.Fprintln(stderr, summaryLine(findings, code))
 	}
 	return code

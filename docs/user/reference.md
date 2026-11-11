@@ -24,14 +24,15 @@ Die Regeln je Modus stehen in `rules.md`.
 | `--config FILE` | alle Prüfbefehle | Konfigurationsdatei; muss existieren. Ohne Option wird `<root>/bedrock-eu-check.yml` gelesen, falls vorhanden |
 | `--format console\|json\|sarif` | alle Prüfbefehle | Ausgabeformat (Default `console`); stdout trägt nur das Ergebnis |
 | `--ci` | alle Prüfbefehle | CI-Modus: schreibt zusätzlich eine Zusammenfassung auf stderr; Format und Exit-Codes bleiben unverändert (siehe `ci.md`) |
+| `--fail-on fail\|warn` | `local`, `terraform`, `aws`, `all` | Exit-Schwelle (Default `fail`): mit `warn` führt auch ein `WARN` zu Exit `1`. Befunde und Ausgabe bleiben unverändert; ein Tool-Fehler (Exit `2`) hat Vorrang; ungültiger Wert oder die Option bei `version` ist ein Aufruffehler (Exit `2`). Keine Umgebungsvariable, kein Konfigurationsfeld |
 | `--allowed-account ID` | `aws`, `all` (wirkt nur dort; das Format wird in allen Modi geprüft) | erlaubte Account-ID (12 Ziffern); mehrfach möglich, wird mit `allowedAccounts` vereint; ungültiges Format ist ein Tool-Fehler (Exit `2`), auch bei `local` |
 
 ## Exit-Codes
 
 | Exit | Bedeutung |
 |---|---|
-| `0` | kein `FAIL`-Finding |
-| `1` | mindestens ein `FAIL` |
+| `0` | kein `FAIL`-Finding (mit `--fail-on warn`: weder `WARN` noch `FAIL`) |
+| `1` | mindestens ein `FAIL` (mit `--fail-on warn`: mindestens ein `WARN` oder `FAIL`) |
 | `2` | Tool-Fehler: ungültige Argumente, ungültige oder nicht lesbare eigene Konfiguration, fehlendes `aws`-Binary (Grund `AWS_CLI_MISSING`) |
 
 ## Konfigurationsdatei `bedrock-eu-check.yml`
