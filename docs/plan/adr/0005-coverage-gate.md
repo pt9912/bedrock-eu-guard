@@ -1,6 +1,6 @@
 # ADR-0005: Coverage-Gate — Messweise, Ausschlüsse und Mindestwert
 
-**Status:** Proposed
+**Status:** Accepted
 
 **Datum:** 2026-11-11
 
@@ -70,3 +70,4 @@ Wir wählen **paketübergreifende Messung mit festem Mindestwert und benannten A
 | Datum | Ereignis | Verweis |
 |---|---|---|
 | 2026-11-11 | Proposed | [`slice-031`](../planning/in-progress/slice-031-coverage-gate.md) |
+| 2026-11-11 | Accepted | Sign-off beider Nutzer (Auftraggeber) zur überarbeiteten Fassung nach dem Review von w2 (Untergrenze 90 % im Skript erzwungen, Mindestwert 90 %, Ausschlüsse `coretest` und `cmd`); Review-Reports [Plan](../../reviews/2026-11-11-pr122-slice-031-plan.md), [Code](../../reviews/2026-11-11-pr123-slice-031-coverage-gate.md) und [Nachlauf](../../reviews/2026-11-11-pr123-slice-031-coverage-gate-nachlauf.md) |
