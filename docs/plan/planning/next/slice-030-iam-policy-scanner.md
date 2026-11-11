@@ -1,6 +1,6 @@
 # Slice slice-030: Scanner für eigenständige IAM-Policy-Dateien (`iam-policy.json`)
 
-**Status:** open. **Verantwortlich:** Kern w1, Adapter/CLI/Doku w2. **Priorisierung:** Nutzer von w2 wählte diesen Slice am 2026-11-11; die Bestätigung des Nutzers von w1 und der Wortlaut der Anforderung stehen aus (siehe Abschnitt 3), deshalb bleibt der Plan in `open/`.
+**Status:** next. **Verantwortlich:** Kern w1, Adapter/CLI/Doku w2. **Priorisierung:** Beide Nutzer haben diesen Slice am 2026-11-11 priorisiert und die Festlegungen in Abschnitt 3 bestätigt.
 
 **Welle:** [`welle-08-erweiterungen`](../welle-08-erweiterungen.md).
 
@@ -22,9 +22,9 @@ Eigenständige IAM-Policy-Dokumente im JSON-Format (zum Beispiel `iam-policy.jso
 
 ## 3. Entscheidungen der Auftraggeber (vor dem Start)
 
-Dieser Plan startet erst, wenn **beide Nutzer** die Priorisierung und diese Festlegungen bestätigt haben. Vorschlag in Klammern.
+Beide Nutzer haben die Priorisierung und diese Festlegungen bestätigt (siehe unten). Vorschlag in Klammern.
 
-**Bestätigungen** (Stand 2026-11-11): Nutzer von w2: „ja stimme zu“ zu den Festlegungen 1 bis 5 in der Fassung nach dem Plan-Review (die Bestätigung bezieht sich auf die Fassung dieses Abschnitts nach Commit `Plan-Review F-1 bis F-3 eingearbeitet`). Nutzer von w1: **offen** (er hat bisher nur slice-031 gewählt).
+**Bestätigungen** (Stand 2026-11-11): Nutzer von w2: „ja stimme zu“ zu den Festlegungen 1 bis 5 in der Fassung nach dem Plan-Review (die Bestätigung bezieht sich auf die Fassung dieses Abschnitts nach Commit `Plan-Review F-1 bis F-3 eingearbeitet`). Nutzer von w1: „Ja, Priorisierung und Festlegungen 1–5“ (nachdem ihm Abschnitt 3 vorgelegt wurde).
 
 1. **Neue Anforderung** (Nummer und Wortlaut legen die Auftraggeber fest). Vorschlag: `IAM-004` im Bereich der IAM-Anforderungen (die ID ist noch nicht vergeben), „Prüfung von IAM-Policy-Dokumenten (JSON)“, Akzeptanzkriterium: „Das Tool findet eigenständige IAM-Policy-Dateien (das Policy-Dokument selbst oder die Ausgabe von `aws iam get-policy-version` bzw. `get-role-policy`) und bewertet sie wie [`LH-FA-IAM-002`](../../../../spec/lastenheft.md#lh-fa-iam-002--zu-breite-bedrock-policies-erkennen) und [`LH-FA-TF-003`](../../../../spec/lastenheft.md#lh-fa-tf-003--bedrock-iam-policies-prüfen): `FAIL`, wenn `bedrock:*` oder `InvokeModel` auf `*` ohne Region-Condition erlaubt ist; `WARN`, wenn `*` verwendet wird, aber eine Region-Condition vorhanden ist, oder wenn die Wirkung nicht auswertbar ist; `PASS`, wenn die Policy eng eingeschränkt ist. Eine nicht lesbare oder ungültige Datei mit eindeutigem Namen (`iam-policy*.json`) ist ein `FAIL` mit Grund `FILE_UNREADABLE` bzw. `FILE_INVALID`; bei einer Datei, die nur das breite Muster `*-policy.json` trifft, ist dies ein `WARN` (Fremdformate lösen keinen `FAIL` aus), und ein gültiges JSON ohne Policy-Statement oder ohne Bedrock-Aktion erzeugt kein Finding. Dateiinhalte erscheinen nie in der Ausgabe.“
 2. **Modus.** Vorschlag: `terraform` ([`LH-MOD-003`](../../../../spec/lastenheft.md#lh-mod-003--terraform-modus): IAM-Konfigurationen in Infrastrukturdateien). Alternative `local`: beide Modi arbeiten offline und ohne AWS-Zugriff; `local` prüft Umgebung, Settings und Container-Dateien, und wer nur `local` ausführt, würde die Policy-Datei dann mitprüfen, aber die Modusgrenzen der Anforderungen verschieben sich (IAM-Konfigurationen gehören bisher zu `terraform`). Der Vorschlag `terraform` folgt der bestehenden Zuordnung; wer nur `local` ausführt, prüft die Policy-Datei nicht (als Grenze im Handbuch zu nennen).
@@ -34,7 +34,8 @@ Dieser Plan startet erst, wenn **beide Nutzer** die Priorisierung und diese Fest
 
 ## 4. Definition of Done
 
-- [ ] Beide Nutzer haben Priorisierung und die Festlegungen aus Abschnitt 3 bestätigt; der Lastenheft-Eintrag steht mit dem bestätigten Wortlaut, [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) ist angepasst.
+- [x] Beide Nutzer haben Priorisierung und die Festlegungen aus Abschnitt 3 bestätigt (2026-11-11).
+- [ ] Der Lastenheft-Eintrag steht mit dem bestätigten Wortlaut, [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) ist angepasst (w1, eigener PR).
 - [ ] Kern (w1): Port für die Suche und das Lesen von Policy-Dateien (eigene kleine Schnittstelle nach dem Muster der `.env`-Suche), Regel auf der vorhandenen Bewertung, Einbindung in `app.Scan` (nur Modus `terraform`), `exclude` im Kern, Unit-Tests; Regelkatalog und Referenz ergänzt (Doku-Drift-Test grün).
 - [ ] Adapter (w2): JSON-Reader auf dem Paket `iampolicy`, rekursive Suche (sortiert, relative Pfade), Testdaten `good`/`bad` (nur offensichtlich synthetische Werte), CLI-Verdrahtung, CLI-Tests ohne Dateiinhalt in der Ausgabe.
 - [ ] Doku (w2): Handbuch und Fehlersuche; die Grenze „eigenständige Policy-Dateien werden nicht geprüft“ entfällt.
@@ -56,7 +57,7 @@ Dieser Plan startet erst, wenn **beide Nutzer** die Priorisierung und diese Fest
 
 ## 6. Trigger
 
-Bestätigung beider Nutzer zu Priorisierung und Festlegungen (Abschnitt 3).
+Bestätigung beider Nutzer zu Priorisierung und Festlegungen (Abschnitt 3): erteilt am 2026-11-11.
 
 ## 7. Closure-Trigger
 
