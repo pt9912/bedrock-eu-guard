@@ -1,6 +1,6 @@
 # Slice slice-031: `coverage-gate` mit begründeter Schwelle und ADR
 
-**Status:** open. **Verantwortlich:** w1 (Plan-Review: w2). **Freigabe:** Nutzer 2026-11-11 („031 coverage-gate + ADR“; beide Nutzer wählten 031).
+**Status:** next. **Verantwortlich:** w1 (Plan-Review: w2). **Freigabe:** Nutzer 2026-11-11 („031 coverage-gate + ADR“; beide Nutzer wählten 031).
 
 **Welle:** [`welle-08-erweiterungen`](../welle-08-erweiterungen.md).
 
@@ -55,7 +55,7 @@ Die Änderung am `Makefile` liegt im Bereich von w2 (Makefile, CI); w2 liest dor
 
 ## 5. Trigger
 
-Nutzerfreigabe liegt vor (siehe Kopf). Plan-Review durch w2 mit Report nach `.harness/skills/reviewer.md`, danach `open → next → in-progress` als reine Moves.
+Nutzerfreigabe liegt vor (siehe Kopf). Plan-Review durch w2 liegt vor ([`2026-11-11-pr122-slice-031-plan.md`](../../../reviews/2026-11-11-pr122-slice-031-plan.md)); `open → next` ist erfolgt, `next → in-progress` mit dem Start der Umsetzung.
 
 ## 6. Closure-Trigger
 
