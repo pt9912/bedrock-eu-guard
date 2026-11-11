@@ -93,10 +93,18 @@ Workflow `release-artifacts` baut nur und veröffentlicht nichts.
    liefert er `SHA256SUMS` bitgleich zum veröffentlichten Release. Beim Vergleich den Tag-Ref
    verwenden: Version und Commit stecken im Binary, auf `main` ergäben sich andere Prüfsummen.
 4. **Veröffentlichen (manuell, außenwirksam):**
-   - Tag setzen und pushen: `git tag -a v1.0.0 -m "bedrock-eu-check 1.0.0"`,
-     `git push origin v1.0.0`.
-   - GitHub-Release mit den Artefakten und Release-Notizen anlegen
-     (`gh release create v1.0.0 dist/v1.0.0/* --notes-file <datei>`).
+   - Tag und GitHub-Release über den Workflow `release-create` (nur manuell,
+     `workflow_dispatch`; Eingaben: `target` = `tool` oder `feature`, `version`, `commit`,
+     `dry_run`). **Standard ist der Trockenlauf**: Er prüft Version, Commit (muss ein Vorfahre
+     von `main` sein) und dass der Tag noch nicht existiert, baut mit `make dist` und zeigt
+     die Prüfsummen; er schreibt nichts. Erst ein Lauf mit `dry_run=false` legt den
+     annotierten Tag (`v<version>` bzw. `feature-v<version>`) und das Release mit
+     Binaries und `SHA256SUMS` an. Schreibrechte hat nur der Job `create`, der an die
+     GitHub-Umgebung `release` gebunden ist; dort kann in den Repository-Einstellungen ein
+     Pflicht-Prüfer eingetragen werden. Das ersetzt das Ja beider Nutzer nicht. Ein scharfer
+     Lauf ist nicht rückholbar. Manuell geht es weiterhin mit
+     `git tag -a v1.0.0 <commit> -m "bedrock-eu-check 1.0.0"`, `git push origin v1.0.0` und
+     `gh release create v1.0.0 dist/v1.0.0/* --notes-file <datei>`.
    - Docker-Images und Devcontainer-Feature nach `ghcr.io` über den Workflow `publish`
      (nur manuell, `workflow_dispatch`; Eingaben: `version`, `commit`, Schalter `images`
      und `feature`). Er baut aus dem Tag `v<version>`, prüft Commit und Labels, führt die

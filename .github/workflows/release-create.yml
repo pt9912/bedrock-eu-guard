@@ -1,0 +1,144 @@
+name: release-create
+
+# Legt Tag und GitHub-Release aus CI an. Läuft NUR manuell (workflow_dispatch), nie auf
+# Push, Merge oder Zeitplan. Standard ist ein TROCKENLAUF (dry_run=true): prüft Version,
+# Commit und Tag und baut die Artefakte, schreibt aber nichts. Ein scharfer Lauf
+# (dry_run=false) legt einen annotierten Tag und ein Release an; beides ist nicht
+# rückholbar (auch der Go-Proxy sieht den Tag) und geschieht nur nach der ausdrücklichen
+# Freigabe BEIDER Nutzer zu genau Version, Commit und Zielen (docs/user/releasing.md).
+# Schreibrechte (contents: write) hat nur der Job `create`, der zusätzlich an die
+# Umgebung `release` gebunden ist (dort können in den Repository-Einstellungen
+# Pflicht-Prüfer eingetragen werden; das ersetzt das Ja beider Nutzer nicht).
+# Vorbild: publish.yml und d-check release.yml (SHA-gepinnte Actions, Rechte oben entzogen).
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "tool = Tag v<version> mit Release und Binaries; feature = nur Tag feature-v<version> (Devcontainer-Feature)"
+        type: choice
+        options: [tool, feature]
+        default: tool
+      version:
+        description: "Version x.y.z (ohne führendes v)"
+        required: true
+      commit:
+        description: "Freigegebener Commit (mindestens 12 Hex-Zeichen); muss ein Vorfahre von main sein"
+        required: true
+      dry_run:
+        description: "Trockenlauf: prüfen und bauen, nichts schreiben (Standard)"
+        type: boolean
+        default: true
+
+# Oben alles entziehen; die Jobs lockern nur, was sie brauchen.
+permissions: {}
+
+env:
+  TARGET: ${{ inputs.target }}
+  VERSION: ${{ inputs.version }}
+  COMMIT_INPUT: ${{ inputs.commit }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    outputs:
+      tag: ${{ steps.verify.outputs.tag }}
+      sha: ${{ steps.verify.outputs.sha }}
+    steps:
+      - name: Eingaben prüfen
+        run: |
+          echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || { echo "ungültige Version: $VERSION" >&2; exit 1; }
+          echo "$COMMIT_INPUT" | grep -Eq '^[0-9a-f]{12,40}$' || { echo "ungültiger Commit: $COMMIT_INPUT" >&2; exit 1; }
+          case "$TARGET" in tool|feature) ;; *) echo "ungültiges Ziel: $TARGET" >&2; exit 1;; esac
+
+      - name: Checkout (Commit, volle Historie)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.commit }}
+          fetch-depth: 0
+
+      - name: Commit und Tag prüfen
+        id: verify
+        run: |
+          set -euo pipefail
+          sha=$(git rev-parse HEAD)
+          case "$sha" in "$COMMIT_INPUT"*) ;; *) echo "Checkout $sha passt nicht zu $COMMIT_INPUT" >&2; exit 1;; esac
+          git fetch --quiet origin main
+          git merge-base --is-ancestor "$sha" origin/main || { echo "Commit $sha ist kein Vorfahre von main" >&2; exit 1; }
+          if [ "$TARGET" = tool ]; then tag="v$VERSION"; else tag="feature-v$VERSION"; fi
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+            echo "Tag $tag existiert bereits" >&2; exit 1
+          fi
+          if [ "$TARGET" = feature ]; then
+            fv=$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' devcontainer-feature/src/bedrock-eu-check/devcontainer-feature.json | head -1)
+            [ "$fv" = "$VERSION" ] || { echo "Feature-Version $fv passt nicht zu $VERSION" >&2; exit 1; }
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Geprüft: Ziel=$TARGET Tag=$tag Commit=$sha (Vorfahre von main, Tag frei)"
+
+      - name: Artefakte bauen und Prüfsummen verifizieren (nur Ziel tool)
+        if: ${{ inputs.target == 'tool' }}
+        run: |
+          make dist VERSION="$VERSION" COMMIT="$(git rev-parse --short=12 HEAD)"
+          echo "### Prüfsummen" >> "$GITHUB_STEP_SUMMARY"
+          { echo '```'; cat "dist/v$VERSION/SHA256SUMS"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Artefakte weitergeben
+        if: ${{ inputs.target == 'tool' && !inputs.dry_run }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dist
+          path: dist/v${{ inputs.version }}/
+          if-no-files-found: error
+
+      - name: Trockenlauf-Ergebnis
+        if: ${{ inputs.dry_run }}
+        run: |
+          echo "Trockenlauf: es wurde nichts geschrieben (kein Tag, kein Release)." | tee -a "$GITHUB_STEP_SUMMARY"
+
+  create:
+    # Nur im scharfen Lauf; an die Umgebung `release` gebunden.
+    needs: check
+    if: ${{ !inputs.dry_run }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: release
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout (Commit)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.check.outputs.sha }}
+
+      - name: Artefakte holen (nur Ziel tool)
+        if: ${{ inputs.target == 'tool' }}
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: dist
+          path: dist
+
+      - name: Tag anlegen und Release erstellen
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.check.outputs.tag }}
+          SHA: ${{ needs.check.outputs.sha }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ "$TARGET" = tool ]; then
+            git tag -a "$TAG" "$SHA" -m "bedrock-eu-check $VERSION"
+            git push origin "refs/tags/$TAG"
+            (cd dist && sha256sum -c SHA256SUMS)
+            gh release create "$TAG" dist/bedrock-eu-check_"$VERSION"_linux_amd64 dist/bedrock-eu-check_"$VERSION"_linux_arm64 dist/SHA256SUMS \
+              --title "bedrock-eu-check $VERSION" \
+              --notes "bedrock-eu-check $VERSION (Commit ${SHA:0:12}). Prüfsummen: siehe SHA256SUMS."
+          else
+            git tag -a "$TAG" "$SHA" -m "Devcontainer-Feature bedrock-eu-check $VERSION"
+            git push origin "refs/tags/$TAG"
+          fi
+          echo "Angelegt: $TAG auf $SHA" | tee -a "$GITHUB_STEP_SUMMARY"
