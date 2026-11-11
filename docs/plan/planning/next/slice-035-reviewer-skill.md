@@ -1,6 +1,6 @@
 # Slice slice-035: Reviewer-Skill `.harness/skills/reviewer.md` anlegen
 
-**Status:** open.
+**Status:** next. **Verantwortlich:** w2 (Gegenlesen: w1). **Freigabe:** Nutzer 2026-11-11 („ja“).
 
 **Welle:** ohne Welle (Harness/Doku, kein Code).
 
