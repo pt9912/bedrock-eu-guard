@@ -1,6 +1,6 @@
 # Slice slice-025: Workflow `release-create` für Tag und GitHub-Release
 
-**Status:** open.
+**Status:** done.
 
 **Welle:** [`welle-06-release-haertung`](../welle-06-release-haertung.md).
 
@@ -16,15 +16,15 @@ Ein neuer Workflow `release-create` legt Tag und GitHub-Release aus CI an, statt
 
 ## 2. Definition of Done
 
-- [ ] Eingaben: `version` (x.y.z), `commit` (mindestens 12 Hex-Zeichen), `dry_run` (Standard: wahr).
-- [ ] Prüft Version und Commit: Checkout mit `ref=<commit>`; der Commit muss ein Vorfahre von `main` sein (auch ein älterer freigegebener Commit ist zulässig, nicht nur der Kopf von `main`); der Tag darf noch nicht existieren. Neben `v<version>` (Werkzeug) unterstützt der Workflow den Feature-Tag `feature-v<x.y.z>` (siehe slice-024).
-- [ ] Trockenlauf: baut mit `make dist`, prüft `SHA256SUMS`, gibt Namen und Prüfsummen aus; schreibt nichts.
-- [ ] Scharfer Lauf (`dry_run=false`): legt den annotierten Tag auf dem Commit an und das Release mit Binaries und `SHA256SUMS`; `contents: write` nur im Job, oben `permissions: {}`.
-- [ ] Im Trockenlauf erprobt (Run-ID in der Closure-Notiz); der scharfe Lauf geschieht erst bei der nächsten freigegebenen Veröffentlichung.
-- [ ] Optionale technische Sicherung geprüft: GitHub-Umgebung (`environment`) mit Required Reviewers für den scharfen Lauf. Sie erzwingt eine zweite Bestätigung in GitHub, kann aber das „Ja beider Nutzer“ nicht prüfen (Reviewer sind GitHub-Konten, die Einstellung nimmt der Nutzer im Repository vor). Entscheidung und Begründung in der Closure-Notiz.
-- [ ] `releasing.md` beschreibt den Ablauf mit dem Workflow; das Ja beider Nutzer zur Version, zum Commit und zu den Zielen bleibt Voraussetzung.
-- [ ] `make verify-clean` und CI grün.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Eingaben: `version` (x.y.z), `commit` (mindestens 12 Hex-Zeichen), `dry_run` (Standard: wahr).
+- [x] Prüft Version und Commit: Checkout mit `ref=<commit>`; der Commit muss ein Vorfahre von `main` sein (auch ein älterer freigegebener Commit ist zulässig, nicht nur der Kopf von `main`); der Tag darf noch nicht existieren. Neben `v<version>` (Werkzeug) unterstützt der Workflow den Feature-Tag `feature-v<x.y.z>` (siehe slice-024).
+- [x] Trockenlauf: baut mit `make dist`, prüft `SHA256SUMS`, gibt Namen und Prüfsummen aus; schreibt nichts.
+- [x] Scharfer Lauf (`dry_run=false`): legt den annotierten Tag auf dem Commit an und das Release mit Binaries und `SHA256SUMS`; `contents: write` nur im Job, oben `permissions: {}`.
+- [x] Im Trockenlauf erprobt (Run-ID in der Closure-Notiz); der scharfe Lauf geschieht erst bei der nächsten freigegebenen Veröffentlichung.
+- [x] Optionale technische Sicherung geprüft: GitHub-Umgebung (`environment`) mit Required Reviewers für den scharfen Lauf. Sie erzwingt eine zweite Bestätigung in GitHub, kann aber das „Ja beider Nutzer“ nicht prüfen (Reviewer sind GitHub-Konten, die Einstellung nimmt der Nutzer im Repository vor). Entscheidung und Begründung in der Closure-Notiz.
+- [x] `releasing.md` beschreibt den Ablauf mit dem Workflow; das Ja beider Nutzer zur Version, zum Commit und zu den Zielen bleibt Voraussetzung.
+- [x] `make verify-clean` und CI grün.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 3. Plan (vor Code)
 
@@ -49,7 +49,11 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 7. Closure-Notiz (nach `done/`)
 
-<!-- Erst nach Abschluss füllen. -->
+- **Funktioniert:** Der Workflow `release-create` (PR #92, Korrektur #93) ist gemergt. Trockenlauf auf GitHub: Run 42972279064 (`target=tool`, Version 1.0.1, Commit `5f1b35cca776`) war erfolgreich: Eingaben geprüft, Commit ist Vorfahre von `main`, Tag `v1.0.1` frei, `make dist` baut beide Binaries, `sha256sum -c` OK; der Job `create` wurde übersprungen. Es entstand kein Tag und kein Release (Tags und Releases vorher und nachher unverändert).
+- **Gegenproben:** Version 1.0.0 (Tag existiert) bricht ab (Run 42972414227, „Tag v1.0.0 existiert bereits“); ein unbekannter Commit bricht ab (Run 42972444200).
+- **Anders als geplant:** Der erste Trockenlauf (Run 42972041118) scheiterte, weil `actions/checkout` keine verkürzte SHA als `ref` akzeptiert; behoben durch Checkout von `main` mit voller Historie und lokalen Wechsel auf den Commit (#93). Außerdem trägt der Workflow die Tag-frei-Prüfung im Job `create` ein zweites Mal (Race zwischen `check` und `create`).
+- **Nicht erprobt:** Der scharfe Lauf (`dry_run=false`), die Umgebung `release` und das Ziel `feature` (Tag `feature-v<version>`) wurden nicht ausgeführt; dafür braucht es das Ja beider Nutzer zu Version, Commit und Ziel. Vor dem ersten scharfen Lauf legen die Nutzer die Umgebung `release` mit Pflicht-Prüfern in den Repository-Einstellungen an (siehe `releasing.md`); sonst wird sie ungeschützt erzeugt.
+- **Steering-Loop:** Eine neue Workflow-Fähigkeit erst im Trockenlauf auf der echten Plattform erproben, bevor sie gebraucht wird; Eingaben, die Nutzer abkürzen (SHA), gegen die Eigenheiten der Plattform-Actions prüfen. Gegenproben (Tag vorhanden, Commit unbekannt) gehören zur Erprobung.
 
 ## 8. Sub-Area-Modus-Begründung
 
