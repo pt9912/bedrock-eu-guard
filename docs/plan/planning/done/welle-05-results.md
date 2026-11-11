@@ -40,6 +40,10 @@ Prüfsummen der Binaries:
 8f91f8e78051505ddbb99dfae301fe21bf1ce4900bd0e1f22f4d43a44d3066a0  bedrock-eu-check_1.0.0_linux_arm64
 ```
 
+**Herkunft der Release-Dateien (ehrlich):** Die Binaries und `SHA256SUMS` im GitHub-Release stammen aus einem **lokalen** `make dist` (reproduzierbar, die Prüfsummen sind identisch zur Vorschau in der Entscheidungsvorlage). Der Workflow `release-artifacts` ist auf GitHub **nie gelaufen** und damit nicht erprobt; nur der Workflow `publish` lief.
+
+**Bekannter Mangel im veröffentlichten Feature:** Die Option-Beschreibung in `devcontainer-feature.json` („der Default zeigt auf ein Release, das noch nicht existiert“) ist im veröffentlichten Feature veraltet, weil das Release inzwischen existiert. Die Korrektur gibt es erst mit der nächsten Feature-Version (Neuveröffentlichung nötig).
+
 **Nachprüfung:** w1 hat das Release frisch heruntergeladen: `sha256sum -c` meldet für beide Dateien OK, `version` meldet `bedrock-eu-check 1.0.0 (5f1b35cca776)`. Die Existenz der Images und des Features auf `ghcr.io` wurde über die Manifeste bestätigt. w2 hat die Images gestartet und getestet; das Feature wurde nur über das Manifest geprüft (nicht in einem Devcontainer installiert).
 
 **Fehllauf:** Der erste Lauf des Workflows `publish` (04:25 UTC) scheiterte, weil das Paket `bedrock-eu-check` schon ohne Zugriff für Actions existierte und der Push verweigert wurde; es wurde nichts veröffentlicht. Nach der Zugriffsfreigabe durch den Nutzer liefen die Wiederholungen grün.
@@ -67,5 +71,6 @@ Prüfsummen der Binaries:
 
 - `--fail-on warn` und `--output FILE` für den CI-Modus; Zusatzregionen für „sichtbare“ Profile; `coverage-gate` mit begründeter Schwelle (eigener ADR).
 - Eigenständige IAM-Policy-Dateien (`iam-policy.json`) als Soll-Anforderung mit Scanner.
+- Den Workflow `release-artifacts` auf GitHub erproben (bisher nur der lokale `make dist` im Einsatz); die Option-Beschreibung des Devcontainer-Features korrigieren und eine neue Feature-Version veröffentlichen (nur nach Freigabe beider Nutzer).
 - Signierte Releases (Sigstore), SBOM, bitgleiche Image-IDs; Erprobung des Feature-Installationswegs und der Workflows gegen die Devcontainer-CLI bzw. GitHub; Plattformen außer Linux.
 - Die neuen Prüfziele von `d-check` (`doc-planning`, `doc-targets`, …) sind nicht in `make gates` aufgenommen (Folgeentscheidung).
