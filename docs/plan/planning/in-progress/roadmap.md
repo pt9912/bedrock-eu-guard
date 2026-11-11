@@ -45,7 +45,7 @@ Pläne: [`../welle-06-release-haertung.md`](../welle-06-release-haertung.md), [`
 | M4 — CI-fähig | welle-04 | SARIF + `--ci` + Exit-Code 1 bei FAIL | erreicht (2026-11-10) |
 | M5 — Release 1.0 | welle-05 | Docker-Image + Doku + Tests grün | erreicht (2026-11-11, veröffentlicht) |
 | M6 — Release-Prozess erprobt | welle-06 | `release-artifacts` und Feature erprobt, `release-create` vorhanden | Slices done (023, 024, 025); offen: Veröffentlichung von Feature 1.0.1 (Entscheidung beider Nutzer) |
-| M7 — CI-Komfort (1.1.0) | welle-07 | `--fail-on warn`, `--output FILE`, Zusatzregionen, Gate-Bewertung | in Arbeit (Slices umgesetzt; Closure slice-027 und Entscheidungsvorlage 1.1.0 offen; nicht veröffentlicht) |
+| M7 — CI-Komfort (1.1.0) | welle-07 | `--fail-on warn`, `--output FILE`, Zusatzregionen, Gate-Bewertung | Slices done (026 bis 029); offen: Entscheidungsvorlage 1.1.0; nicht veröffentlicht |
 | M8 — Erweiterungen | welle-08 | je Slice: Entscheidung der Auftraggeber bzw. ADR | offen (nicht freigegeben) |
 
 ## Abhängigkeitsgraph
