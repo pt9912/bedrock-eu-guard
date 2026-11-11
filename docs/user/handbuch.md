@@ -258,6 +258,19 @@ allowedAccounts: ["123456789012"]
 
 Leer bedeutet: Das Konto wird nicht geprüft. Alternativ `--allowed-account` (Aufgabe 5).
 
+### Zusätzliche Regionen auf sichtbare Profile prüfen
+
+```yaml
+visibilityRegions: [us-east-1]
+```
+
+Im Modus `aws` und `all` werden in diesen Regionen nur die Inference-Profile gelesen. Ein sichtbares,
+nicht erlaubtes Profil ergibt `WARN` `PROFILES_VISIBLE_NOT_ALLOWED` mit der Region; ist die Region
+nicht lesbar (zum Beispiel fehlendes Recht), `WARN` `VISIBILITY_UNKNOWN`. Beides ist nie ein `FAIL`;
+ein `FAIL` entsteht nur, wenn ein nicht erlaubtes Profil tatsächlich verwendet wird. Eine Region darf
+nicht zugleich in `allowedRegions` stehen (Konfigurationsfehler, Exit `2`). Benötigte Rechte:
+[`aws-permissions.md`](aws-permissions.md).
+
 ### Modelle erlauben oder blockieren
 
 ```yaml

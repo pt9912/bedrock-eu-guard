@@ -83,6 +83,14 @@ unterstützen keine Einschränkung auf Ressourcen und stehen daher mit `*`.
 Die `aws:RequestedRegion`-Bedingung ist an die erlaubten Regionen
 anzupassen (`allowedRegions` in `bedrock-eu-check.yml`).
 
+**Zusatzregionen (`visibilityRegions`):** Wer zusätzlich prüfen lassen will, ob in weiteren
+Regionen nicht erlaubte Profile sichtbar sind, trägt sie in `visibilityRegions` ein. Dort
+ruft das Werkzeug **nur** `bedrock list-inference-profiles` auf und braucht deshalb nur
+`bedrock:ListInferenceProfiles` in diesen Regionen. Die Beispiel-Policy oben erlaubt es nur in
+den erlaubten Regionen; in einer Zusatzregion ergibt das `WARN` `VISIBILITY_UNKNOWN`
+(Sichtbarkeit nicht ermittelbar), kein `FAIL`. Soll die Prüfung dort Ergebnisse liefern, wird
+`ListInferenceProfiles` für diese Regionen ergänzt (Region in `aws:RequestedRegion` aufnehmen).
+
 ## Hinweise
 
 - **Näherung:** Die Rechtesimulation berücksichtigt Organisations-SCPs und Permission
