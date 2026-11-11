@@ -1,6 +1,6 @@
 # Slice slice-024: Devcontainer-Feature mit der devcontainer-CLI erproben und korrigieren
 
-**Status:** open.
+**Status:** next. **Verantwortlich:** w2 (Plan-Review: w1). **Freigabe zum Erproben:** Nutzer 2026-11-11 („slice 024 freigegeben“).
 
 **Welle:** [`welle-06-release-haertung`](../welle-06-release-haertung.md).
 
@@ -25,6 +25,16 @@ Das Devcontainer-Feature wird mit der echten `devcontainer`-CLI installiert und 
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 3. Plan (vor Code)
+
+**Ablauf der Erprobung** (veröffentlicht nichts):
+
+1. Workflow `feature-cli` (`workflow_dispatch` und bei Änderungen unter `devcontainer-feature/**`; Rechte `contents: read`, kein `packages: write`): installiert die `devcontainer`-CLI in gepinnter Version (`@devcontainers/cli@0.72.0`, dieselbe wie in `publish.yml`) und baut zwei Beispiel-Container.
+2. **Fall A, Feature aus dem Arbeitsstand:** Die Konfiguration verweist auf das Verzeichnis `devcontainer-feature/src` (lokaler Pfad). `devcontainer build` installiert das Feature mit der Standard-`baseUrl` aus dem GitHub-Release `v1.0.0`; im Container prüft `bedrock-eu-check version` die Ausgabe `1.0.0 (5f1b35cca776)`.
+3. **Fall B, veröffentlichtes Feature:** Die Konfiguration verweist auf `ghcr.io/pt9912/bedrock-eu-guard/bedrock-eu-check:1`; gleiche Prüfung. Das belegt, was Nutzer heute bekommen.
+4. Beide Fälle laufen mit einer Basis aus `mcr.microsoft.com/devcontainers/base:ubuntu` (die Vorlage in `devcontainer.md`); Fehler der CLI (zum Beispiel Rechte, `curl`, Architektur) gelten als Mangel und werden behoben, nicht umgangen.
+5. Befunde, Run-ID und Ergebnis kommen in die Closure-Notiz; erst dann wird entschieden, ob eine neue Feature-Version nötig ist.
+
+**Veröffentlichung:** Eine neue Feature-Version erscheint nur über `publish` mit Eingabe `ref` und dem Tag `feature-v<x.y.z>` (angelegt über `release-create`, Ziel `feature`) und nur nach dem Ja **beider** Nutzer zu Feature-Version, Commit und Ziel. Dieser Slice bereitet sie vor, führt sie aber nicht aus.
 
 | Datei / Komponente | Änderungs-Art | Begründung |
 |---|---|---|
