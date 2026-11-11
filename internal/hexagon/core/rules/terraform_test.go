@@ -107,6 +107,7 @@ func TestTerraformIAM(t *testing.T) {
 		{"Deny wird ignoriert", []model.IAMStatement{{Effect: "Deny", Actions: []string{"bedrock:*"}, Resources: star, Line: 5}}, true, 0, ""},
 		{"kein Bedrock", []model.IAMStatement{allow([]string{"s3:*"}, star, false, false, 5)}, true, 0, ""},
 		{"dynamisch", []model.IAMStatement{allow([]string{"bedrock:InvokeModel"}, nil, false, true, 6)}, false, model.WARN, model.ReasonIAMDynamic},
+		{"NotAction ohne Aktionsliste: nicht auswertbar", []model.IAMStatement{allow(nil, star, false, true, 6)}, false, model.WARN, model.ReasonIAMDynamic},
 		{"riskant + eng: nur das riskante", []model.IAMStatement{
 			allow([]string{"bedrock:*"}, star, false, false, 5),
 			allow([]string{"bedrock:InvokeModel"}, []string{"arn:x"}, false, false, 9)}, false, model.FAIL, model.ReasonIAMWildcard},

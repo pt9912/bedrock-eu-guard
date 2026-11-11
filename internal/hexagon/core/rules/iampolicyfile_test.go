@@ -33,6 +33,7 @@ func TestIAMPolicyFilesAssessment(t *testing.T) {
 		{"mit Region-Condition", []model.IAMStatement{allow([]string{"bedrock:*"}, star, true)}, false, model.WARN, model.ReasonIAMWildcardCond},
 		{"eng", []model.IAMStatement{allow([]string{"bedrock:InvokeModel"}, []string{"arn:aws:bedrock:eu-central-1::foundation-model/x"}, false)}, false, model.PASS, model.ReasonOK},
 		{"nicht auswertbar", []model.IAMStatement{{Effect: "Allow", Actions: []string{"bedrock:InvokeModel"}, Dynamic: true}}, false, model.WARN, model.ReasonIAMDynamic},
+		{"NotAction ohne Aktionsliste: nicht auswertbar", []model.IAMStatement{{Effect: "Allow", Resources: star, Dynamic: true}}, false, model.WARN, model.ReasonIAMDynamic},
 		{"ohne Bedrock-Aktion: kein Finding", []model.IAMStatement{allow([]string{"s3:*"}, star, false)}, true, 0, ""},
 		{"Fremdformat (leere Liste): kein Finding", nil, true, 0, ""},
 	}
