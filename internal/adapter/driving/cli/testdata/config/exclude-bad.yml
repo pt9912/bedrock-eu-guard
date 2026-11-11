@@ -1,1 +1,1 @@
-exclude: [main.tf, Dockerfile, docker-compose.yml, .devcontainer, ".claude"]
+exclude: [main.tf, Dockerfile, docker-compose.yml, .devcontainer, ".claude", iam-policy.json, policies]

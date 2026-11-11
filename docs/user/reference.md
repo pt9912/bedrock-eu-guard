@@ -9,7 +9,7 @@
 | Befehl | Prüft | Netz |
 |---|---|---|
 | `bedrock-eu-check local` | Umgebungsvariablen, `.env`-Dateien (rekursiv), Claude-Code-Settings, Devcontainer, Compose, Dockerfile | nein |
-| `bedrock-eu-check terraform` | Terraform-Dateien (rekursiv) | nein |
+| `bedrock-eu-check terraform` | Terraform-Dateien und eigenständige IAM-Policy-Dateien (rekursiv) | nein |
 | `bedrock-eu-check aws` | STS-Identität, Bedrock-Profile, IAM-Rechte (lesend, über das `aws`-Binary) | ja |
 | `bedrock-eu-check all` | `local` + `terraform` + `aws` | ja |
 | `bedrock-eu-check version` | gibt Version und Commit aus | nein |

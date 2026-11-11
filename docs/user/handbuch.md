@@ -88,9 +88,8 @@ ohne AWS-Zugang.
 `ANTHROPIC_API_KEY`, Modellvariablen, Mantle), `.env`-Dateien, die Claude-Code-Settings (Benutzer und
 Projekt), Devcontainer, Compose-Dateien und Dockerfiles.
 
-**Nicht geprüft:** eigenständige Policy-Dateien wie `iam-policy.json` werden derzeit **nicht**
-ausgewertet; IAM-Policies prüft das Werkzeug in Terraform-Dateien (Aufgabe 4) und beim eigenen
-Principal (Aufgabe 5). Gehen Sie nicht davon aus, dass losgelöste Policy-JSONs geprüft sind.
+**Nicht in `local`:** eigenständige Policy-Dateien wie `iam-policy.json` prüft der Modus `terraform`
+(Aufgabe 4), nicht `local`. IAM-Policies prüft das Werkzeug außerdem beim eigenen Principal (Aufgabe 5).
 
 **Wo gesucht wird:** Claude-Projekt-Settings (`.claude/settings.json`,
 `.claude/settings.local.json`), `.devcontainer/devcontainer.json`, `.devcontainer.json`,
@@ -146,7 +145,7 @@ Benutzer-Settings) erscheint je betroffener Regel einmal.
 
 ## Aufgabe 4: Terraform prüfen
 
-**Ziel:** Provider-Region, Bedrock-IAM-Policies und Modell-IDs in `.tf`-Dateien prüfen.
+**Ziel:** Provider-Region, Bedrock-IAM-Policies und Modell-IDs in `.tf`-Dateien sowie eigenständige IAM-Policy-Dateien (JSON) prüfen.
 
 ```bash
 bedrock-eu-check terraform                  # aktuelles Verzeichnis, rekursiv
@@ -173,6 +172,15 @@ Was Sie wissen sollten:
   ergibt `WARN` (`REGION_DYNAMIC`); ebenso eine nicht auflösbare Policy (`IAM_DYNAMIC`).
   Werte aus `variable`, `locals` und `.tfvars` werden nie gelesen oder ausgegeben.
 - **Keine Terraform-Dateien:** `WARN` (`NO_TERRAFORM_FILES`) — prüfen Sie `--root`.
+- **Eigenständige Policy-Dateien:** `terraform` (und `all`) sucht zusätzlich rekursiv nach Dateien mit dem
+  Namen `iam-policy*.json` oder `*-policy.json` und bewertet sie wie die Policies in Terraform: `FAIL` bei
+  `bedrock:*` oder `InvokeModel` auf `*` ohne Region-Condition, `WARN` mit Region-Condition oder bei
+  nicht auswertbaren Einträgen, sonst `PASS`. Erkannt werden das Policy-Dokument selbst sowie die Ausgabe von
+  `aws iam get-policy-version` und `aws iam get-role-policy`; andere Formate (zum Beispiel CloudFormation oder
+  URL-kodierte Dokumente) und Policies ohne Bedrock-Aktion erzeugen kein Finding. Eine ungültige oder nicht
+  lesbare Datei mit dem Namen `iam-policy*.json` ist ein `FAIL` (`FILE_INVALID`, `FILE_UNREADABLE`), eine Datei,
+  die nur das breite Muster `*-policy.json` trifft, nur ein `WARN`. Dateiinhalte erscheinen nie in der Ausgabe;
+  JSON kennt keine Zeilen der Statements, genannt wird die Datei (bei ungültigem JSON die Zeile des Fehlers).
 - **Testdaten ausnehmen:** absichtlich fehlerhafte Beispiele per `exclude` (Aufgabe 7).
 
 ## Aufgabe 5: Das AWS-Konto und die Berechtigungen prüfen
@@ -405,8 +413,9 @@ Die vollständige Liste typischer Meldungen steht in der [Fehlersuche](troublesh
 
 - **Nur sichtbare Konfiguration.** Das Werkzeug ist keine Rechts- oder Datenschutzberatung und
   kein Beweis über das interne Routing von AWS; es prüft Konfigurationen, die es lesen kann.
-- **Nicht alle Dateiarten.** Eigenständige Policy-JSONs (`iam-policy.json`) werden nicht geprüft (siehe
-  Aufgabe 2); Direktzugriffe auf die Anthropic-API darin erkennt das Werkzeug daher nicht.
+- **Nicht alle Dateiarten.** Eigenständige Policy-Dateien werden nur im Modus `terraform` (und `all`) und nur bei
+  den Namen `iam-policy*.json` und `*-policy.json` gefunden; andere Vorlagen wie CloudFormation und
+  URL-kodierte Policy-Dokumente prüft das Werkzeug nicht.
 - **Nur lesend.** Es ändert weder Dateien noch AWS-Ressourcen und repariert nichts. Der Modus `aws`
   nutzt ausschließlich lesende Aufrufe.
 - **Keine Secret-Werte.** Weder in der Konsole noch in JSON oder SARIF erscheinen Zugangsdaten

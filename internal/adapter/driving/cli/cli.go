@@ -18,6 +18,7 @@ import (
 	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/envos"
 	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/envsource"
 	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/fs"
+	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/policyfile"
 	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/report"
 	"github.com/pt9912/bedrock-eu-guard/internal/adapter/driven/terraform"
 	"github.com/pt9912/bedrock-eu-guard/internal/hexagon/core/app"
@@ -89,7 +90,7 @@ func run(args []string, env driven.Environment, home string, stdout, stderr io.W
 	}
 	if err == nil && (mode == "terraform" || mode == "all") {
 		var tf []model.Finding
-		tf, err = app.Scan{Terraform: terraform.New(opts.root)}.Run(cfg)
+		tf, err = app.Scan{Terraform: terraform.New(opts.root), IAMPolicyFiles: policyfile.New(opts.root)}.Run(cfg)
 		findings = append(findings, tf...)
 	}
 	if err == nil && (mode == "aws" || mode == "all") {
