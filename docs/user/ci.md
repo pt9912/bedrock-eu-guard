@@ -11,6 +11,7 @@ nichts hoch; das Hochladen übernimmt der Workflow.
 |---|---|
 | `--format console\|json\|sarif` | Ausgabeformat auf stdout (Default `console`) |
 | `--ci` | stdout trägt weiterhin nur das Ergebnis; zusätzlich steht eine Zusammenfassung auf **stderr**, damit das Pipeline-Log auch bei umgeleitetem stdout den Ausgang zeigt |
+| `--fail-on fail\|warn` | Exit-Schwelle (Default `fail`); mit `warn` scheitert die Pipeline auch bei `WARN` (siehe unten) |
 | `--root DIR` | Wurzel der zu prüfenden Dateien (Default: aktuelles Verzeichnis) |
 | `--config FILE` | Konfigurationsdatei (Default: `<root>/bedrock-eu-check.yml`) |
 
@@ -20,8 +21,17 @@ nichts hoch; das Hochladen übernimmt der Workflow.
 | `1` | mindestens ein `FAIL` ([`LH-FA-EXIT-002`](../../spec/lastenheft.md#lh-fa-exit-002--fehlgeschlagene-prüfung)) |
 | `2` | Tool-Fehler, z. B. ungültige Konfiguration, unbekannte Option oder fehlendes `aws`-Binary ([`LH-FA-EXIT-003`](../../spec/lastenheft.md#lh-fa-exit-003--tool-fehler)) |
 
-`--ci` ändert die Exit-Codes nicht: `WARN` lässt den Lauf nicht scheitern. Ein
-Schwellenwert wie `--fail-on warn` ist ein Folgepunkt.
+`--ci` ändert die Exit-Codes nicht: `WARN` lässt den Lauf nicht scheitern. Für eine strenge
+Pipeline gibt es `--fail-on warn`: Dann endet der Lauf bei mindestens einem `WARN` oder `FAIL`
+mit Exit `1`. Befunde und Ausgabeformate bleiben gleich, nur der Exit-Code ändert sich; ein
+Tool-Fehler (Exit `2`) hat Vorrang. Beispiel:
+
+```bash
+bedrock-eu-check local --ci --fail-on warn --format sarif > local.sarif
+```
+
+Vorsicht: Erwartete Warnungen (zum Beispiel `FILE_MISSING` für die Benutzer-Settings in CI,
+siehe [Fehlersuche](troubleshooting.md)) lassen die Pipeline dann scheitern.
 
 Bei einem Tool-Fehler bleibt stdout trotzdem im gewählten Format parsebar
 (bereits ermittelte Findings), die Fehlermeldung steht auf stderr.
