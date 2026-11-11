@@ -10,7 +10,7 @@ Reihenfolge von Terminen. Die Wellen bilden die Versions-Stufen
 
 ## Aktuelle Welle
 
-Keine aktive Welle (kein Slice in `in-progress/`; Ruhezustand im Sinne des Slice-Lifecycles). Zuletzt abgeschlossen: Wartung ohne Welle, [`slice-034`](../done/slice-034-devcontainer-cli-aktualisieren.md) (devcontainer-CLI 0.90.0) und [`slice-035`](../done/slice-035-reviewer-skill.md) (Reviewer-Skill).
+welle-08 (Erweiterungen) ist teilweise freigegeben: [`slice-031`](slice-031-coverage-gate.md) (`coverage-gate` mit ADR) liegt in `in-progress/`; die übrigen Slices der Welle warten auf ihre Trigger. Zuletzt abgeschlossen: Wartung ohne Welle, [`slice-034`](../done/slice-034-devcontainer-cli-aktualisieren.md) (devcontainer-CLI 0.90.0) und [`slice-035`](../done/slice-035-reviewer-skill.md) (Reviewer-Skill).
 
 welle-01 bis welle-07 sind abgeschlossen. Release 1.0.0 ist am 2026-11-11 veröffentlicht
 (Tag `v1.0.0` auf Commit `5f1b35cca776`, GitHub-Release, Images auf `ghcr.io`, Devcontainer-Feature),
@@ -24,7 +24,7 @@ siehe [`../done/welle-01-results.md`](../done/welle-01-results.md),
 [`../done/welle-06-results.md`](../done/welle-06-results.md) und [`../done/welle-07-results.md`](../done/welle-07-results.md). Die Pläne liegen unter
 [`../done/`](../done/), zuletzt [`../done/welle-07-ci-komfort.md`](../done/welle-07-ci-komfort.md).
 
-Als Nächstes steht nur welle-08 an; sie startet erst nach einer Entscheidung der Auftraggeber. Sobald ein Slice nach `in-progress/` zieht, entfällt der Ruhe-Marker oben.
+Von welle-08 laufen nur die Slices, die die Auftraggeber freigegeben haben; jeder weitere Slice braucht seinen Trigger. Sobald kein Slice mehr in `in-progress/` liegt, trägt dieser Block wieder den Ruhe-Marker.
 
 ## Nächste Wellen
 
@@ -49,7 +49,7 @@ Pläne: [`../done/welle-06-release-haertung.md`](../done/welle-06-release-haertu
 | M5 — Release 1.0 | welle-05 | Docker-Image + Doku + Tests grün | erreicht (2026-11-11, veröffentlicht) |
 | M6 — Release-Prozess erprobt | welle-06 | `release-artifacts` und Feature erprobt, `release-create` vorhanden | erreicht (2026-11-11; Feature 1.0.1 veröffentlicht) |
 | M7 — CI-Komfort (1.1.0) | welle-07 | `--fail-on warn`, `--output FILE`, Zusatzregionen, Gate-Bewertung | erreicht (2026-11-11; 1.1.0 veröffentlicht) |
-| M8 — Erweiterungen | welle-08 | je Slice: Entscheidung der Auftraggeber bzw. ADR | offen (nicht freigegeben) |
+| M8 — Erweiterungen | welle-08 | je Slice: Entscheidung der Auftraggeber bzw. ADR | in Arbeit (nur slice-031 freigegeben) |
 
 ## Abhängigkeitsgraph
 
