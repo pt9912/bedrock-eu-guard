@@ -1,6 +1,6 @@
 # Welle welle-07-ci-komfort: Komfort für CI und Auswertung
 
-**Status:** open (geplant, noch nicht gestartet)
+**Status:** in-progress (gestartet; slice-026, -028, -029 done, slice-027 umgesetzt, Closure und Entscheidungsvorlage 1.1.0 offen)
 
 **Zielmeilenstein:** M7 — CI-Komfort (Werkzeug-Version 1.1.0)
 
