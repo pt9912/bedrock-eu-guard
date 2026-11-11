@@ -16,7 +16,7 @@
 
 `AGENTS.md` §4 kündigt ein `coverage-gate` an; §3.6 verlangt, dass jede Schwelle (Coverage, Linter-Strenge, Architekturregel) eine ADR ist und kein PR-Kommentar. Bisher misst kein Gate die Abdeckung.
 
-Gemessener Ist-Stand (2026-11-11, gepinntes Image, ohne Netz, [`slice-031`](../planning/in-progress/slice-031-coverage-gate.md) §2):
+Gemessener Ist-Stand (2026-11-11, gepinntes Image, ohne Netz, [`slice-031`](../planning/done/slice-031-coverage-gate.md) §2):
 
 | Messweise | Gesamt |
 |---|---|
@@ -69,5 +69,5 @@ Wir wählen **paketübergreifende Messung mit festem Mindestwert und benannten A
 
 | Datum | Ereignis | Verweis |
 |---|---|---|
-| 2026-11-11 | Proposed | [`slice-031`](../planning/in-progress/slice-031-coverage-gate.md) |
+| 2026-11-11 | Proposed | [`slice-031`](../planning/done/slice-031-coverage-gate.md) |
 | 2026-11-11 | Accepted | Sign-off beider Nutzer (Auftraggeber) zur überarbeiteten Fassung nach dem Review von w2 (Untergrenze 90 % im Skript erzwungen, Mindestwert 90 %, Ausschlüsse `coretest` und `cmd`); Review-Reports [Plan](../../reviews/2026-11-11-pr122-slice-031-plan.md), [Code](../../reviews/2026-11-11-pr123-slice-031-coverage-gate.md) und [Nachlauf](../../reviews/2026-11-11-pr123-slice-031-coverage-gate-nachlauf.md) |
