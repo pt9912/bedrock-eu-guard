@@ -29,7 +29,7 @@ der Zeitpunkt von A um die zusätzlichen Slices.
 
 ## 2. Stand (Messwerte)
 
-Gemessen auf `main`, Commit `7e78decdd8c8`, am 2026-11-11.
+Gemessen auf `main`, Commit `7e78decdd8c8`, am 2026-11-11 (**vor** dem `.env`-Scanner; der Release-Commit ist ein späterer, siehe Abschnitt 3).
 
 | Gegenstand | Stand |
 |---|---|
@@ -48,7 +48,7 @@ b0494016e33b7d3f5456a3e1468bb9ee0822925370e7ced451b5d6821556c3cb  bedrock-eu-che
 e83aba16a734ccb28227ce98c51ce98bd33a2c13074f2a7c27c60fc1259dc352  bedrock-eu-check_1.0.0_linux_arm64
 ```
 
-Die Prüfsummen hängen von Version **und Commit** ab (beides steckt im Binary). **Maßgeblich** sind die
+Die Vorschau gilt für den älteren Commit und ändert sich mit dem Release-Commit. Die Prüfsummen hängen von Version **und Commit** ab (beides steckt im Binary). **Maßgeblich** sind die
 Werte des Release-Commits; die Vorschau zeigt nur, dass der Build reproduzierbar ist.
 
 ## 3. Entscheidung A: Freigabe zur Veröffentlichung
@@ -142,6 +142,10 @@ Empfehlung stehen in [`release-1.0-entscheidung-qa003.md`](release-1.0-entscheid
 - **Option 1 (Scanner ergänzen):** Release verschiebt sich um die zusätzlichen Slices; A wird danach freigegeben.
 - **Option 2 (Anforderung präzisieren):** Release 1.0 kann zeitnah erfolgen; die Grenze („`.env` und Policy-JSON werden
   nicht geprüft“) steht bereits im [Handbuch](../../../user/handbuch.md) und im README und gehört in die Release-Notizen.
+
+**Umsetzungsstand (2026-11-11):** Option 1b ist umgesetzt: Der `.env`-Scanner ist in `main`
+([`slice-022`](../done/slice-022-dotenv-scanner.md), PRs #76–#79, Matrix-Test #78). Offen bleibt nur die
+eigenständige Policy-Datei `iam-policy.json` (Soll nach 1.0, gehört in die Release-Notizen).
 
 ## 9. Nicht erprobt und Risiken
 
