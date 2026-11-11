@@ -1,6 +1,6 @@
 # Slice slice-030: Scanner für eigenständige IAM-Policy-Dateien (`iam-policy.json`)
 
-**Status:** next. **Verantwortlich:** Kern w1, Adapter/CLI/Doku w2. **Priorisierung:** Beide Nutzer haben diesen Slice am 2026-11-11 priorisiert und die Festlegungen in Abschnitt 3 bestätigt.
+**Status:** in-progress. **Verantwortlich:** Kern w1, Adapter/CLI/Doku w2. **Priorisierung:** Beide Nutzer haben diesen Slice am 2026-11-11 priorisiert und die Festlegungen in Abschnitt 3 bestätigt.
 
 **Welle:** [`welle-08-erweiterungen`](../welle-08-erweiterungen.md).
 

@@ -10,7 +10,7 @@ Reihenfolge von Terminen. Die Wellen bilden die Versions-Stufen
 
 ## Aktuelle Welle
 
-Keine aktive Welle (kein Slice in `in-progress/`; Ruhezustand im Sinne des Slice-Lifecycles). welle-08 (Erweiterungen) ist teilweise umgesetzt: [`slice-031`](../done/slice-031-coverage-gate.md) (`coverage-gate`, [ADR-0005](../../adr/0005-coverage-gate.md)) ist done; die übrigen Slices warten auf ihre Trigger. Zuletzt abgeschlossen davor: Wartung ohne Welle, [`slice-034`](../done/slice-034-devcontainer-cli-aktualisieren.md) und [`slice-035`](../done/slice-035-reviewer-skill.md).
+welle-08 (Erweiterungen) ist teilweise aktiv: [`slice-030`](slice-030-iam-policy-scanner.md) (Scanner für eigenständige IAM-Policy-Dateien) liegt in `in-progress/`; [`slice-031`](../done/slice-031-coverage-gate.md) (`coverage-gate`, [ADR-0005](../../adr/0005-coverage-gate.md)) ist done; die übrigen Slices warten auf ihre Trigger. Zuletzt abgeschlossen davor: Wartung ohne Welle, [`slice-034`](../done/slice-034-devcontainer-cli-aktualisieren.md) und [`slice-035`](../done/slice-035-reviewer-skill.md).
 
 welle-01 bis welle-07 sind abgeschlossen. Release 1.0.0 ist am 2026-11-11 veröffentlicht
 (Tag `v1.0.0` auf Commit `5f1b35cca776`, GitHub-Release, Images auf `ghcr.io`, Devcontainer-Feature),
