@@ -88,6 +88,13 @@ ohne AWS-Zugang.
 `ANTHROPIC_API_KEY`, Modellvariablen, Mantle), die Claude-Code-Settings (Benutzer und
 Projekt), Devcontainer, Compose-Dateien und Dockerfiles.
 
+**Nicht geprüft:** `.env`-Dateien und eigenständige Policy-Dateien (`iam-policy.json`) werden
+derzeit **nicht** ausgewertet. Ein `ANTHROPIC_API_KEY` in einer `.env`-Datei bleibt unentdeckt, solange
+die Variable nicht zusätzlich in der Umgebung, den Settings, im Devcontainer, in Compose oder
+im Dockerfile steht. Ob Scanner dafür ergänzt werden, ist offen
+([Entscheidungsvorlage](../plan/planning/in-progress/release-1.0-entscheidung-qa003.md)); gehen Sie bis dahin
+nicht davon aus, dass diese Dateien geprüft sind.
+
 **Wo gesucht wird:** Claude-Projekt-Settings (`.claude/settings.json`,
 `.claude/settings.local.json`), `.devcontainer/devcontainer.json`, `.devcontainer.json`,
 `docker-compose*.yml|yaml`, `compose*.yml|yaml` und `Dockerfile*` werden **nur im Scan-Root**
@@ -106,7 +113,7 @@ gesucht, nicht in Unterverzeichnissen. Terraform dagegen wird rekursiv gesucht (
 | Reason | Typische Ursache | Abhilfe |
 |---|---|---|
 | `REGION_NOT_ALLOWED` | Region liegt nicht in `allowedRegions` (Default nur `eu-central-1`) | Eine erlaubte Region setzen, oder die Region bewusst erlauben (Aufgabe 7) |
-| `REGION_MISSING` | Weder `AWS_REGION` noch `AWS_DEFAULT_REGION` gesetzt | `AWS_REGION` setzen |
+| `REGION_MISSING` | Weder `AWS_REGION` noch `AWS_DEFAULT_REGION` gesetzt; auch: `env.AWS_REGION` fehlt in den Benutzer-Settings (`FAIL`) bzw. ein Terraform-AWS-Provider hat kein `region`-Attribut (`WARN`) | Region setzen: Umgebungsvariable, Eintrag unter `env` in den Settings, `region` im Provider |
 | `REGION_FALLBACK_DEFAULT` | Nur `AWS_DEFAULT_REGION` gesetzt (`WARN`) | Zusätzlich `AWS_REGION` setzen |
 | `BEDROCK_NOT_ENABLED` | `CLAUDE_CODE_USE_BEDROCK` ist nicht `1` | `CLAUDE_CODE_USE_BEDROCK=1` setzen |
 | `ANTHROPIC_API_KEY_SET` | `ANTHROPIC_API_KEY` ist gesetzt, die Anfragen könnten direkt an Anthropic gehen | Variable entfernen |
@@ -119,6 +126,11 @@ gesucht, nicht in Unterverzeichnissen. Terraform dagegen wird rekursiv gesucht (
 | `FILE_MISSING` | Benutzer-Settings (`~/.claude/settings.json`) fehlen (`WARN`) | In CI und Containern erwartbar; sonst Datei anlegen |
 | `FILE_INVALID` | Eine geprüfte Datei ist kein gültiges JSON/YAML/HCL | Syntax reparieren; Zeile steht in der Ausgabe |
 | `FILE_UNREADABLE` | Eine geprüfte Datei ist nicht lesbar | Dateirechte prüfen |
+| `NO_CLAUDE_CONFIG` | Devcontainer enthält weder Bedrock-Flag noch Region noch Anthropic-Variable (`WARN`) | `CLAUDE_CODE_USE_BEDROCK=1` und `AWS_REGION` unter `containerEnv` bzw. `remoteEnv` setzen, falls Claude Code im Devcontainer läuft |
+| `ENV_INCOMPLETE` | Devcontainer setzt nur eines von Bedrock-Flag und Region, oder das Flag ist nicht `1` (`WARN`) | Beides setzen |
+| `REGION_NOT_SET` | Dockerfile setzt keine AWS-Region per `ENV` (`WARN`) | Region per `ENV` setzen, oder bewusst zur Laufzeit setzen und die Warnung akzeptieren |
+| `ENDPOINT_FOREIGN` | `ANTHROPIC_BASE_URL` zeigt auf einen anderen Host als `api.anthropic.com` (`WARN`) | Prüfen, ob der Endpunkt (z. B. ein Proxy) Anfragen innerhalb der EU hält |
+| `ENDPOINT_TEXT_ONLY` | `ANTHROPIC_API_KEY` oder `ANTHROPIC_BASE_URL` kommt nur als Text außerhalb von `env` vor (`WARN`) | Prüfen, ob es nur ein Verweis ist (z. B. in einer Sperrliste) oder eine echte Konfiguration |
 | `APIKEY_HELPER` | `apiKeyHelper` ist in den Claude-Settings gesetzt (`WARN`) | Prüfen, ob der Helper einen Anthropic-Key liefert |
 
 **Warum `WARN` statt `FAIL`?** Ein `WARN` heißt: Das Werkzeug kann die EU-Konformität weder
@@ -377,6 +389,8 @@ Die vollständige Liste typischer Meldungen steht in der [Fehlersuche](troublesh
 
 - **Nur sichtbare Konfiguration.** Das Werkzeug ist keine Rechts- oder Datenschutzberatung und
   kein Beweis über das interne Routing von AWS; es prüft Konfigurationen, die es lesen kann.
+- **Nicht alle Dateiarten.** `.env`-Dateien und eigenständige Policy-JSONs werden nicht geprüft
+  (siehe Aufgabe 2); Direktzugriffe auf die Anthropic-API in solchen Dateien erkennt das Werkzeug daher nicht.
 - **Nur lesend.** Es ändert weder Dateien noch AWS-Ressourcen und repariert nichts. Der Modus `aws`
   nutzt ausschließlich lesende Aufrufe.
 - **Keine Secret-Werte.** Weder in der Konsole noch in JSON oder SARIF erscheinen Zugangsdaten
