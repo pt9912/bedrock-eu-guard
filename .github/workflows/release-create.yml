@@ -128,6 +128,9 @@ jobs:
           SHA: ${{ needs.check.outputs.sha }}
         run: |
           set -euo pipefail
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG existiert inzwischen bereits (Abbruch, nichts überschrieben)" >&2; exit 1
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if [ "$TARGET" = tool ]; then

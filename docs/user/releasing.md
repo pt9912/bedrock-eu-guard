@@ -101,7 +101,10 @@ Workflow `release-artifacts` baut nur und veröffentlicht nichts.
      annotierten Tag (`v<version>` bzw. `feature-v<version>`) und das Release mit
      Binaries und `SHA256SUMS` an. Schreibrechte hat nur der Job `create`, der an die
      GitHub-Umgebung `release` gebunden ist; dort kann in den Repository-Einstellungen ein
-     Pflicht-Prüfer eingetragen werden. Das ersetzt das Ja beider Nutzer nicht. Ein scharfer
+     Pflicht-Prüfer eingetragen werden. **Voraussetzung für den ersten scharfen Lauf:** Die
+     Nutzer legen die Umgebung `release` mit Pflicht-Prüfern in den Repository-Einstellungen an;
+     sonst wird sie beim ersten Lauf ohne Schutz erzeugt, und jede Person mit Schreibrecht
+     könnte den Lauf starten. Das ersetzt das Ja beider Nutzer nicht. Ein scharfer
      Lauf ist nicht rückholbar. Manuell geht es weiterhin mit
      `git tag -a v1.0.0 <commit> -m "bedrock-eu-check 1.0.0"`, `git push origin v1.0.0` und
      `gh release create v1.0.0 dist/v1.0.0/* --notes-file <datei>`.
