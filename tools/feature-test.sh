@@ -39,7 +39,7 @@ out=$(run 'cd /feature && ./install.sh >/dev/null && bedrock-eu-check version') 
 [ "$out" = "bedrock-eu-check $version (featuretest)" ] || fail "unerwartete Ausgabe: $out"
 
 # 4. Negativ: manipulierte Pruefsumme -> Exit != 0, Fehlermeldung, kein Binary.
-sed -i 's/^./0/' "$work/release/v$version/SHA256SUMS"
+sed -i 's/^./x/' "$work/release/v$version/SHA256SUMS"  # 'x' ist keine Hex-Ziffer: die Manipulation ändert jede Prüfsumme (mit '0' war sie bei Hashes, die mit 0 beginnen, wirkungslos)
 rc=0
 out=$(run 'cd /feature && ./install.sh 2>&1; code=$?; [ -e /usr/local/bin/bedrock-eu-check ] && echo "BINARY-INSTALLIERT"; exit $code') || rc=$?
 [ "$rc" -ne 0 ] || fail "manipulierte Pruefsumme wurde akzeptiert"
