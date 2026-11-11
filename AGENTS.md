@@ -60,7 +60,7 @@ In dieser Reihenfolge:
 ### 3.1 Gates laufen über `make`
 
 Quality-Gates werden über `make` ausgeführt; `make doc-check` nutzt ein
-auf `:v0.29.0` gepinntes, netzloses Docker-Image (`d-check.mk`, erzeugt mit
+auf `:v0.91.0` gepinntes, netzloses Docker-Image (`d-check.mk`, erzeugt mit
 `d-check --print-mk`; `DCHECK_DIGEST` für strikten Digest-Pin). **Aber:** Das Werkzeug
 `bedrock-eu-check` selbst muss lokal **ohne** Docker und ohne Internet
 lauffähig sein ([`LH-NF-001`](spec/lastenheft.md#lh-nf-001--plattform), [`LH-NF-005`](spec/lastenheft.md#lh-nf-005--offline-fähigkeit)) — es gibt also keinen
@@ -126,7 +126,7 @@ Nur real existierende Targets (keine halluzinierten Gates, Modul 13):
 
 | Target           | Zweck                                                              |
 | ---------------- | ------------------------------------------------------------------ |
-| `make doc-check` | Doku-Referenzen prüfen (Links/Anker, via d-check v0.29.0, netzlos) |
+| `make doc-check` | Doku-Referenzen prüfen (Links/Anker, via d-check v0.91.0, netzlos) |
 | `make lint`      | `gofmt -l .` + `go vet ./...` (containerisiert, netzlos)           |
 | `make test`      | Unit-Tests (`go test ./...`, containerisiert, netzlos)             |
 | `make build`     | Binary `bin/bedrock-eu-check` bauen                                |

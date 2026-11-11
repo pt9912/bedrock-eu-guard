@@ -42,7 +42,7 @@ stehen trotzdem als Safety-Boundaries in [`README.md`](README.md).
   (AGENTS, conventions, README, spec, roadmap, Index-READMEs) sind bewusst
   **nicht** co-located ([`MR-003`](#mr-003--template-verkörperung-nur-für-wiederkehrende-skelette)).
   Dazu die Gate-Baseline (`d-check.mk`, `.d-check.yml`, `Makefile`);
-  `d-check.mk` ist mit `d-check --print-mk` (v0.29.0) erzeugt, Templates aus
+  `d-check.mk` ist mit `d-check --print-mk` (v0.91.0) erzeugt, Templates aus
   `lab-templates.zip` v1.4.0.
 - **Lokale Lese-/Adoptions-Form (Cache, ephemer):** das **Regelwerk** wird
   zum Lesen nach `.harness/cache/<tag>/regelwerk/` entpackt (`<tag>` =
