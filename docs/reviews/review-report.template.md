@@ -13,7 +13,7 @@ Code-Review gegen Plan + Konventionen (Modul 10 §Drei Review-Arten).
 
 **Gegenstand:** <Slice-ID / Diff-Range / Commit-Hash>
 
-**Skill:** `.harness/skills/reviewer.md` @ <Version/Commit> · <!-- d-check:ignore (Adopter-spezifischer Skill-Pfad, existiert im Ziel-Repo ggf. nicht) -->
+**Skill:** [`.harness/skills/reviewer.md`](../../.harness/skills/reviewer.md) @ <Version/Commit>
 **Modell:** <Modell-ID> · **Datum:** <YYYY-MM-DD>
 
 **Eingangs-Kontext** (die Verträge, gegen die geprüft wurde — ohne
@@ -40,9 +40,10 @@ Abweichung gilt der Skill bzw. dessen Quelle
 
 - `kategorie`: HIGH | MEDIUM | LOW | INFO
 - `quelle`: <ADR-ID, LH-ID, Hard-Rule-Name oder "Maintainability">
-- `pfad`: <Datei:Zeile>
+- `pfad`: <Datei · wörtliches, eindeutig auffindbares Kurzzitat der Stelle; die Zeile nur als Lesehilfe>
 - `befund`: <1–2 Sätze, beobachtbar, ohne Lösungsvorschlag>
 - `verifizierbar`: ja/nein — <welcher Gate-Lauf würde es bestätigen?>
+- `klasse`: <stabile Kurz-Bezeichnung des Fehlermusters für den Steering-Loop-Zähler>
 
 ## Negativbefunde
 
