@@ -15,14 +15,18 @@ schon" — die in der Praxis oft nicht stimmt.
 
 ## Stand
 
-`bedrock-eu-check` ist **funktionsfähig**; **Version 1.1.0** ist veröffentlicht
-(Commit `5274f3dce55f`): als [GitHub-Release](https://github.com/pt9912/bedrock-eu-guard/releases/tag/v1.1.0)
-mit Linux-Binaries und `SHA256SUMS` und als Docker-Images `ghcr.io/pt9912/bedrock-eu-check:1.1.0-slim`
-und `:1.1.0-full`. Neu gegenüber 1.0.0 sind `--fail-on warn`, `--output FILE` und die Konfiguration
+`bedrock-eu-check` ist **funktionsfähig**; **Version 1.2.0** ist veröffentlicht
+(Commit `e04f5da47a07`): als [GitHub-Release](https://github.com/pt9912/bedrock-eu-guard/releases/tag/v1.2.0)
+mit Linux-Binaries und `SHA256SUMS` und als Docker-Images `ghcr.io/pt9912/bedrock-eu-check:1.2.0-slim`
+und `:1.2.0-full`. Neu gegenüber 1.1.0 ist die Prüfung eigenständiger IAM-Policy-Dateien
+(`iam-policy*.json`, `*-policy.json`) im Modus `terraform` und `all`; ein `Allow` nur mit `NotAction` ergibt jetzt
+`WARN`. **Hinweis zum Umstieg:** Die Prüfung der Policy-Dateien hat keinen Schalter; ein Repository mit einer
+Datei, die Bedrock breit erlaubt, liefert ab 1.2.0 `FAIL` und Exit 1 (ausnehmen mit `exclude`). Neu gegenüber 1.0.0
+(in 1.1.0) sind `--fail-on warn`, `--output FILE` und die Konfiguration
 `visibilityRegions` (siehe [`docs/user/reference.md`](docs/user/reference.md)); Exit-Codes und
 Standardverhalten sind unverändert. Das Devcontainer-Feature liegt in der Version 1.0.1 vor
 (Tag `feature-v1.0.1`, Commit `5274f3dce55f`); es installiert standardmäßig weiterhin das Werkzeug 1.0.0.
-Version 1.0.0 (Commit `5f1b35cca776`) bleibt unverändert abrufbar. Alle Prüfmodi, die Ausgabeformate
+Die Versionen 1.0.0 (Commit `5f1b35cca776`) und 1.1.0 (Commit `5274f3dce55f`) bleiben unverändert abrufbar. Alle Prüfmodi, die Ausgabeformate
 (Konsole, JSON, SARIF) und der CI-Modus sind implementiert und getestet. Der Ablauf steht in
 [`docs/user/releasing.md`](docs/user/releasing.md).
 
@@ -96,8 +100,8 @@ Alle Felder und Defaults: [Referenz](docs/user/reference.md#konfigurationsdatei-
 
 | Weg | Stand | Dokumentation |
 |---|---|---|
-| Binary (Linux `amd64`/`arm64`, `make dist VERSION=x.y.z`) | [GitHub-Release v1.1.0](https://github.com/pt9912/bedrock-eu-guard/releases/tag/v1.1.0) | [`releasing.md`](docs/user/releasing.md) |
-| Docker-Image `slim` (`local`, `terraform`) und `full` (mit AWS-CLI, alle Modi) | `ghcr.io/pt9912/bedrock-eu-check:1.1.0-slim` / `:1.1.0-full` (lokal: `make image`) | [`docker.md`](docs/user/docker.md) |
+| Binary (Linux `amd64`/`arm64`, `make dist VERSION=x.y.z`) | [GitHub-Release v1.2.0](https://github.com/pt9912/bedrock-eu-guard/releases/tag/v1.2.0) | [`releasing.md`](docs/user/releasing.md) |
+| Docker-Image `slim` (`local`, `terraform`) und `full` (mit AWS-CLI, alle Modi) | `ghcr.io/pt9912/bedrock-eu-check:1.2.0-slim` / `:1.2.0-full` (lokal: `make image`) | [`docker.md`](docs/user/docker.md) |
 | Devcontainer-Feature | `ghcr.io/pt9912/bedrock-eu-guard/bedrock-eu-check:1` (Version 1.0.1) | [`devcontainer.md`](docs/user/devcontainer.md) |
 | CI-Einbindung | Beispiel-Workflow | [`ci.md`](docs/user/ci.md) |
 

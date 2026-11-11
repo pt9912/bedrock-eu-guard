@@ -1,6 +1,6 @@
 # Welle welle-08-erweiterungen: Erweiterungen und Härtung (nach Entscheidung der Auftraggeber)
 
-**Status:** in-progress (teilweise: slice-030 und slice-031 done; slice-032 und slice-033 warten auf ihre Trigger)
+**Status:** in-progress (teilweise: slice-030 und slice-031 done, slice-030 mit Werkzeug 1.2.0 veröffentlicht; slice-032 und slice-033 warten auf ihre Trigger)
 
 **Zielmeilenstein:** M8 — Erweiterungen (Werkzeug-Version 1.2.0 oder später, je Slice)
 

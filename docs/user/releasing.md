@@ -2,7 +2,8 @@
 
 **Status:** Version 1.0.0 veröffentlicht am 2026-11-11 auf Commit `5f1b35cca776` (Tag, GitHub-Release, Images, Feature). Version 1.1.0
 veröffentlicht am 2026-11-11 auf Commit `5274f3dce55f` (Tag `v1.1.0`, GitHub-Release, Images `1.1.0-slim` und `1.1.0-full`); Feature
-1.0.1 am selben Tag auf demselben Commit (Tag `feature-v1.0.1`). Zuletzt konkretisiert mit
+1.0.1 am selben Tag auf demselben Commit (Tag `feature-v1.0.1`). Version 1.2.0 am selben Tag auf Commit `e04f5da47a07`
+(Tag `v1.2.0`, GitHub-Release, Images `1.2.0-slim` und `1.2.0-full`). Zuletzt konkretisiert mit
 Welle 5 ([`LH-RM-005`](../../spec/lastenheft.md#lh-rm-005--version-10)) und den Wellen 6 und 7.
 
 Dieses Dokument (Rang 6 der Source Precedence) beschreibt, *wie*
@@ -110,9 +111,11 @@ Workflow `release-artifacts` baut nur und veröffentlicht nichts.
      könnte den Lauf starten. Da alle Beteiligten dasselbe GitHub-Konto nutzen, unterscheidet die
      Umgebung nicht zwischen den Nutzern und erlaubt Selbstfreigabe; sie ersetzt das Ja beider
      Nutzer nicht, das als Wortlaut-Freigabe festgehalten wird. Die Freigabe erteilt ein Mensch in der
-     Weboberfläche; das Token der Agenten darf Deployments nicht freigeben. Ein scharfer
-     Lauf ist nicht rückholbar und ist für `v1.1.0` (Run 42990440491) und `feature-v1.0.1` (Run 42993689182)
-     erfolgreich durchlaufen. Manuell geht es weiterhin mit
+     Weboberfläche oder, auf ausdrückliche Anweisung eines Nutzers und nachdem beide Ja im Wortlaut vorliegen, ein Agent
+     per `gh api` (das Token der Agenten durfte dies bei 1.1.0 noch nicht, bei 1.2.0 war es möglich); das Freigabeprotokoll
+     des Laufs hält den Kommentar fest. Ein scharfer
+     Lauf ist nicht rückholbar und ist für `v1.1.0` (Run 42990440491), `feature-v1.0.1` (Run 42993689182) und `v1.2.0`
+     (Run 43026896914, Freigabe per `gh api` durch w1) erfolgreich durchlaufen. Manuell geht es weiterhin mit
      `git tag -a v1.0.0 <commit> -m "bedrock-eu-check 1.0.0"`, `git push origin v1.0.0` und
      `gh release create v1.0.0 dist/v1.0.0/* --notes-file <datei>`.
    - Docker-Images und Devcontainer-Feature nach `ghcr.io` über den Workflow `publish`
