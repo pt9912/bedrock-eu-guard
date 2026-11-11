@@ -18,7 +18,26 @@ eine Anhebung dieses Standards ist **nicht Teil** dieser Vorlage.
 
 ## 2. Änderungen seit 1.1.0
 
-*(Abschnitt von w1: Funktionsumfang, Kompatibilität der Exit-Codes, Spezifikation und Lastenheft.)*
+**Werkzeug 1.2.0** bringt gegenüber 1.1.0 eine neue Prüfung und eine Angleichung an das Handbuch:
+
+| Änderung | Wirkung | Bedienung |
+|---|---|---|
+| Eigenständige IAM-Policy-Dateien ([`LH-FA-IAM-004`](../../../../spec/lastenheft.md#lh-fa-iam-004--iam-policy-dokumente-json-prüfen), slice-030) | Der Modus `terraform` (und `all`) findet rekursiv `iam-policy*.json` und `*-policy.json` und bewertet sie wie [`LH-FA-TF-003`](../../../../spec/lastenheft.md#lh-fa-tf-003--bedrock-iam-policies-prüfen) und [`LH-FA-IAM-002`](../../../../spec/lastenheft.md#lh-fa-iam-002--zu-breite-bedrock-policies-erkennen): `FAIL` bei `bedrock:*` oder `InvokeModel` auf `*` ohne Region-Condition, `WARN` mit Region-Condition oder nicht auswertbar, sonst `PASS`. Erkannt werden das Policy-Dokument sowie die Ausgabe von `aws iam get-policy-version` und `get-role-policy`. | Immer aktiv in `terraform` und `all`; ausnehmen mit `exclude` je Pfad. Nicht in `local`. |
+| `Allow` nur mit `NotAction` ergibt `WARN` (`IAM_DYNAMIC`) | Gilt für [`LH-FA-TF-003`](../../../../spec/lastenheft.md#lh-fa-tf-003--bedrock-iam-policies-prüfen), [`LH-FA-IAM-002`](../../../../spec/lastenheft.md#lh-fa-iam-002--zu-breite-bedrock-policies-erkennen) und die neue Prüfung; bisher entstand dafür kein Finding, das Handbuch sagte aber `WARN` zu. | Keine; ein `WARN` ändert den Standard-Exit-Code nicht. |
+
+**Fehlerregel der neuen Prüfung:** Eine nicht lesbare oder ungültige Datei mit eindeutigem Namen (`iam-policy*.json`) ist ein `FAIL` (`FILE_UNREADABLE`, `FILE_INVALID`), bei einer Datei, die nur das breite Muster `*-policy.json` trifft, ein `WARN`. Gültiges JSON ohne Policy-Statement oder ohne Bedrock-Aktion erzeugt kein Finding. Dateiinhalte erscheinen nie in der Ausgabe.
+
+**Kompatibilität.**
+
+- Exit-Codes `0`, `1` und `2`, Optionen, Ausgabeformate und die Konfiguration sind unverändert ([`SPEC-030`](../../../../spec/spezifikation.md#spec-030--exit-codes) und [`SPEC-020`](../../../../spec/spezifikation.md#spec-020--konfigurationsschema-bedrock-eu-checkyml) ohne Änderung seit 1.1.0).
+- **Verhaltensänderung für Bestandsnutzer (Entscheidung C):** Ein Repository mit einer eigenständigen Policy-Datei, die Bedrock breit erlaubt, ergibt im Modus `terraform` oder `all` künftig `FAIL` und damit Exit `1`, wo 1.1.0 nichts gefunden hat. Es gibt keinen Schalter zum Abschalten; ausnehmen lässt sich je Pfad mit `exclude`. Ebenso kann ein vorhandenes `NotAction`-Statement neu ein `WARN` erzeugen (kein neuer Exit `1`, außer mit `--fail-on warn`).
+- Neue Befunde tragen die Regel-ID [`LH-FA-IAM-004`](../../../../spec/lastenheft.md#lh-fa-iam-004--iam-policy-dokumente-json-prüfen) und vorhandene Reason-Codes; es gibt keinen neuen Reason-Code und kein neues Konfigurationsfeld.
+
+**Spezifikation und Lastenheft.** Geändert wurde nur das Lastenheft: die neue Anforderung [`LH-FA-IAM-004`](../../../../spec/lastenheft.md#lh-fa-iam-004--iam-policy-dokumente-json-prüfen) und [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) (Testdaten für `iam-policy.json`), jeweils mit dem von beiden Nutzern bestätigten Wortlaut. `spec/spezifikation.md` ist seit `v1.1.0` unverändert (`git diff v1.1.0..HEAD -- spec` zeigt nur `lastenheft.md`).
+
+**Seit 1.1.0 geändert, ohne Wirkung auf das Binary:** das `coverage-gate` in `make gates` (Mindestwert 90 %, [ADR-0005](../../adr/0005-coverage-gate.md)), der Reviewer-Skill `.harness/skills/reviewer.md` und die Review-Reports, die devcontainer-CLI 0.90.0 in `feature-cli` und `publish`, die Korrektur der Prüfsummen-Negativprobe in `tools/feature-test.sh`, Dokumentation und Planung.
+
+**Nicht enthalten:** Änderungen am Devcontainer-Feature und welle-08 jenseits der Slices 030 und 031 (Sigstore/SBOM, macOS/Windows).
 
 ## 3. Stand (Messwerte)
 
