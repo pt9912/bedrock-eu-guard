@@ -42,9 +42,9 @@ erlaubt, den Wortlaut im Lastenheft einzutragen. Eingetragen sind:
 - [x] Kern (w1): `EnvDotenv`, `EnvFileFinder`, `CheckDotenv`, `app.Scan` mit `EnvFinder`, Double `fakeenvsource.Finder`, Unit-Tests; Regelkatalog und Referenz ergänzt (Doku-Drift-Test grün).
 - [x] Adapter (w2): Parser und Finder, Testdaten `good`/`bad` unter `testdata/` mit gezielter `.gitignore`-Negation; CLI übergibt `EnvFinder`; Test ohne Wert in der Ausgabe.
 - [x] Doku (w2): Handbuch und Fehlersuche; die Aussage „`.env` wird nicht geprüft“ entfällt.
-- [ ] Matrix-Test zu [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) um `.env` erweitert; `iam-policy.json` bleibt als bekannte Lücke benannt.
+- [x] Matrix-Test zu [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) um `.env` erweitert; `iam-policy.json` bleibt als bekannte Lücke benannt.
 - [x] `make verify-clean` und CI grün.
-- [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
+- [x] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 5. Plan (vor Code)
 
@@ -70,11 +70,13 @@ DoD vollständig + PR gemerged + Closure-Notiz geschrieben.
 
 ## 9. Closure-Notiz (nach `done/`)
 
+**Kern-Seite (w1):** Kern in #76 (`EnvDotenv`, `EnvFileFinder` als eigene Schnittstelle, `CheckDotenv`, `app.Scan.EnvFinder`, `exclude` im Kern, Suchfehler = Finding); Lastenheft-Eintrag und Präzisierung nach Entscheidung 1b; Dateimuster bewusst breiter (`.env.*`). Matrix-Test in #78 um `.env` erweitert, dazu `TestDotenvTestdataIsSynthetic` (secret-artige Werte in Testdaten müssen den Marker `GEHEIM` tragen). Steering-Loop: Die gemeinsame Env-Auswertung (`factsOf`/`failFacts`) wiederzuverwenden machte die Regel zu ~25 Zeilen; der Doku-Drift-Test meldete den fehlenden Katalogeintrag zuerst.
+
 **Adapter-Seite (w2):**
 
 - **Funktioniert:** Parser (`dotenv.go`) für Kommentare, `export`, Anführungszeichen (auch mehrzeilig), Inline-Kommentare und BOM; Secret-Werte werden im Adapter verworfen (nur gesetzt/nicht gesetzt); defekte Dateien ergeben `FILE_INVALID` nur mit Zeilennummer, ohne Inhalt. Rekursiver Finder (`finder.go`) überspringt `.git`, `.terraform`, `vendor`, `node_modules`, `.tmp` und Symlinks und lässt Beispieldateien (`.example`, `.sample`, `.template`) aus. Gilt nur im Modus `local`. CLI-Tests über alle Formate ohne Wert in der Ausgabe; Handbuch, README und Quickstart angepasst.
 - **Anders als geplant:** Die Suche ist rekursiv (nicht nur im Root), damit `.env`-Dateien in Unterprojekten nicht übersehen werden; `exclude` greift auch dort. Variablenreferenzen (`${X}`) als Region-Wert werden verworfen statt als Fehlalarm gemeldet. Die `.gitignore` bekam eine Ausnahme nur für `internal/**/testdata/**`; eine `.env` im Repository-Root bleibt ignoriert (mit `git check-ignore` geprüft).
-- **Offen:** Matrix-Test zu [`LH-QA-003`](../../../../spec/lastenheft.md#lh-qa-003--testdaten) um `.env` (w1); `iam-policy.json` bleibt als eigenständige Policy-Datei ungeprüft.
+- **Offen:** `iam-policy.json` bleibt als eigenständige Policy-Datei ungeprüft (Soll nach 1.0); Dialekte von `.env` und `env_file` in Compose als Folgepunkte.
 - **Steering-Loop:** Testdaten, die von Ignore-Regeln geschützt sind, nach dem Anlegen mit `git ls-files` bzw. `git check-ignore` prüfen, bevor man dem grünen lokalen Lauf traut; ein Verhalten, das nur durch eine lokale Ausnahme läuft, fällt sonst erst in CI auf.
 
 
