@@ -85,20 +85,20 @@ ohne AWS-Zugang.
 | `(REGION_NOT_ALLOWED)` | der Reason-Code, Grundlage für die Abhilfe (Aufgabe 3) |
 
 **Was `local` prüft:** Umgebungsvariablen (`AWS_REGION`, `CLAUDE_CODE_USE_BEDROCK`,
-`ANTHROPIC_API_KEY`, Modellvariablen, Mantle), die Claude-Code-Settings (Benutzer und
+`ANTHROPIC_API_KEY`, Modellvariablen, Mantle), `.env`-Dateien, die Claude-Code-Settings (Benutzer und
 Projekt), Devcontainer, Compose-Dateien und Dockerfiles.
 
-**Nicht geprüft:** `.env`-Dateien und eigenständige Policy-Dateien (`iam-policy.json`) werden
-derzeit **nicht** ausgewertet. Ein `ANTHROPIC_API_KEY` in einer `.env`-Datei bleibt unentdeckt, solange
-die Variable nicht zusätzlich in der Umgebung, den Settings, im Devcontainer, in Compose oder
-im Dockerfile steht. Ob Scanner dafür ergänzt werden, ist offen
-([Entscheidungsvorlage](../plan/planning/in-progress/release-1.0-entscheidung-qa003.md)); gehen Sie bis dahin
-nicht davon aus, dass diese Dateien geprüft sind.
+**Nicht geprüft:** eigenständige Policy-Dateien wie `iam-policy.json` werden derzeit **nicht**
+ausgewertet; IAM-Policies prüft das Werkzeug in Terraform-Dateien (Aufgabe 4) und beim eigenen
+Principal (Aufgabe 5). Gehen Sie nicht davon aus, dass losgelöste Policy-JSONs geprüft sind.
 
 **Wo gesucht wird:** Claude-Projekt-Settings (`.claude/settings.json`,
 `.claude/settings.local.json`), `.devcontainer/devcontainer.json`, `.devcontainer.json`,
 `docker-compose*.yml|yaml`, `compose*.yml|yaml` und `Dockerfile*` werden **nur im Scan-Root**
-gesucht, nicht in Unterverzeichnissen. Terraform dagegen wird rekursiv gesucht (Aufgabe 4).
+gesucht, nicht in Unterverzeichnissen. **Rekursiv** gesucht werden Terraform-Dateien (Aufgabe 4) und
+`.env`-Dateien: `.env` und `.env.<name>` (z. B. `.env.production`), nicht aber Beispieldateien
+(`*.example`, `*.sample`, `*.template`). Die Verzeichnisse `.git`, `.terraform`, `vendor`, `node_modules` und `.tmp`
+werden übersprungen, Symlinks nicht verfolgt.
 
 **Erfolg:** Exit-Code `0` (kein `FAIL`). `WARN` lässt den Lauf nicht scheitern.
 
@@ -117,7 +117,7 @@ gesucht, nicht in Unterverzeichnissen. Terraform dagegen wird rekursiv gesucht (
 | `REGION_FALLBACK_DEFAULT` | Nur `AWS_DEFAULT_REGION` gesetzt (`WARN`) | Zusätzlich `AWS_REGION` setzen |
 | `BEDROCK_NOT_ENABLED` | `CLAUDE_CODE_USE_BEDROCK` ist nicht `1` | `CLAUDE_CODE_USE_BEDROCK=1` setzen |
 | `ANTHROPIC_API_KEY_SET` | `ANTHROPIC_API_KEY` ist gesetzt, die Anfragen könnten direkt an Anthropic gehen | Variable entfernen |
-| `DIRECT_ANTHROPIC` | Direkte Anthropic-Konfiguration (API-Key, Auth-Token oder `ANTHROPIC_BASE_URL` auf `api.anthropic.com`) in Settings, Devcontainer, Compose oder Dockerfile | Eintrag entfernen und Bedrock verwenden |
+| `DIRECT_ANTHROPIC` | Direkte Anthropic-Konfiguration (API-Key, Auth-Token oder `ANTHROPIC_BASE_URL` auf `api.anthropic.com`) in Settings, Devcontainer, Compose, Dockerfile oder `.env` | Eintrag entfernen und Bedrock verwenden |
 | `MODEL_BLOCKED` | Modell-/Profil-ID entspricht einem Block-Muster (`us.*`, `global.*`, nicht erlaubte Region in der ID) | Ein EU-Profil (`eu.*`) verwenden |
 | `MODEL_UNCLASSIFIED` | ID passt weder auf ein Block- noch auf ein Allow-Muster (`WARN`) | ID prüfen oder per Konfiguration erlauben (Aufgabe 7) |
 | `SETTINGS_UNSAFE` | Projekt-Settings enthalten ein nicht erlaubtes Modell, eine nicht erlaubte Region oder einen API-Key | Aus den Settings entfernen |
@@ -389,8 +389,8 @@ Die vollständige Liste typischer Meldungen steht in der [Fehlersuche](troublesh
 
 - **Nur sichtbare Konfiguration.** Das Werkzeug ist keine Rechts- oder Datenschutzberatung und
   kein Beweis über das interne Routing von AWS; es prüft Konfigurationen, die es lesen kann.
-- **Nicht alle Dateiarten.** `.env`-Dateien und eigenständige Policy-JSONs werden nicht geprüft
-  (siehe Aufgabe 2); Direktzugriffe auf die Anthropic-API in solchen Dateien erkennt das Werkzeug daher nicht.
+- **Nicht alle Dateiarten.** Eigenständige Policy-JSONs (`iam-policy.json`) werden nicht geprüft (siehe
+  Aufgabe 2); Direktzugriffe auf die Anthropic-API darin erkennt das Werkzeug daher nicht.
 - **Nur lesend.** Es ändert weder Dateien noch AWS-Ressourcen und repariert nichts. Der Modus `aws`
   nutzt ausschließlich lesende Aufrufe.
 - **Keine Secret-Werte.** Weder in der Konsole noch in JSON oder SARIF erscheinen Zugangsdaten

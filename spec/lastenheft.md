@@ -264,6 +264,23 @@ PASS, wenn die Modell-ID einem erlaubten Muster entspricht.
 WARN, wenn die Modell-ID nicht klassifizierbar ist.
 ```
 
+### LH-FA-LENV-007 — Prüfung von `.env`-Dateien
+
+Das Tool muss `.env`-Dateien im Projekt rekursiv auf Umgebungsvariablen prüfen, die Claude Code von Amazon Bedrock auf eine direkte Anthropic-Verbindung oder in eine nicht erlaubte Region umleiten. Geprüft werden `.env` und `.env.*`; Beispieldateien (`*.example`, `*.sample`, `*.template`) sind ausgenommen. Die Prüfung gehört zum lokalen Modus (`bedrock-eu-check local`).
+
+Akzeptanzkriterium:
+
+```text
+FAIL, wenn ANTHROPIC_API_KEY oder ANTHROPIC_AUTH_TOKEN gesetzt ist.
+FAIL, wenn ANTHROPIC_BASE_URL auf api.anthropic.com zeigt.
+FAIL, wenn AWS_REGION oder AWS_DEFAULT_REGION auf eine nicht erlaubte Region zeigt.
+PASS, wenn mindestens eine dieser Regionsvariablen gesetzt ist und nur erlaubte Regionen verwendet werden.
+FAIL, wenn eine vorhandene Datei nicht gelesen oder nicht als .env-Datei verstanden werden kann.
+Kein Befund, wenn die Datei keine der genannten Variablen setzt.
+```
+
+Werte werden nie ausgegeben (siehe `LH-NF-004`).
+
 ---
 
 ## 8.2 Claude-Code-Konfigurationsprüfung
@@ -772,6 +789,8 @@ main.tf
 iam-policy.json
 .claude/settings.json
 ```
+
+Für `iam-policy.json` gilt dies, sobald eine Anforderung zur Prüfung eigenständiger IAM-Policy-Dateien besteht (vorgesehen als Soll-Anforderung nach Version 1.0); bis dahin sind für diese Dateiart weder Scanner noch Testdaten gefordert.
 
 ### LH-QA-004 — Reproduzierbarer Build
 

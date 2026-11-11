@@ -81,3 +81,13 @@ type IAMReader interface {
 	// PrincipalPolicies liefert die Statements der angehängten und Inline-Policies.
 	PrincipalPolicies(principalARN string) ([]model.IAMStatement, error)
 }
+
+// EnvFileFinder findet Env-Dateien rekursiv unter dem Scan-Root (bisher
+// EnvDotenv). Find liefert sortierte, relative, "/"-getrennte Pfade und
+// schließt .git, .terraform, vendor, node_modules und .tmp aus; Symlinks
+// werden nicht verfolgt. Für EnvDotenv gilt: Basename ".env" oder ".env.*",
+// ausgenommen *.example, *.sample und *.template. Ein Fehler der Suche selbst
+// ist ein Fehler; das Lesen übernimmt EnvSourceReader.
+type EnvFileFinder interface {
+	Find(kind model.EnvSourceKind) ([]string, error)
+}

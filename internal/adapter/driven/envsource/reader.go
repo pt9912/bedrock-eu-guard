@@ -47,6 +47,8 @@ func (r Reader) ReadEnvSource(kind model.EnvSourceKind, rel string) (*model.EnvF
 		f, ferr = parseCompose(display, data)
 	case model.EnvDockerfile:
 		f, ferr = parseDockerfile(display, data)
+	case model.EnvDotenv:
+		f, ferr = parseDotenv(display, data)
 	default:
 		return nil, &model.FileError{Path: display, Reason: model.ReasonFileUnreadable}
 	}

@@ -27,7 +27,7 @@ Alternativen: das [Docker-Image](docker.md) oder das [Devcontainer-Feature](devc
 Im Wurzelverzeichnis des zu prüfenden Projekts:
 
 ```bash
-bedrock-eu-check local        # Umgebung, Claude-Settings, Devcontainer, Compose, Dockerfile
+bedrock-eu-check local        # Umgebung, .env, Claude-Settings, Devcontainer, Compose, Dockerfile
 bedrock-eu-check terraform    # Terraform-Dateien (rekursiv)
 ```
 

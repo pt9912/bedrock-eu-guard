@@ -777,3 +777,55 @@ func TestAPIKeyHelperIsWarningWithoutCommand(t *testing.T) {
 		}
 	}
 }
+
+// slice-022: .env-Dateien (LH-FA-LENV-007) — rekursiv, Beispieldateien ausgenommen.
+func TestDotenvGood(t *testing.T) {
+	code, out, errs := modeRun(t, "local", "good", euEnv)
+	if code != 0 || errs != "" {
+		t.Fatalf("exit=%d stdout=%q stderr=%q", code, out, errs)
+	}
+	if !strings.Contains(out, "[PASS] LH-FA-LENV-007 .env") {
+		t.Errorf("PASS für die .env erwartet:\n%s", out)
+	}
+}
+
+func TestDotenvBadRecursiveWithoutSecrets(t *testing.T) {
+	for _, format := range []string{"console", "json", "sarif"} {
+		code, out, errs := modeRun(t, "local", "bad", euEnv, "--format", format)
+		if code != 1 {
+			t.Fatalf("%s: exit=%d stderr=%q", format, code, errs)
+		}
+		for _, want := range []string{"LH-FA-LENV-007", "apps/api/.env.production"} {
+			if !strings.Contains(out, want) {
+				t.Errorf("%s: %q fehlt:\n%s", format, want, out)
+			}
+		}
+		// Beispieldateien (.env.example) werden nicht geprüft, und kein Secret-Wert erscheint.
+		for _, s := range []string{out, errs} {
+			if strings.Contains(s, ".env.example") || strings.Contains(s, "GEHEIM") || strings.Contains(s, "sk-ant") {
+				t.Errorf("%s: Beispieldatei geprüft oder Secret in der Ausgabe:\n%s", format, s)
+			}
+		}
+	}
+	_, out, _ := modeRun(t, "local", "bad", euEnv)
+	if !strings.Contains(out, "[FAIL] LH-FA-LENV-007 .env") {
+		t.Errorf("FAIL für die .env im Root erwartet:\n%s", out)
+	}
+}
+
+func TestDotenvExcludeSkipsSubdirectories(t *testing.T) {
+	_, out, _ := modeRun(t, "local", "bad", euEnv, "--config", "testdata/config/exclude-apps.yml")
+	if strings.Contains(out, "apps/api") {
+		t.Errorf("exclude: [apps] muss die verschachtelte .env ausnehmen:\n%s", out)
+	}
+	if !strings.Contains(out, "LH-FA-LENV-007 .env") {
+		t.Errorf("die .env im Root bleibt:\n%s", out)
+	}
+}
+
+func TestDotenvOnlyInLocalMode(t *testing.T) {
+	_, out, _ := modeRun(t, "terraform", "bad", mapEnv{})
+	if strings.Contains(out, "LH-FA-LENV-007") {
+		t.Errorf("terraform darf keine .env-Regel ausführen:\n%s", out)
+	}
+}

@@ -19,6 +19,9 @@ type Scan struct {
 	// Dockerfile-Prüfung). Files dient der Dateisuche per Glob.
 	EnvSources driven.EnvSourceReader
 	Files      driven.Filesystem
+	// EnvFinder ist optional: findet .env-Dateien rekursiv (LH-FA-LENV-007).
+	// Ohne EnvFinder (oder ohne EnvSources) wird keine .env-Datei geprüft.
+	EnvFinder driven.EnvFileFinder
 	// Terraform ist optional (nil = keine Terraform-Prüfung).
 	Terraform driven.TerraformReader
 }
@@ -45,6 +48,9 @@ func (u Scan) Run(cfg model.Config) ([]model.Finding, error) {
 		sc.Devcontainers = u.loadEnv(cfg, model.EnvDevcontainer, rules.DevcontainerPatterns)
 		sc.Composes = u.loadEnv(cfg, model.EnvCompose, rules.ComposePatterns)
 		sc.Dockerfiles = u.loadEnv(cfg, model.EnvDockerfile, rules.DockerfilePatterns)
+	}
+	if u.EnvSources != nil && u.EnvFinder != nil {
+		sc.Dotenvs = u.loadDotenv(cfg)
 	}
 	if u.Terraform != nil {
 		sc.Terraform = u.loadTerraform(cfg)
@@ -134,4 +140,36 @@ func (u Scan) loadTerraform(cfg model.Config) rules.TerraformScan {
 		t.Files = append(t.Files, st)
 	}
 	return t
+}
+
+// loadDotenv sucht .env-Dateien über den EnvFinder (rekursiv), filtert
+// ausgeschlossene Pfade und liest die übrigen. Ein Fehler der Suche selbst
+// wird als nicht lesbare Quelle gemeldet.
+func (u Scan) loadDotenv(cfg model.Config) []rules.EnvSourceFile {
+	rels, err := u.EnvFinder.Find(model.EnvDotenv)
+	if err != nil {
+		var fe *model.FileError
+		if !errors.As(err, &fe) {
+			fe = &model.FileError{Path: ".", Reason: model.ReasonFileUnreadable}
+		}
+		return []rules.EnvSourceFile{{Path: ".", Err: fe}}
+	}
+	sort.Strings(rels)
+	var out []rules.EnvSourceFile
+	for _, rel := range rels {
+		if cfg.Excluded(rel) {
+			continue
+		}
+		f, err := u.EnvSources.ReadEnvSource(model.EnvDotenv, rel)
+		sf := rules.EnvSourceFile{Path: rel, F: f}
+		if err != nil {
+			var fe *model.FileError
+			if !errors.As(err, &fe) {
+				fe = &model.FileError{Path: rel, Reason: model.ReasonFileUnreadable}
+			}
+			sf.F, sf.Err = nil, fe
+		}
+		out = append(out, sf)
+	}
+	return out
 }
