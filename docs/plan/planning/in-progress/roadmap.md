@@ -10,7 +10,7 @@ Reihenfolge von Terminen. Die Wellen bilden die Versions-Stufen
 
 ## Aktuelle Welle
 
-welle-06 (Release-Härtung) ist aktiv: [`slice-024`](slice-024-devcontainer-feature-erproben.md) liegt in `in-progress/`.
+Keine aktive Welle (kein Slice in `in-progress/`; Ruhezustand im Sinne des Slice-Lifecycles).
 
 welle-01 bis welle-05 sind abgeschlossen. Release 1.0.0 ist am 2026-11-11 veröffentlicht
 (Tag `v1.0.0` auf Commit `5f1b35cca776`, GitHub-Release, Images auf `ghcr.io`, Devcontainer-Feature),
@@ -21,7 +21,7 @@ siehe [`../done/welle-01-results.md`](../done/welle-01-results.md),
 [`../done/welle-05-results.md`](../done/welle-05-results.md). Die Pläne liegen unter
 [`../done/`](../done/), zuletzt [`../done/welle-05-release.md`](../done/welle-05-release.md).
 
-**Weiter gestartet:** welle-06 (slice-023 und slice-025 sind done, slice-024 in Arbeit) und welle-07 (CI-Komfort: slice-026, slice-027, slice-028 und slice-029 sind done; für 1.1.0 fehlt die gemeinsame Entscheidungsvorlage). Sobald kein Slice mehr in `in-progress/` liegt, trägt dieser Block wieder den Ruhe-Marker für den Ruhezustand.
+**Gestartet, aber ohne Slice in Arbeit:** welle-06 (Release-Härtung: slice-023, slice-024 und slice-025 sind done; offen ist die Veröffentlichung von Feature 1.0.1 nach dem Ja beider Nutzer) und welle-07 (CI-Komfort: slice-026 bis slice-029 sind done; für 1.1.0 fehlt die gemeinsame Entscheidungsvorlage). Sobald ein Slice nach `in-progress/` zieht, entfällt der Ruhe-Marker oben.
 
 ## Nächste Wellen
 
@@ -44,8 +44,8 @@ Pläne: [`../welle-06-release-haertung.md`](../welle-06-release-haertung.md), [`
 | M3 — AWS-Live-Checks | welle-03 | STS/Bedrock/IAM read-only | erreicht (2026-11-10) |
 | M4 — CI-fähig | welle-04 | SARIF + `--ci` + Exit-Code 1 bei FAIL | erreicht (2026-11-10) |
 | M5 — Release 1.0 | welle-05 | Docker-Image + Doku + Tests grün | erreicht (2026-11-11, veröffentlicht) |
-| M6 — Release-Prozess erprobt | welle-06 | `release-artifacts` und Feature erprobt, `release-create` vorhanden | in Arbeit (slice-023 und slice-025 done, slice-024 offen) |
-| M7 — CI-Komfort (1.1.0) | welle-07 | `--fail-on warn`, `--output FILE`, Zusatzregionen, Gate-Bewertung | in Arbeit (Slices umgesetzt; Closure slice-027 und Entscheidungsvorlage 1.1.0 offen; nicht veröffentlicht) |
+| M6 — Release-Prozess erprobt | welle-06 | `release-artifacts` und Feature erprobt, `release-create` vorhanden | Slices done (023, 024, 025); offen: Veröffentlichung von Feature 1.0.1 (Entscheidung beider Nutzer) |
+| M7 — CI-Komfort (1.1.0) | welle-07 | `--fail-on warn`, `--output FILE`, Zusatzregionen, Gate-Bewertung | Slices done (026 bis 029); offen: Entscheidungsvorlage 1.1.0; nicht veröffentlicht |
 | M8 — Erweiterungen | welle-08 | je Slice: Entscheidung der Auftraggeber bzw. ADR | offen (nicht freigegeben) |
 
 ## Abhängigkeitsgraph
