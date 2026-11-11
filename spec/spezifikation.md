@@ -218,7 +218,9 @@ Konfiguration), wird keine Datei angelegt und eine vorhandene bleibt
 unverändert. Liegt bei einem späteren Tool-Fehler (zum Beispiel `all` mit
 fehlendem `aws`-Binary) ein Teilergebnis vor, wird es wie auf stdout
 geschrieben, der Exit-Code bleibt `2`. Kann die Datei nicht geschrieben werden,
-endet der Lauf mit Exit `2` und einer festen Meldung ohne Dateiinhalt.
+endet der Lauf mit Exit `2` und einer Meldung, die nur die Fehlerklasse nennt
+(Zielverzeichnis fehlt, Ziel ist ein Verzeichnis, keine Berechtigung, sonstiger
+Fehler), nie den Pfad oder Dateiinhalt.
 
 **Schwelle `--fail-on`** (Erweiterung, nur auf ausdrückliche Anforderung auf
 der Kommandozeile): `--fail-on fail` ist der Standard und gleichbedeutend mit
