@@ -5,7 +5,9 @@ name: publish
 # ausdrücklicher Freigabe beider Nutzer zu genau Version, Commit und Zielen
 # (docs/user/releasing.md). Der Push nutzt das GITHUB_TOKEN dieses Laufs; es gibt
 # keine eigenen Zugangsdaten. Images und Feature sind getrennte Schalter, damit das
-# Feature erst nach Nachprüfung der Images veröffentlicht wird.
+# Feature erst nach Nachprüfung der Images veröffentlicht wird. Standard ist ein
+# TROCKENLAUF (dry_run=true): Eingaben, Tag, Commit und Version werden geprüft, Images
+# gebaut und getestet bzw. das Feature gepackt; nichts wird angemeldet oder gepusht.
 # Vorbild: d-check release.yml (SHA-gepinnte Actions, Rechte oben entzogen).
 on:
   workflow_dispatch:
@@ -24,6 +26,10 @@ on:
         description: "Devcontainer-Feature nach ghcr.io veröffentlichen"
         type: boolean
         default: false
+      dry_run:
+        description: "Trockenlauf: prüfen, bauen und testen bzw. packen, aber nichts pushen (Standard)"
+        type: boolean
+        default: true
       ref:
         description: "Nur für das Feature: Tag feature-v<version> statt des Tool-Tags v<version> (version ist dann die Feature-Version und muss dem Tag-Suffix und der devcontainer-feature.json entsprechen)"
         required: false
@@ -57,6 +63,7 @@ jobs:
         run: |
           echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || { echo "ungültige Version: $VERSION" >&2; exit 1; }
           echo "$COMMIT_INPUT" | grep -Eq '^[0-9a-f]{12,40}$' || { echo "ungültiger Commit: $COMMIT_INPUT" >&2; exit 1; }
+          [ -z "$REF_INPUT" ] || { echo "ref gilt nur für das Feature, nicht für die Images" >&2; exit 1; }
           head=$(git rev-parse HEAD)
           case "$head" in "$COMMIT_INPUT"*) ;; *) echo "Tag v$VERSION zeigt auf $head, freigegeben war $COMMIT_INPUT" >&2; exit 1;; esac
 
@@ -77,19 +84,32 @@ jobs:
           tools/image-smoke.sh "$IMAGE:$VERSION-slim" slim
           tools/image-smoke.sh "$IMAGE:$VERSION-full" full
 
+      - name: OCI-Labels prüfen
+        run: |
+          set -euo pipefail
+          for t in slim full; do
+            v=$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.version" }}' "$IMAGE:$VERSION-$t")
+            [ "$v" = "$VERSION" ] || { echo "Label version=[$v] passt nicht zu $VERSION" >&2; exit 1; }
+          done
+
+      - name: Trockenlauf-Ergebnis (Images)
+        if: ${{ inputs.dry_run }}
+        run: |
+          echo "Trockenlauf: Images gebaut und getestet, nichts gepusht." | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: Bei ghcr.io anmelden
+        if: ${{ !inputs.dry_run }}
         uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: OCI-Labels prüfen und nach ghcr.io pushen
+      - name: Nach ghcr.io pushen
+        if: ${{ !inputs.dry_run }}
         run: |
           set -euo pipefail
           for t in slim full; do
-            v=$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.version" }}' "$IMAGE:$VERSION-$t")
-            [ "$v" = "$VERSION" ] || { echo "Label version=[$v] passt nicht zu $VERSION" >&2; exit 1; }
             docker push "$IMAGE:$VERSION-$t"
             docker inspect --format '{{index .RepoDigests 0}}' "$IMAGE:$VERSION-$t" | sed "s/^/$t: /"
           done
@@ -118,10 +138,21 @@ jobs:
           fv=$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' devcontainer-feature/src/bedrock-eu-check/devcontainer-feature.json | head -1)
           [ "$fv" = "$VERSION" ] || { echo "Feature-Version $fv passt nicht zu $VERSION" >&2; exit 1; }
 
+      - name: devcontainer-CLI installieren
+        run: npm install --global @devcontainers/cli@0.72.0
+
+      - name: Trockenlauf — Feature packen, nichts veröffentlichen
+        if: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          devcontainer features package --output-folder "$RUNNER_TEMP/feature-package" ./devcontainer-feature/src
+          ls -l "$RUNNER_TEMP/feature-package"
+          echo "Trockenlauf: Feature gepackt, nichts veröffentlicht." | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: Feature veröffentlichen
+        if: ${{ !inputs.dry_run }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          npm install --global @devcontainers/cli@0.72.0
           devcontainer features publish --registry ghcr.io \
             --namespace pt9912/bedrock-eu-guard ./devcontainer-feature/src
