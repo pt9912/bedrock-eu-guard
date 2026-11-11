@@ -170,3 +170,9 @@ Pro Slice:
 7. Doku/Indizes aktualisieren, falls ein öffentlicher Vertrag berührt ist.
 8. Ausgeführte Sensors und verbleibende Risiken berichten — keine
    Erfolgsmeldung ohne Gate-Ausführung.
+9. Review: Ein **anderer** Agent als der Autor liest den Pull Request gegen
+   und legt einen Review-Report nach
+   [`docs/reviews/review-report.template.md`](docs/reviews/review-report.template.md)
+   unter `docs/reviews/<YYYY-MM-DD>-<ref>.md` ab (ein Report pro Lauf, nach dem
+   Gegenlesen und **vor** dem Merge). Findings der Kategorien `HIGH` und `MEDIUM`
+   blockieren den Merge; eine Abweichung wird im Verdikt begründet.

@@ -36,6 +36,7 @@ Liste mit jeweils prüfbarem Kriterium.
 - [ ] LH-QA-<NN> erfüllt, Messung dokumentiert.
 - [ ] `make gates` grün.
 - [ ] Doku-Update für <Schnittstelle X> falls öffentlicher Vertrag berührt.
+- [ ] Review-Report eines anderen Agenten unter `docs/reviews/` abgelegt (Verdikt: nicht merge-blockierend).
 - [ ] Closure-Notiz mit Steering-Loop-Lerneintrag.
 
 ## 3. Plan (vor Code)
