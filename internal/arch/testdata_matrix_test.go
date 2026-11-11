@@ -10,9 +10,8 @@ import (
 )
 
 // TestTestdataCoverage hält die Abdeckungsmatrix für LH-QA-003 fest: je
-// Dateiart ein Positiv- (good) und ein Negativbeispiel (bad). Für Dateiarten
-// ohne Scanner (iam-policy.json) ist die Lücke ausdrücklich benannt und wird
-// geloggt, nicht stillschweigend übergangen.
+// Dateiart ein Positiv- (good) und ein Negativbeispiel (bad); iam-policy.json
+// gehört seit LH-FA-IAM-004 dazu.
 func TestTestdataCoverage(t *testing.T) {
 	root := moduleRoot(t)
 	base := "internal/adapter/driving/cli/testdata"
@@ -26,6 +25,7 @@ func TestTestdataCoverage(t *testing.T) {
 		{"Dockerfile", "Dockerfile"},
 		{"main.tf", "main.tf"},
 		{".claude/settings.json", ".claude/settings.json"},
+		{"iam-policy.json", "iam-policy.json"},
 	}
 	for _, k := range kinds {
 		for _, variant := range []string{"good", "bad"} {
@@ -42,7 +42,41 @@ func TestTestdataCoverage(t *testing.T) {
 			t.Errorf("Testdaten fehlen (LH-FA-LENV-007): %s", rel)
 		}
 	}
-	t.Logf("LÜCKE (LH-QA-003): für iam-policy.json gibt es keinen Scanner und keine Testdaten (Soll-Anforderung nach 1.0)")
+}
+
+// iamSecretLike erkennt echt wirkende Konto-IDs (zwölf Ziffern) und Zugangsschlüssel-IDs.
+var iamSecretLike = regexp.MustCompile(`\b[0-9]{12}\b|AKIA[0-9A-Z]{16}`)
+
+// TestIAMPolicyTestdataIsSynthetic stellt sicher, dass die IAM-Policy-Testdaten
+// (LH-QA-003, LH-FA-IAM-004) keine echt wirkenden Konto-IDs oder Schlüssel-IDs enthalten.
+func TestIAMPolicyTestdataIsSynthetic(t *testing.T) {
+	root := moduleRoot(t)
+	base := filepath.Join(root, "internal", "adapter", "driving", "cli", "testdata")
+	found := 0
+	err := filepath.WalkDir(base, func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return err
+		}
+		if n := d.Name(); !strings.HasSuffix(n, "-policy.json") && !(strings.HasPrefix(n, "iam-policy") && strings.HasSuffix(n, ".json")) {
+			return nil
+		}
+		found++
+		b, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		if m := iamSecretLike.Find(b); m != nil {
+			rel, _ := filepath.Rel(root, path)
+			t.Errorf("%s: echt wirkende Konto- oder Schlüssel-ID in den Testdaten (nur synthetische Werte erlaubt)", rel)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if found < 4 {
+		t.Fatalf("nur %d IAM-Policy-Testdateien gefunden; Pfad prüfen", found)
+	}
 }
 
 // secretKey erkennt Schlüsselnamen, deren Werte geheim sein könnten.
