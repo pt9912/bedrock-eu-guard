@@ -15,7 +15,8 @@ Keine aktive Welle (kein Slice in `in-progress/`; Ruhezustand im Sinne des Slice
 welle-01 bis welle-07 sind abgeschlossen. Release 1.0.0 ist am 2026-11-11 veröffentlicht
 (Tag `v1.0.0` auf Commit `5f1b35cca776`, GitHub-Release, Images auf `ghcr.io`, Devcontainer-Feature),
 danach Werkzeug 1.1.0 (Tag `v1.1.0`, GitHub-Release, Images `1.1.0-slim` und `1.1.0-full`) und Feature 1.0.1
-(Tag `feature-v1.0.1`), beide auf Commit `5274f3dce55f`,
+(Tag `feature-v1.0.1`), beide auf Commit `5274f3dce55f`, sowie Werkzeug 1.2.0 (Tag `v1.2.0`, GitHub-Release, Images
+`1.2.0-slim` und `1.2.0-full`) auf Commit `e04f5da47a07` mit den Ergebnissen aus welle-08 (slice-030),
 siehe [`../done/welle-01-results.md`](../done/welle-01-results.md),
 [`../done/welle-02-results.md`](../done/welle-02-results.md),
 [`../done/welle-03-results.md`](../done/welle-03-results.md),
@@ -49,7 +50,7 @@ Pläne: [`../done/welle-06-release-haertung.md`](../done/welle-06-release-haertu
 | M5 — Release 1.0 | welle-05 | Docker-Image + Doku + Tests grün | erreicht (2026-11-11, veröffentlicht) |
 | M6 — Release-Prozess erprobt | welle-06 | `release-artifacts` und Feature erprobt, `release-create` vorhanden | erreicht (2026-11-11; Feature 1.0.1 veröffentlicht) |
 | M7 — CI-Komfort (1.1.0) | welle-07 | `--fail-on warn`, `--output FILE`, Zusatzregionen, Gate-Bewertung | erreicht (2026-11-11; 1.1.0 veröffentlicht) |
-| M8 — Erweiterungen | welle-08 | je Slice: Entscheidung der Auftraggeber bzw. ADR | teilweise (slice-030 und slice-031 done; 032 und 033 warten auf Trigger) |
+| M8 — Erweiterungen | welle-08 | je Slice: Entscheidung der Auftraggeber bzw. ADR | teilweise (slice-030 und slice-031 done, mit 1.2.0 veröffentlicht; 032 und 033 warten auf Trigger) |
 
 ## Abhängigkeitsgraph
 
