@@ -2,7 +2,7 @@
 
 **Status:** done.
 
-**Welle:** [`welle-07-ci-komfort`](../welle-07-ci-komfort.md).
+**Welle:** [`welle-07-ci-komfort`](welle-07-ci-komfort.md).
 
 **Bezug:** `AGENTS.md` §4 (Quality Gates), [`welle-05-results.md`](../done/welle-05-results.md) (Folgeaufgaben), PR #82.
 

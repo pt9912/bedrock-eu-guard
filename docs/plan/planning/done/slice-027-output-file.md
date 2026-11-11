@@ -2,7 +2,7 @@
 
 **Status:** done.
 
-**Welle:** [`welle-07-ci-komfort`](../welle-07-ci-komfort.md).
+**Welle:** [`welle-07-ci-komfort`](welle-07-ci-komfort.md).
 
 **Bezug:** [`LH-MOD-005`](../../../../spec/lastenheft.md#lh-mod-005--ci-modus), [`LH-FA-REP-002`](../../../../spec/lastenheft.md#lh-fa-rep-002--json-ausgabe), [`LH-FA-REP-003`](../../../../spec/lastenheft.md#lh-fa-rep-003--sarif-ausgabe), [`LH-QA-005`](../../../../spec/lastenheft.md#lh-qa-005--ci-prüfung).
 

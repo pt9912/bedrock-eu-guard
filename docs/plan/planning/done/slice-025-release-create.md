@@ -2,7 +2,7 @@
 
 **Status:** done.
 
-**Welle:** [`welle-06-release-haertung`](../welle-06-release-haertung.md).
+**Welle:** [`welle-06-release-haertung`](welle-06-release-haertung.md).
 
 **Bezug:** [`LH-QA-004`](../../../../spec/lastenheft.md#lh-qa-004--reproduzierbarer-build), [`LH-RM-005`](../../../../spec/lastenheft.md#lh-rm-005--version-10), `docs/user/releasing.md`.
 
