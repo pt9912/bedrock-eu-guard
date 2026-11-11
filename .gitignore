@@ -37,6 +37,9 @@ result.json
 .env
 .env.*
 !.env.example
+# Testdaten des .env-Scanners: absichtlich synthetisch (nur GEHEIM-Marker, keine echten Schlüssel).
+!internal/**/testdata/**/.env
+!internal/**/testdata/**/.env.*
 .aws/
 credentials
 
