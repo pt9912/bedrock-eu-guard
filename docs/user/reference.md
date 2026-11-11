@@ -46,6 +46,7 @@ Felder oder falsche Typen sind ein Fehler (Exit `2`).
 | `allowedModelPatterns` | `['^eu\.', '^anthropic\.claude-sonnet-4-6$', '^anthropic\.claude-haiku-4-5$']` | reguläre Ausdrücke für erlaubte Modell-/Profil-IDs |
 | `blockedModelPatterns` | `['^us\.', '^global\.', 'us-east-1', 'us-west-2']` | reguläre Ausdrücke für blockierte IDs; haben Vorrang |
 | `allowedProfiles` | `['eu.*', 'eu-central-1.*']` | Allowlist für verwendete Profile (verankerte reguläre Ausdrücke) |
+| `visibilityRegions` | `[]` | Zusatzregionen (nicht in `allowedRegions`), in denen nur die Sichtbarkeit nicht erlaubter Bedrock-Profile geprüft wird (`WARN`, nie `FAIL`); je Region ein lesender Aufruf von `bedrock:ListInferenceProfiles` |
 | `mantle` | `warn` | Umgang mit `CLAUDE_CODE_USE_MANTLE=1`: `warn`, `allow` oder `block` |
 | `exclude` | `[]` | Glob-Muster relativ zum Scan-Root, die von der Datei-Discovery ausgenommen werden (`path.Match`, ein Muster trifft auch alles unterhalb eines passenden Verzeichnisses, kein `**`) |
 
@@ -72,6 +73,7 @@ Feldwert; bei Syntaxfehlern der Datei als `FILE_INVALID` mit Zeile.
 | `INVALID_ACCOUNT` | Account-ID hat nicht genau 12 Ziffern |
 | `INVALID_REGEX` | ungültiger regulärer Ausdruck in `allowedModelPatterns`, `blockedModelPatterns` oder `allowedProfiles` |
 | `INVALID_PATTERN` | ungültiges Glob-Muster in `exclude` |
+| `REGION_ALSO_ALLOWED` | eine Region in `visibilityRegions` steht auch in `allowedRegions` |
 | `INVALID_VALUE` | leerer oder unzulässiger Wert (z. B. `mantle` außerhalb von `warn`/`allow`/`block`, leerer Regionsname, leeres `exclude`-Muster) |
 | `FILE_INVALID` | Datei nicht als YAML lesbar, unbekanntes Feld oder falscher Typ (mit Zeile) |
 

@@ -122,3 +122,46 @@ func TestResolveExclude(t *testing.T) {
 		}
 	}
 }
+
+func TestResolveVisibilityRegions(t *testing.T) {
+	// Default: leer, nicht gesetzt
+	if c, err := model.Resolve(model.PartialConfig{}); err != nil || c.VisibilityRegions != nil {
+		t.Fatalf("Default: %+v, %v", c, err)
+	}
+	// gültig
+	c, err := model.Resolve(model.PartialConfig{VisibilityRegions: []string{"us-east-1", "us-west-2"}})
+	if err != nil || len(c.VisibilityRegions) != 2 {
+		t.Fatalf("gültig: %+v, %v", c, err)
+	}
+	// explizit leer
+	if c, err := model.Resolve(model.PartialConfig{VisibilityRegions: []string{}}); err != nil || c.VisibilityRegions == nil || len(c.VisibilityRegions) != 0 {
+		t.Fatalf("leer: %+v, %v", c, err)
+	}
+	// leerer Name und Überschneidung mit allowedRegions (Default und eigene Liste)
+	cases := map[string]struct {
+		p      model.PartialConfig
+		index  int
+		reason string
+	}{
+		"leerer Name":                  {model.PartialConfig{VisibilityRegions: []string{"us-east-1", ""}}, 1, model.ConfigInvalidValue},
+		"Überschneidung mit Default":   {model.PartialConfig{VisibilityRegions: []string{"eu-central-1"}}, 0, model.ConfigRegionOverlap},
+		"Überschneidung mit eigener":   {model.PartialConfig{AllowedRegions: []string{"eu-west-1"}, VisibilityRegions: []string{"us-east-1", "eu-west-1"}}, 1, model.ConfigRegionOverlap},
+		"eigene Liste ersetzt Default": {model.PartialConfig{AllowedRegions: []string{"eu-west-1"}, VisibilityRegions: []string{"eu-central-1"}}, -2, ""},
+	}
+	for name, cs := range cases {
+		_, err := model.Resolve(cs.p)
+		if cs.index == -2 { // kein Fehler erwartet
+			if err != nil {
+				t.Errorf("%s: unerwartet %v", name, err)
+			}
+			continue
+		}
+		var ce *model.ConfigError
+		if !errors.As(err, &ce) || ce.Field != "visibilityRegions" || ce.Index != cs.index || ce.Reason != cs.reason {
+			t.Errorf("%s: %v", name, err)
+		}
+		if strings.Contains(err.Error(), "us-east-1") || strings.Contains(err.Error(), "eu-west-1") {
+			t.Errorf("%s: Feldwert im Fehlertext: %v", name, err)
+		}
+	}
+}

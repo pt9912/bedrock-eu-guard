@@ -297,3 +297,58 @@ func TestCheckAWSUsesSettingsModels(t *testing.T) {
 		}
 	}
 }
+
+func TestCheckAWSVisibilityRegions(t *testing.T) {
+	r := fakeaws.Reader{Ident: &model.AWSIdentity{Account: "1", ARN: "arn"}}
+	b := fakeaws.Bedrock{
+		Profiles: map[string][]model.InferenceProfile{
+			"eu-central-1": {{ID: "eu.anthropic.claude-sonnet-4-6"}},
+			"us-east-1":    {{ID: "us.anthropic.claude-sonnet-4-6"}},
+		},
+		Models:      map[string][]model.FoundationModel{"eu-central-1": {{ID: "anthropic.claude-sonnet-4-6"}}},
+		ProfilesErr: map[string]error{"us-west-2": &model.AWSError{Op: "bedrock:ListInferenceProfiles", Reason: model.AWSAccessDenied}},
+		ModelsErr:   map[string]error{"us-east-1": errors.New("darf nicht aufgerufen werden")},
+	}
+	cfg := model.DefaultConfig()
+	cfg.VisibilityRegions = []string{"us-east-1", "us-west-2"}
+	fs, err := app.CheckAWS{AWS: r, Bedrock: b}.Run(fakeenv.Env{}, cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var visible, unknown, profilesFor001 int
+	for _, f := range fs {
+		switch {
+		case f.RuleID == "LH-FA-BEDROCK-002" && f.Reason == model.ReasonProfilesVisible && f.Severity == model.WARN:
+			visible++
+		case f.RuleID == "LH-FA-BEDROCK-002" && f.Reason == model.ReasonVisibilityUnknown && f.Severity == model.WARN && f.Subject == "us-west-2":
+			unknown++
+		case f.RuleID == "LH-FA-BEDROCK-001":
+			profilesFor001++
+		}
+		if f.Severity == model.FAIL {
+			t.Errorf("Zusatzregionen dürfen nie FAIL erzeugen: %+v", f)
+		}
+	}
+	if visible != 1 || unknown != 1 || profilesFor001 != 1 {
+		t.Fatalf("visible=%d unknown=%d 001=%d: %+v", visible, unknown, profilesFor001, fs)
+	}
+	// ohne Zusatzregionen: keine zusätzlichen Aufrufe/Befunde (Standardverhalten)
+	fs, _ = app.CheckAWS{AWS: r, Bedrock: b}.Run(fakeenv.Env{}, model.DefaultConfig())
+	for _, f := range fs {
+		if f.Reason == model.ReasonProfilesVisible || f.Reason == model.ReasonVisibilityUnknown {
+			t.Errorf("Standard: unerwartet %+v", f)
+		}
+	}
+	// Identität unbrauchbar: Zusatzregionen → WARN statt FAIL
+	rr := fakeaws.Reader{Err: &model.AWSError{Op: "sts:GetCallerIdentity", Reason: model.AWSNoCredentials}}
+	fs, _ = app.CheckAWS{AWS: rr, Bedrock: b}.Run(fakeenv.Env{}, cfg)
+	n := 0
+	for _, f := range fs {
+		if f.RuleID == "LH-FA-BEDROCK-002" && f.Reason == model.ReasonVisibilityUnknown && f.Severity == model.WARN {
+			n++
+		}
+	}
+	if n != 2 {
+		t.Errorf("2 WARN VISIBILITY_UNKNOWN erwartet, got %d", n)
+	}
+}

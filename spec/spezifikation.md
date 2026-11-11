@@ -120,6 +120,7 @@ blockedModelPatterns:  ['^us\.', '^global\.', 'us-east-1', 'us-west-2']
 allowedProfiles:       ['eu.*', 'eu-central-1.*']
 mantle:                warn                         # warn | allow | block; LH-OFF-003
 exclude:               []                           # Glob-Muster relativ zum Scan-Root
+visibilityRegions:     []                           # Zusatzregionen nur für Sichtbarkeit (aws)
 ```
 
 `exclude` nimmt Pfade von der Datei-Discovery aus (Claude-Projekt-Settings,
@@ -128,6 +129,13 @@ relativ zum Scan-Root, mit `/` getrennt; ein Muster trifft den Pfad selbst
 oder ein Verzeichnis darüber (`testdata` nimmt `testdata/a/b.tf` aus,
 `docs/*/gen` nimmt `docs/x/gen/y` aus); `**` wird nicht unterstützt. Die
 Benutzer-Settings (`~/.claude/settings.json`) sind davon nicht betroffen.
+
+`visibilityRegions` benennt Zusatzregionen, in denen der Modus `aws` nur die
+Inference-Profile liest und die Sichtbarkeit nicht erlaubter Profile bewertet
+([`LH-FA-BEDROCK-002`](lastenheft.md#lh-fa-bedrock-002--nicht-erlaubte-profile-erkennen)): sichtbare blockierte Profile ergeben `WARN`
+(nie `FAIL`), eine nicht lesbare Zusatzregion `WARN` (`VISIBILITY_UNKNOWN`). Eine
+Region darf nicht zugleich in `allowedRegions` stehen (Konfigurationsfehler,
+Exit `2`). Leer (Default) bedeutet: keine zusätzlichen Aufrufe.
 
 Alle Felder optional; fehlende Felder fallen auf die Defaults zurück
 ([`LH-NF-007`](lastenheft.md#lh-nf-007--konfigurierbarkeit)). Block-Muster haben Vorrang (`SPEC-010`).

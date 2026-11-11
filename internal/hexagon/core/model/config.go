@@ -28,6 +28,7 @@ const (
 	ConfigInvalidAccount = "INVALID_ACCOUNT"
 	ConfigEmptyRegions   = "EMPTY_REGIONS"
 	ConfigInvalidPattern = "INVALID_PATTERN"
+	ConfigRegionOverlap  = "REGION_ALSO_ALLOWED"
 )
 
 // PartialConfig ist der gelesene Inhalt von bedrock-eu-check.yml. Ein
@@ -41,6 +42,7 @@ type PartialConfig struct {
 	AllowedProfiles      []string
 	Mantle               string
 	Exclude              []string
+	VisibilityRegions    []string
 }
 
 // ConfigError beschreibt ein ungültiges Konfigurationsfeld. Sie zitiert
@@ -110,6 +112,17 @@ func Resolve(p PartialConfig) (Config, error) {
 		for i, pat := range f.pats {
 			if _, err := regexp.Compile(pat); err != nil {
 				bad(f.name, i, ConfigInvalidRegex)
+			}
+		}
+	}
+	if p.VisibilityRegions != nil {
+		c.VisibilityRegions = p.VisibilityRegions
+		for i, r := range p.VisibilityRegions {
+			switch {
+			case r == "":
+				bad("visibilityRegions", i, ConfigInvalidValue)
+			case c.RegionAllowed(r):
+				bad("visibilityRegions", i, ConfigRegionOverlap)
 			}
 		}
 	}

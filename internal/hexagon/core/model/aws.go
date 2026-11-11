@@ -53,13 +53,14 @@ type FoundationModel struct {
 
 // Reason-Codes der Bedrock-Regeln.
 const (
-	ReasonProfilesListed   = "PROFILES_LISTED"
-	ReasonProfilesNone     = "PROFILES_NONE"
-	ReasonProfilesVisible  = "PROFILES_VISIBLE_NOT_ALLOWED"
-	ReasonProfileNotListed = "PROFILE_NOT_ALLOWLISTED"
-	ReasonModelAvailable   = "MODEL_AVAILABLE"
-	ReasonModelUnavailable = "MODEL_UNAVAILABLE"
-	ReasonModelUnknown     = "MODEL_AVAILABILITY_UNKNOWN"
+	ReasonProfilesListed    = "PROFILES_LISTED"
+	ReasonProfilesNone      = "PROFILES_NONE"
+	ReasonProfilesVisible   = "PROFILES_VISIBLE_NOT_ALLOWED"
+	ReasonVisibilityUnknown = "VISIBILITY_UNKNOWN"
+	ReasonProfileNotListed  = "PROFILE_NOT_ALLOWLISTED"
+	ReasonModelAvailable    = "MODEL_AVAILABLE"
+	ReasonModelUnavailable  = "MODEL_UNAVAILABLE"
+	ReasonModelUnknown      = "MODEL_AVAILABILITY_UNKNOWN"
 )
 
 // ActionDecision ist das Ergebnis der Rechtesimulation für eine Aktion.

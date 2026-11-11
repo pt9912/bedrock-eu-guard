@@ -127,6 +127,9 @@ type Config struct {
 	// Exclude sind Glob-Muster (path.Match, relativ zum Scan-Root, "/"),
 	// die Pfade von der Datei-Discovery ausnehmen (siehe Excluded).
 	Exclude []string
+	// VisibilityRegions sind zusätzliche Regionen (nicht in AllowedRegions), in
+	// denen nur die Sichtbarkeit nicht erlaubter Profile geprüft wird (WARN).
+	VisibilityRegions []string
 }
 
 // DefaultConfig liefert die Defaults (LH-NF-007: überschreibbar).

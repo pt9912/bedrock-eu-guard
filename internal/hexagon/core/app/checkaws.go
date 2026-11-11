@@ -80,6 +80,19 @@ func (u CheckAWS) readBedrock(env driven.Environment, cfg model.Config, idErr *m
 		})
 		b.Regions = append(b.Regions, rd)
 	}
+	// Zusatzregionen: nur Profile, nur Sichtbarkeit (kein Modell-Aufruf).
+	for _, region := range rules.VisibilityRegions(cfg) {
+		rd := rules.RegionData{Region: region, VisibilityOnly: true}
+		if idErr != nil && (idErr.Reason == model.AWSNoCredentials || idErr.Reason == model.AWSUnreachable) {
+			rd.ProfilesErr = &model.AWSError{Op: "bedrock:ListInferenceProfiles", Reason: idErr.Reason}
+			b.Regions = append(b.Regions, rd)
+			continue
+		}
+		rd.Profiles, rd.ProfilesErr = asAWSError("bedrock:ListInferenceProfiles", func() ([]model.InferenceProfile, error) {
+			return u.Bedrock.ListInferenceProfiles(region)
+		})
+		b.Regions = append(b.Regions, rd)
+	}
 	return b
 }
 
