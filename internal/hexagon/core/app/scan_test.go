@@ -281,3 +281,61 @@ func TestScanExcludeFiltersAllDiscoveries(t *testing.T) {
 		t.Errorf("Rest bleibt geprüft: %v", ex)
 	}
 }
+
+func TestScanDotenvDiscoveryExcludeAndErrors(t *testing.T) {
+	good := &model.EnvFile{Env: []model.EnvEntry{{Key: "AWS_REGION", Value: "eu-central-1", Line: 1}}}
+	bad := &model.EnvFile{Env: []model.EnvEntry{{Key: "ANTHROPIC_API_KEY", Secret: true, Line: 2}}}
+	r := fakeenvsource.Reader{
+		Files: map[string]*model.EnvFile{".env": good, "apps/api/.env": bad, "testdata/.env": bad},
+		Errs:  map[string]error{"apps/web/.env.local": &model.FileError{Path: "apps/web/.env.local", Reason: model.ReasonFileInvalid, Line: 3}},
+	}
+	finder := fakeenvsource.Finder{Paths: map[model.EnvSourceKind][]string{
+		model.EnvDotenv: {"testdata/.env", "apps/web/.env.local", ".env", "apps/api/.env"}}}
+	cfg := model.DefaultConfig()
+	cfg.Exclude = []string{"testdata"}
+	fs, err := app.Scan{EnvSources: r, EnvFinder: finder}.Run(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]string{}
+	for _, f := range fs {
+		if f.RuleID == "LH-FA-LENV-007" {
+			got[f.File] = f.Severity.String() + "/" + f.Reason
+		}
+	}
+	want := map[string]string{".env": "PASS/OK", "apps/api/.env": "FAIL/DIRECT_ANTHROPIC", "apps/web/.env.local": "FAIL/FILE_INVALID"}
+	if len(got) != len(want) {
+		t.Fatalf("got %v want %v", got, want)
+	}
+	for k, v := range want {
+		if got[k] != v {
+			t.Errorf("%s: got %q want %q", k, got[k], v)
+		}
+	}
+	if app.ExitCode(fs, nil) != 1 {
+		t.Error("exit != 1")
+	}
+
+	// Suchfehler: Finding, kein Tool-Fehler
+	fs, err = app.Scan{EnvSources: r, EnvFinder: fakeenvsource.Finder{Err: errors.New("boom")}}.Run(model.DefaultConfig())
+	if err != nil {
+		t.Fatalf("Suchfehler ist kein Tool-Fehler: %v", err)
+	}
+	if len(fs) != 1 || fs[0].Severity != model.FAIL || fs[0].Reason != model.ReasonFileUnreadable || fs[0].RuleID != "LH-FA-LENV-007" {
+		t.Errorf("Suchfehler: %+v", fs)
+	}
+
+	// ohne EnvFinder (oder ohne EnvSources): keine .env-Prüfung
+	for name, s := range map[string]app.Scan{
+		"ohne Finder": {EnvSources: r},
+		"ohne Reader": {EnvFinder: finder},
+		"beides leer": {},
+	} {
+		fs, _ := s.Run(model.DefaultConfig())
+		for _, f := range fs {
+			if f.RuleID == "LH-FA-LENV-007" {
+				t.Errorf("%s: unerwartetes Finding %+v", name, f)
+			}
+		}
+	}
+}

@@ -11,6 +11,7 @@ const (
 	IDDevcontainer = "LH-FA-DEVCON-001"
 	IDCompose      = "LH-FA-DOCKER-001"
 	IDDockerfile   = "LH-FA-DOCKER-002"
+	IDDotenv       = "LH-FA-LENV-007"
 )
 
 // Such-Muster je Quelle (Glob, relativ zum Scan-Root).
@@ -191,6 +192,35 @@ func CheckDockerfile(sc ScanContext, cfg model.Config) []model.Finding {
 			fd.Severity, fd.Reason = model.PASS, model.ReasonOK
 			fd.Message = "Region erlaubt, kein Anthropic-Zugang"
 		}
+		out = append(out, fd)
+	}
+	return out
+}
+
+// CheckDotenv prüft .env-Dateien (LH-FA-LENV-007): FAIL bei Anthropic-Zugang
+// oder nicht erlaubter Region, PASS wenn mindestens eine Region gesetzt ist
+// und alle erlaubt sind; ohne relevante Variablen kein Finding.
+func CheckDotenv(sc ScanContext, cfg model.Config) []model.Finding {
+	var out []model.Finding
+	for _, f := range sc.Dotenvs {
+		if f.Err != nil {
+			out = append(out, envErr(IDDotenv, f))
+			continue
+		}
+		if f.F == nil {
+			continue
+		}
+		x := factsOf(f.F, cfg)
+		fd := envBase(IDDotenv, f)
+		if r, bad := failFacts(fd, x); bad {
+			out = append(out, r)
+			continue
+		}
+		if x.regions == 0 {
+			continue
+		}
+		fd.Severity, fd.Reason = model.PASS, model.ReasonOK
+		fd.Message = "Nur erlaubte Regionen gesetzt, kein Anthropic-Zugang"
 		out = append(out, fd)
 	}
 	return out
