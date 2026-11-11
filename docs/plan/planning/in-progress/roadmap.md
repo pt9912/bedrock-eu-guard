@@ -10,7 +10,7 @@ Reihenfolge von Terminen. Die Wellen bilden die Versions-Stufen
 
 ## Aktuelle Welle
 
-Keine Welle aktiv; Wartung ohne Welle: [`slice-034`](slice-034-devcontainer-cli-aktualisieren.md) (devcontainer-CLI aktualisieren) liegt in `in-progress/`.
+Keine aktive Welle (kein Slice in `in-progress/`; Ruhezustand im Sinne des Slice-Lifecycles). Zuletzt abgeschlossen: Wartung ohne Welle, [`slice-034`](../done/slice-034-devcontainer-cli-aktualisieren.md) (devcontainer-CLI 0.90.0).
 
 welle-01 bis welle-07 sind abgeschlossen. Release 1.0.0 ist am 2026-11-11 veröffentlicht
 (Tag `v1.0.0` auf Commit `5f1b35cca776`, GitHub-Release, Images auf `ghcr.io`, Devcontainer-Feature),
@@ -24,7 +24,7 @@ siehe [`../done/welle-01-results.md`](../done/welle-01-results.md),
 [`../done/welle-06-results.md`](../done/welle-06-results.md) und [`../done/welle-07-results.md`](../done/welle-07-results.md). Die Pläne liegen unter
 [`../done/`](../done/), zuletzt [`../done/welle-07-ci-komfort.md`](../done/welle-07-ci-komfort.md).
 
-Als Nächstes steht nur welle-08 an; sie startet erst nach einer Entscheidung der Auftraggeber. Sobald kein Slice mehr in `in-progress/` liegt, trägt dieser Block wieder den Ruhe-Marker für den Ruhezustand.
+Als Nächstes steht nur welle-08 an; sie startet erst nach einer Entscheidung der Auftraggeber. Sobald ein Slice nach `in-progress/` zieht, entfällt der Ruhe-Marker oben.
 
 ## Nächste Wellen
 
