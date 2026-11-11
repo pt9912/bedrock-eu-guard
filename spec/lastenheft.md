@@ -565,6 +565,23 @@ PASS, wenn eine erlaubte EU-Region per Condition erzwungen wird.
 FAIL, wenn Bedrock-Aufrufe ohne Region-Condition erlaubt sind.
 ```
 
+### LH-FA-IAM-004 — IAM-Policy-Dokumente (JSON) prüfen
+
+Das Tool soll eigenständige IAM-Policy-Dateien im JSON-Format auf riskante Bedrock-Rechte prüfen. Gemeint sind das Policy-Dokument selbst (`Version`, `Statement`) sowie die Ausgabe von `aws iam get-policy-version` (`PolicyVersion.Document`) und `aws iam get-role-policy` (`PolicyDocument`); andere Vorlagen (zum Beispiel CloudFormation) sind nicht Teil dieser Anforderung. Die Prüfung gehört zum Terraform-Modus ([`LH-MOD-003`](#lh-mod-003--terraform-modus)). Gefunden werden Dateien rekursiv nach den Mustern `iam-policy*.json` und `*-policy.json`; Ausschlüsse gelten wie bei Terraform-Dateien (`.git`, `.terraform`, `vendor`, `node_modules`, `.tmp`, keine Symlinks) und über `exclude`.
+
+Akzeptanzkriterium:
+
+```text
+Das Tool findet eigenständige IAM-Policy-Dateien und bewertet sie wie LH-FA-IAM-002 und LH-FA-TF-003:
+FAIL, wenn bedrock:* oder InvokeModel auf "*" ohne Region-Condition erlaubt ist.
+WARN, wenn "*" verwendet wird, aber eine Region-Condition vorhanden ist, oder wenn die Wirkung nicht auswertbar ist.
+PASS, wenn die Policy eng eingeschränkt ist.
+Eine nicht lesbare oder ungültige Datei mit eindeutigem Namen (iam-policy*.json) ist ein FAIL mit Grund FILE_UNREADABLE bzw. FILE_INVALID.
+Bei einer Datei, die nur das breite Muster *-policy.json trifft, ist dies ein WARN (Fremdformate lösen keinen FAIL aus).
+Ein gültiges JSON ohne Policy-Statement oder ohne Bedrock-Aktion erzeugt kein Finding.
+Dateiinhalte erscheinen nie in der Ausgabe.
+```
+
 ---
 
 ## 8.7 Terraform-Prüfung
@@ -790,7 +807,7 @@ iam-policy.json
 .claude/settings.json
 ```
 
-Für `iam-policy.json` gilt dies, sobald eine Anforderung zur Prüfung eigenständiger IAM-Policy-Dateien besteht (vorgesehen als Soll-Anforderung nach Version 1.0); bis dahin sind für diese Dateiart weder Scanner noch Testdaten gefordert.
+Für `iam-policy.json` gilt dies seit der Anforderung [`LH-FA-IAM-004`](#lh-fa-iam-004--iam-policy-dokumente-json-prüfen): Positiv- und Negativbeispiele gehören zu den Testdaten.
 
 ### LH-QA-004 — Reproduzierbarer Build
 
