@@ -1,0 +1,78 @@
+name: feature-cli
+
+# Erprobt das Devcontainer-Feature mit der echten devcontainer-CLI (slice-024).
+# Veröffentlicht NICHTS: nur lesende Rechte, kein Push. Fall A installiert das Feature
+# aus dem Arbeitsstand und läuft auch bei Änderungen am Feature; Fall B prüft das
+# bereits veröffentlichte Artefakt von ghcr.io und läuft nur manuell (sein Ergebnis
+# hängt nicht von einem Pull Request ab und soll unbeteiligte PRs nicht blockieren).
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - devcontainer-feature/**
+      - .github/workflows/feature-cli.yml
+
+permissions: {}
+
+env:
+  CLI_VERSION: 0.72.0
+  # Erwartete Ausgabe des Release v1.0.0 (Tool-Version, unabhängig von der Feature-Version).
+  EXPECTED: "bedrock-eu-check 1.0.0 (5f1b35cca776)"
+
+jobs:
+  working-tree:
+    name: Fall A — Feature aus dem Arbeitsstand
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: devcontainer-CLI installieren
+        run: npm install --global "@devcontainers/cli@$CLI_VERSION"
+
+      - name: Beispiel-Container bauen und Feature prüfen
+        run: |
+          set -euo pipefail
+          ws="$RUNNER_TEMP/case-a"
+          mkdir -p "$ws/.devcontainer"
+          cp -r devcontainer-feature/src/bedrock-eu-check "$ws/.devcontainer/bedrock-eu-check"
+          cat > "$ws/.devcontainer/devcontainer.json" <<'JSON'
+          {
+            "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+            "features": { "./bedrock-eu-check": { "version": "1.0.0" } }
+          }
+          JSON
+          devcontainer up --workspace-folder "$ws"
+          out=$(devcontainer exec --workspace-folder "$ws" bedrock-eu-check version)
+          echo "Ausgabe: $out"
+          [ "$out" = "$EXPECTED" ] || { echo "unerwartete Ausgabe (erwartet: $EXPECTED)" >&2; exit 1; }
+
+  published:
+    name: Fall B — veröffentlichtes Feature von ghcr.io
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: devcontainer-CLI installieren
+        run: npm install --global "@devcontainers/cli@$CLI_VERSION"
+
+      - name: Beispiel-Container bauen und Feature prüfen
+        run: |
+          set -euo pipefail
+          ws="$RUNNER_TEMP/case-b"
+          mkdir -p "$ws/.devcontainer"
+          cat > "$ws/.devcontainer/devcontainer.json" <<'JSON'
+          {
+            "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+            "features": { "ghcr.io/pt9912/bedrock-eu-guard/bedrock-eu-check:1": { "version": "1.0.0" } }
+          }
+          JSON
+          devcontainer up --workspace-folder "$ws"
+          out=$(devcontainer exec --workspace-folder "$ws" bedrock-eu-check version)
+          echo "Ausgabe: $out"
+          [ "$out" = "$EXPECTED" ] || { echo "unerwartete Ausgabe (erwartet: $EXPECTED)" >&2; exit 1; }
