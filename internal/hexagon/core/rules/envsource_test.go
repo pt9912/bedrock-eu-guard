@@ -109,3 +109,55 @@ func TestEnvSourceMissingAndBroken(t *testing.T) {
 		t.Errorf("kaputt: %+v", f)
 	}
 }
+
+func TestDotenv(t *testing.T) {
+	cfg := model.DefaultConfig()
+	file := func(path string, env ...model.EnvEntry) rules.EnvSourceFile {
+		return rules.EnvSourceFile{Path: path, F: &model.EnvFile{Path: path, Kind: model.EnvDotenv, Env: env}}
+	}
+	cases := []struct {
+		name string
+		f    rules.EnvSourceFile
+		none bool
+		sev  model.Severity
+		rsn  string
+		line int
+	}{
+		{"nur erlaubte Region", file(".env", e("AWS_REGION", "eu-central-1", 2)), false, model.PASS, model.ReasonOK, 0},
+		{"Fallback-Region erlaubt", file("apps/api/.env", e("AWS_DEFAULT_REGION", "eu-central-1", 1)), false, model.PASS, model.ReasonOK, 0},
+		{"Region nicht erlaubt", file(".env", e("AWS_REGION", "us-east-1", 3)), false, model.FAIL, model.ReasonRegionNotAllowed, 3},
+		{"API-Key", file(".env", secret("ANTHROPIC_API_KEY", 4), e("AWS_REGION", "eu-central-1", 2)), false, model.FAIL, model.ReasonDirectAnthropic, 4},
+		{"Auth-Token", file(".env.local", secret("ANTHROPIC_AUTH_TOKEN", 1)), false, model.FAIL, model.ReasonDirectAnthropic, 1},
+		{"Base-URL Anthropic", file(".env", e("ANTHROPIC_BASE_URL", "https://api.anthropic.com", 5)), false, model.FAIL, model.ReasonDirectAnthropic, 5},
+		{"nichts Relevantes", file(".env", e("DATABASE_URL", "x", 1)), true, 0, "", 0},
+		{"leer", file(".env"), true, 0, "", 0},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			fs := rules.CheckDotenv(rules.ScanContext{Dotenvs: []rules.EnvSourceFile{c.f}}, cfg)
+			if c.none {
+				if len(fs) != 0 {
+					t.Fatalf("got %+v", fs)
+				}
+				return
+			}
+			f := sole(t, fs)
+			if f.Severity != c.sev || f.Reason != c.rsn || f.RuleID != rules.IDDotenv || f.File != c.f.Path {
+				t.Fatalf("got %+v", f)
+			}
+			if c.line != 0 && f.Line != c.line {
+				t.Fatalf("line %d", f.Line)
+			}
+		})
+	}
+	if rules.IDDotenv != "LH-FA-LENV-007" {
+		t.Errorf("Regel-ID: %s", rules.IDDotenv)
+	}
+	bad := rules.EnvSourceFile{Path: ".env", Err: &model.FileError{Path: ".env", Reason: model.ReasonFileInvalid, Line: 6}}
+	if f := sole(t, rules.CheckDotenv(rules.ScanContext{Dotenvs: []rules.EnvSourceFile{bad}}, cfg)); f.Severity != model.FAIL || f.Reason != model.ReasonFileInvalid || f.Line != 6 {
+		t.Errorf("kaputt: %+v", f)
+	}
+	if fs := rules.CheckDotenv(rules.ScanContext{Dotenvs: []rules.EnvSourceFile{{Path: ".env"}}}, cfg); len(fs) != 0 {
+		t.Errorf("fehlend: %+v", fs)
+	}
+}
