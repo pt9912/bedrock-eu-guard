@@ -3,6 +3,7 @@
 package cli
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -24,7 +25,7 @@ import (
 
 const exitToolError = 2
 
-const usage = "usage: bedrock-eu-check version | (local|terraform|aws|all) [--root DIR] [--config FILE] [--allowed-account ID]... [--format console|json|sarif] [--ci] [--fail-on fail|warn]\n"
+const usage = "usage: bedrock-eu-check version | (local|terraform|aws|all) [--root DIR] [--config FILE] [--allowed-account ID]... [--format console|json|sarif] [--ci] [--fail-on fail|warn] [--output FILE]\n"
 
 // Build-Informationen, zur Buildzeit per -ldflags gesetzt (siehe Makefile):
 //
@@ -76,7 +77,8 @@ func run(args []string, env driven.Environment, home string, stdout, stderr io.W
 	// Eigene Konfiguration ungültig → Tool-Fehler, Exit 2 (SPEC-030).
 	cfg, err := app.LoadConfig(accountOverlay{configyaml.New(opts.configPath()), opts.accounts})
 	if err != nil {
-		return finish(nil, err, reporterFor(opts, stdout), opts, stdout, stderr)
+		rep, sink := newReporter(opts, stdout)
+		return finish(nil, err, rep, sink, opts, stderr)
 	}
 	var findings []model.Finding
 	if mode == "local" || mode == "all" {
@@ -95,7 +97,8 @@ func run(args []string, env driven.Environment, home string, stdout, stderr io.W
 		findings = append(findings, aws...)
 	}
 	sort.SliceStable(findings, func(i, j int) bool { return findings[i].RuleID < findings[j].RuleID })
-	return finish(findings, err, reporterFor(opts, stdout), opts, stdout, stderr)
+	rep, sink := newReporter(opts, stdout)
+	return finish(findings, err, rep, sink, opts, stderr)
 }
 
 // runLocal ist der Modus local (LH-MOD-001): Env, Claude-Settings,
@@ -122,6 +125,7 @@ type options struct {
 	ci           bool   // CI-Modus: Zusammenfassung auf stderr (LH-MOD-005)
 	accounts     []string
 	failOn       model.Severity // Exit-Schwelle (--fail-on); Default FAIL
+	output       string         // --output: Ergebnis in diese Datei statt nach stdout
 }
 
 // reporterFor wählt den Reporter für das Ausgabeformat (stdout trägt nur das
@@ -199,6 +203,8 @@ func parseOptions(args []string) (options, bool) {
 			opts.format = args[1]
 		case "--allowed-account":
 			opts.accounts = append(opts.accounts, args[1])
+		case "--output":
+			opts.output = args[1]
 		case "--fail-on":
 			sev, ok := model.ParseFailOn(args[1])
 			if !ok {
@@ -217,23 +223,67 @@ func parseOptions(args []string) (options, bool) {
 // (SPEC-030). Im CI-Modus steht zusätzlich eine Zusammenfassung auf stderr,
 // damit die Pipeline-Logs auch bei umgeleitetem stdout (z. B. SARIF-Datei)
 // den Ausgang zeigen; stdout trägt weiterhin nur das Ergebnis.
-func finish(findings []model.Finding, err error, rep driven.Reporter, opts options, stdout, stderr io.Writer) int {
+func finish(findings []model.Finding, err error, rep driven.Reporter, sink *bytes.Buffer, opts options, stderr io.Writer) int {
 	code := exitToolError
+	reported := false
 	if err != nil {
 		if len(findings) > 0 { // bereits ermittelte Befunde trotzdem zeigen
-			_ = rep.Report(findings)
+			reported = rep.Report(findings) == nil
 		}
 		fmt.Fprintf(stderr, "error: %v\n", err)
 		code = app.ExitCode(nil, err)
 	} else if rerr := rep.Report(findings); rerr != nil {
 		fmt.Fprintf(stderr, "error: %v\n", rerr)
 	} else {
+		reported = true
 		code = app.ExitCodeAt(findings, nil, opts.failOn)
+	}
+	if sink != nil && reported {
+		if werr := writeFileAtomic(opts.output, sink.Bytes()); werr != nil {
+			fmt.Fprintln(stderr, "error: Ausgabedatei konnte nicht geschrieben werden (--output)")
+			code = exitToolError
+		}
 	}
 	if opts.ci {
 		fmt.Fprintln(stderr, summaryLine(findings, code))
 	}
 	return code
+}
+
+// newReporter wählt den Reporter. Mit --output schreibt er in einen Puffer, den
+// finish nur bei vorhandenem Ergebnis atomar in die Datei überträgt; stdout
+// bleibt dann leer.
+func newReporter(opts options, stdout io.Writer) (driven.Reporter, *bytes.Buffer) {
+	if opts.output == "" {
+		return reporterFor(opts, stdout), nil
+	}
+	buf := &bytes.Buffer{}
+	return reporterFor(opts, buf), buf
+}
+
+// writeFileAtomic ersetzt die Zieldatei vollständig oder gar nicht: erst eine
+// temporäre Datei im selben Verzeichnis, dann Umbenennen.
+func writeFileAtomic(path string, data []byte) error {
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".bedrock-eu-check-*")
+	if err != nil {
+		return err
+	}
+	name := tmp.Name()
+	_, werr := tmp.Write(data)
+	cerr := tmp.Close()
+	if werr == nil {
+		werr = cerr
+	}
+	if werr == nil {
+		werr = os.Chmod(name, 0o644)
+	}
+	if werr == nil {
+		werr = os.Rename(name, path)
+	}
+	if werr != nil {
+		_ = os.Remove(name)
+	}
+	return werr
 }
 
 func summaryLine(findings []model.Finding, code int) string {

@@ -62,7 +62,7 @@ das [Handbuch](docs/user/handbuch.md).
 | `bedrock-eu-check version` | Version und Commit | nein |
 
 Wichtige Optionen: `--root DIR`, `--config FILE`, `--format console|json|sarif`, `--ci`,
-`--allowed-account ID`, `--fail-on fail|warn`. Exit-Codes: `0` kein `FAIL`, `1` mindestens ein `FAIL`
+`--allowed-account ID`, `--fail-on fail|warn`, `--output FILE`. Exit-Codes: `0` kein `FAIL`, `1` mindestens ein `FAIL`
 (mit `--fail-on warn` auch bei `WARN`), `2` Tool-Fehler.
 Alle Details stehen in der [Referenz](docs/user/reference.md); jede Prüfung ist im
 [Regelkatalog](docs/user/rules.md) beschrieben.
@@ -70,7 +70,7 @@ Alle Details stehen in der [Referenz](docs/user/reference.md); jede Prüfung ist
 Beispiel für CI (SARIF für Code Scanning, Zusammenfassung auf stderr):
 
 ```bash
-bedrock-eu-check terraform --ci --format sarif > terraform.sarif
+bedrock-eu-check terraform --ci --format sarif --output terraform.sarif
 ```
 
 ## Konfiguration

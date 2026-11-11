@@ -11,6 +11,7 @@ nichts hoch; das Hochladen übernimmt der Workflow.
 |---|---|
 | `--format console\|json\|sarif` | Ausgabeformat auf stdout (Default `console`) |
 | `--ci` | stdout trägt weiterhin nur das Ergebnis; zusätzlich steht eine Zusammenfassung auf **stderr**, damit das Pipeline-Log auch bei umgeleitetem stdout den Ausgang zeigt |
+| `--output FILE` | Ergebnis in eine Datei statt nach stdout (atomar ersetzt); stdout bleibt leer, `--ci` und Exit-Codes unverändert |
 | `--fail-on fail\|warn` | Exit-Schwelle (Default `fail`); mit `warn` scheitert die Pipeline auch bei `WARN` (siehe unten) |
 | `--root DIR` | Wurzel der zu prüfenden Dateien (Default: aktuelles Verzeichnis) |
 | `--config FILE` | Konfigurationsdatei (Default: `<root>/bedrock-eu-check.yml`) |
@@ -29,6 +30,16 @@ Tool-Fehler (Exit `2`) hat Vorrang. Beispiel:
 ```bash
 bedrock-eu-check local --ci --fail-on warn --format sarif > local.sarif
 ```
+
+Statt der Shell-Umleitung geht auch `--output`:
+
+```bash
+bedrock-eu-check terraform --ci --format sarif --output terraform.sarif
+```
+
+Liegt die Ausgabedatei im Scan-Root, wird sie beim nächsten Lauf unter Umständen selbst durchsucht
+(zum Beispiel `*.sarif` unter einem geprüften Verzeichnis); sie gehört deshalb außerhalb des Scan-Roots
+oder unter `exclude`.
 
 Vorsicht: Erwartete Warnungen (zum Beispiel `FILE_MISSING` für die Benutzer-Settings in CI,
 siehe [Fehlersuche](troubleshooting.md)) lassen die Pipeline dann scheitern.
