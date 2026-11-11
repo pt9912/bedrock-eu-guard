@@ -1,6 +1,6 @@
 # Welle welle-06-release-haertung: Release-Prozess erproben und härten
 
-**Status:** open (geplant, noch nicht gestartet)
+**Status:** in-progress (gestartet; slice-023 und slice-025 done, slice-024 offen)
 
 **Zielmeilenstein:** M6 — Release-Prozess erprobt
 

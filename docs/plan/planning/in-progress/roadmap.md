@@ -10,7 +10,7 @@ Reihenfolge von Terminen. Die Wellen bilden die Versions-Stufen
 
 ## Aktuelle Welle
 
-(keine; alle geplanten Wellen sind abgeschlossen)
+Keine aktive Welle (kein Slice in `in-progress/`; Ruhezustand im Sinne des Slice-Lifecycles).
 
 welle-01 bis welle-05 sind abgeschlossen. Release 1.0.0 ist am 2026-11-11 veröffentlicht
 (Tag `v1.0.0` auf Commit `5f1b35cca776`, GitHub-Release, Images auf `ghcr.io`, Devcontainer-Feature),
@@ -21,15 +21,17 @@ siehe [`../done/welle-01-results.md`](../done/welle-01-results.md),
 [`../done/welle-05-results.md`](../done/welle-05-results.md). Die Pläne liegen unter
 [`../done/`](../done/), zuletzt [`../done/welle-05-release.md`](../done/welle-05-release.md).
 
+**Gestartet, aber ohne Slice in Arbeit:** welle-06 (Release-Härtung: slice-023 und slice-025 sind done, slice-024 offen) und
+welle-07 (CI-Komfort: slice-026, slice-028 und slice-029 sind done, slice-027 ist umgesetzt, seine Closure steht aus; für 1.1.0
+fehlt die gemeinsame Entscheidungsvorlage). Sobald ein Slice nach `in-progress/` zieht, entfällt der Ruhe-Marker oben.
+
 ## Nächste Wellen
 
-Alle drei sind **geplant, noch nicht gestartet**. Versionsnummern nach 1.0 sind projektintern
-(das Lastenheft kennt `LH-RM-*` nur bis Version 1.0); jede Veröffentlichung braucht das Ja beider Nutzer.
+Versionsnummern nach 1.0 sind projektintern (das Lastenheft kennt `LH-RM-*` nur bis Version 1.0); jede Veröffentlichung
+braucht das Ja beider Nutzer.
 
 | Welle | Ziel | Trigger | Wichtigste Slices | Aufwand |
 |---|---|---|---|---|
-| welle-06-release-haertung | Release-Prozess erproben und härten (Feature 1.0.1, Werkzeug bleibt 1.0.0) | Release 1.0.0 veröffentlicht | 023 `release-artifacts` erproben, 025 `release-create`, 024 Feature mit `devcontainer`-CLI | S |
-| welle-07-ci-komfort | Werkzeug 1.1.0: CI-Komfort | Release 1.0.0 veröffentlicht | 026 `--fail-on warn`, 027 `--output FILE`, 028 Zusatzregionen, 029 `d-check`-Prüfziele | M |
 | welle-08-erweiterungen | Erweiterungen und Härtung (nach Entscheidung) | je Slice: Entscheidung der Auftraggeber bzw. ADR | 030 `iam-policy.json`, 031 `coverage-gate`, 032 Sigstore/SBOM, 033 macOS/Windows | M bis L |
 
 Pläne: [`../welle-06-release-haertung.md`](../welle-06-release-haertung.md), [`../welle-07-ci-komfort.md`](../welle-07-ci-komfort.md), [`../welle-08-erweiterungen.md`](../welle-08-erweiterungen.md).
@@ -44,8 +46,8 @@ Pläne: [`../welle-06-release-haertung.md`](../welle-06-release-haertung.md), [`
 | M3 — AWS-Live-Checks | welle-03 | STS/Bedrock/IAM read-only | erreicht (2026-11-10) |
 | M4 — CI-fähig | welle-04 | SARIF + `--ci` + Exit-Code 1 bei FAIL | erreicht (2026-11-10) |
 | M5 — Release 1.0 | welle-05 | Docker-Image + Doku + Tests grün | erreicht (2026-11-11, veröffentlicht) |
-| M6 — Release-Prozess erprobt | welle-06 | `release-artifacts` und Feature erprobt, `release-create` vorhanden | offen (geplant) |
-| M7 — CI-Komfort (1.1.0) | welle-07 | `--fail-on warn`, `--output FILE`, Zusatzregionen, Gate-Bewertung | offen (geplant) |
+| M6 — Release-Prozess erprobt | welle-06 | `release-artifacts` und Feature erprobt, `release-create` vorhanden | in Arbeit (slice-023 und slice-025 done, slice-024 offen) |
+| M7 — CI-Komfort (1.1.0) | welle-07 | `--fail-on warn`, `--output FILE`, Zusatzregionen, Gate-Bewertung | in Arbeit (Slices umgesetzt; Closure slice-027 und Entscheidungsvorlage 1.1.0 offen; nicht veröffentlicht) |
 | M8 — Erweiterungen | welle-08 | je Slice: Entscheidung der Auftraggeber bzw. ADR | offen (nicht freigegeben) |
 
 ## Abhängigkeitsgraph
@@ -72,4 +74,9 @@ flowchart LR
 
 ## Historische Trigger-Verschiebungen
 
-(noch keine)
+- **Slice-Lifecycle nicht eingehalten (festgestellt am 2026-11-11):** Die Slices 001 bis 029 gingen von `open/` direkt nach
+  `done/`; `next/` und `in-progress/` blieben ungenutzt, obwohl [`../README.md`](../README.md) und `AGENTS.md` §3.3 den Weg
+  `open → next → in-progress → done` verlangen. Das war ein Versehen beider Agenten, kein bewusster Entscheid. Die Moves werden
+  **nicht rückwirkend** nachgebildet. **Ab slice-024 gilt der Lifecycle:** Start = reiner `git mv` nach `next/` (Verantwortlicher im
+  Plan benannt), PR/Branch = `in-progress/`, Abschluss = `done/`. Das `d-check`-Modul `planning` soll danach als Gate aufgenommen
+  werden (Folgeslice).
